@@ -1,0 +1,17 @@
+{
+  "name": "Newsac",
+  "short_name": "Newsac",
+  "description": "Монголын хип-хоп зах зээл",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070707",
+  "theme_color": "#070707",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

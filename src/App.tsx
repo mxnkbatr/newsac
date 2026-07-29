@@ -1,0 +1,60 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
+import { StoreProvider } from './store/StoreContext'
+import { PlayerProvider } from './context/PlayerContext'
+import { Layout } from './components/Layout'
+import { RevealObserver } from './components/RevealObserver'
+import { EffectsLayer } from './components/EffectsLayer'
+import { Home } from './pages/Home'
+import { NewsPage, NewsDetailPage } from './pages/News'
+import { VideosPage } from './pages/Videos'
+import { RappersPage, RapperDetailPage } from './pages/Rappers'
+import { RankingsPage } from './pages/Rankings'
+import { AuthPage } from './pages/Auth'
+import { ProfilePage } from './pages/Profile'
+import { ShopPage, MembershipPage } from './pages/Shop'
+import { TicketsPage } from './pages/Tickets'
+import { ShortsPage } from './pages/Shorts'
+import { FeedPage } from './pages/Feed'
+import { PodcastsPage } from './pages/Podcasts'
+import { LivePage } from './pages/Live'
+import { WallPage } from './pages/Wall'
+import { AdminPage } from './pages/Admin'
+import './effects.css'
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <StoreProvider>
+        <PlayerProvider>
+          <BrowserRouter>
+            <EffectsLayer />
+            <RevealObserver />
+            <Routes>
+              <Route element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="news" element={<NewsPage />} />
+                <Route path="news/:id" element={<NewsDetailPage />} />
+                <Route path="videos" element={<VideosPage />} />
+                <Route path="rappers" element={<RappersPage />} />
+                <Route path="rappers/:id" element={<RapperDetailPage />} />
+                <Route path="rankings" element={<RankingsPage />} />
+                <Route path="shop" element={<ShopPage />} />
+                <Route path="tickets" element={<TicketsPage />} />
+                <Route path="podcasts" element={<PodcastsPage />} />
+                <Route path="live" element={<LivePage />} />
+                <Route path="wall" element={<WallPage />} />
+                <Route path="shorts" element={<ShortsPage />} />
+                <Route path="feed" element={<FeedPage />} />
+                <Route path="membership" element={<MembershipPage />} />
+                <Route path="profile" element={<ProfilePage />} />
+              </Route>
+              <Route path="auth" element={<AuthPage />} />
+              <Route path="admin" element={<AdminPage />} />
+            </Routes>
+          </BrowserRouter>
+        </PlayerProvider>
+      </StoreProvider>
+    </AuthProvider>
+  )
+}

@@ -1,0 +1,105 @@
+.mini-player {
+  position: fixed;
+  left: 0.65rem;
+  right: 0.65rem;
+  bottom: calc(4.55rem + env(safe-area-inset-bottom, 0px));
+  z-index: 88;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(18, 18, 18, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+.mini-seek {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.mini-seek i {
+  display: block;
+  height: 100%;
+  background: var(--red);
+}
+
+.mini-body {
+  display: grid;
+  grid-template-columns: 44px 1fr auto auto;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.55rem 0.65rem 0.65rem;
+}
+
+.mini-body img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.mini-meta {
+  min-width: 0;
+}
+
+.mini-meta a {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-meta span {
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+}
+
+.mini-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.mini-btn.ghost {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-dim);
+  width: 34px;
+  height: 34px;
+}
+
+@media (min-width: 861px) {
+  .mini-player {
+    left: auto;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    width: min(420px, calc(100vw - 2.5rem));
+  }
+}
+
+@media (max-width: 860px) {
+  .layout-main.has-player {
+    padding-bottom: calc(9.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-shell.has-mini-player .app-more {
+    bottom: calc(9.1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-shell.has-mini-player .mobile-sheet-fab {
+    bottom: calc(9rem + env(safe-area-inset-bottom, 0px));
+  }
+}
