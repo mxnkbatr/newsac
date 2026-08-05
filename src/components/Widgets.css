@@ -165,10 +165,62 @@
 
 @media (max-width: 860px) {
   .sponsor-slot {
-    grid-template-columns: 96px 1fr;
+    grid-template-columns: 72px 1fr;
+    gap: 0.7rem;
+    margin: 0.65rem 0;
+    border-radius: 14px;
+    border-color: rgba(255, 255, 255, 0.075);
+    background: #101114;
+  }
+
+  .sponsor-slot img {
+    height: 72px;
+  }
+
+  .sponsor-slot strong {
+    font-size: 0.88rem;
+  }
+
+  .sponsor-slot p {
+    font-size: 0.78rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .poll-widget,
+  .newsletter-box {
+    padding: 0.85rem 0.15rem;
+  }
+
+  .poll-widget h3,
+  .newsletter-box h3 {
+    font-size: 1rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .newsletter-box p {
+    font-size: 0.82rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .poll-option {
+    border-radius: 12px;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .newsletter-tabs {
+    border-radius: 999px;
+    overflow: hidden;
   }
 
   .newsletter-form {
     grid-template-columns: 1fr;
+  }
+
+  .newsletter-form input,
+  .newsletter-form .btn {
+    border-radius: 12px;
   }
 }

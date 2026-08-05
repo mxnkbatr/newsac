@@ -9,6 +9,8 @@ export type OfflineMeta = {
   duration: string
   savedAt: string
   blobOk: boolean
+  kind?: 'podcast' | 'song'
+  artist?: string
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -31,6 +33,10 @@ export function listOfflineMeta(): OfflineMeta[] {
   } catch {
     return []
   }
+}
+
+export function listOfflineSongs(): OfflineMeta[] {
+  return listOfflineMeta().filter((m) => m.kind === 'song')
 }
 
 function saveMeta(list: OfflineMeta[]) {
@@ -64,6 +70,8 @@ export async function saveOfflineEpisode(ep: {
   cover: string
   duration: string
   audioUrl: string
+  kind?: 'podcast' | 'song'
+  artist?: string
 }): Promise<{ ok: boolean; blobOk: boolean; error?: string }> {
   let blobOk = false
   try {
@@ -91,6 +99,8 @@ export async function saveOfflineEpisode(ep: {
     duration: ep.duration,
     savedAt: new Date().toISOString(),
     blobOk,
+    kind: ep.kind || 'podcast',
+    artist: ep.artist,
   })
   saveMeta(list)
 

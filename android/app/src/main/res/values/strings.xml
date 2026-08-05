@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Newsac</string>
+    <string name="title_activity_main">Newsac</string>
+    <string name="package_name">mn.newsac.app</string>
+    <string name="custom_url_scheme">mn.newsac.app</string>
+</resources>

@@ -27,7 +27,7 @@ export function Footer() {
               <Link to="/videos">Бичлэг</Link>
             </li>
             <li>
-              <Link to="/live">Live</Link>
+              <Link to="/live">Шууд</Link>
             </li>
             <li>
               <Link to="/wall">Wall</Link>
@@ -51,13 +51,19 @@ export function Footer() {
               <Link to="/tickets">Тасалбар</Link>
             </li>
             <li>
-              <Link to="/shop">Shop</Link>
+              <Link to="/shop">Дэлгүүр</Link>
             </li>
             <li>
               <Link to="/shorts">Shorts</Link>
             </li>
             <li>
-              <Link to="/membership">Membership</Link>
+              <Link to="/membership">Fan Pass</Link>
+            </li>
+            <li>
+              <Link to="/battle">Battle</Link>
+            </li>
+            <li>
+              <Link to="/artist">Artist Hub</Link>
             </li>
             <li>
               <Link to="/admin">Admin</Link>
@@ -76,7 +82,10 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} Newsac. Бүх эрх хуулиар хамгаалагдсан.</span>
+        <span>
+          © {new Date().getFullYear()} Newsac. Бүх эрх хуулиар хамгаалагдсан.
+          <span className="footer-credit"> · Developed by Munkhbaatar Dorjsuren</span>
+        </span>
         <span className="footer-pulse">LIVE CULTURE</span>
       </div>
     </footer>

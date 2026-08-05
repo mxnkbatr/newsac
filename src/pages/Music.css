@@ -1,0 +1,145 @@
+.music-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  margin-bottom: 1.1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.music-tabs button {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-dim);
+  padding: 0.55rem 0.9rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.music-tabs button.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.music-search {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 700;
+}
+
+.music-search input {
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  color: var(--ink);
+  padding: 0.85rem 0.95rem;
+  font-size: 16px;
+}
+
+.music-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.music-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 0.45rem 0.5rem 0.45rem 0.35rem;
+}
+
+.music-row.active {
+  border-color: rgba(227, 27, 35, 0.55);
+}
+
+.music-row-main {
+  display: grid;
+  grid-template-columns: 36px 52px 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.2rem;
+  min-width: 0;
+}
+
+.music-rank {
+  font-family: var(--font-display);
+  color: var(--red);
+  font-size: 0.9rem;
+}
+
+.music-row img,
+.music-artist img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+}
+
+.music-row strong,
+.music-artist strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.music-row strong i {
+  font-style: normal;
+  color: var(--red);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+
+.music-row em,
+.music-artist em {
+  font-style: normal;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+}
+
+.music-play {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+.music-artists {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.music-artist {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 0.55rem 0.65rem;
+}
+
+@media (max-width: 860px) {
+  .music-row,
+  .music-artist,
+  .music-tabs button {
+    border-radius: 14px;
+  }
+
+  .music-row img,
+  .music-artist img {
+    border-radius: 8px;
+  }
+}

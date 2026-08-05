@@ -33,6 +33,33 @@ export type Rapper = {
   image: string
   tags: string[]
   streams: string
+  /** Verified artist on Newsac */
+  verified?: boolean
+  /** Linked fan/account email (Gmail) */
+  ownerEmail?: string
+  /** Supabase user id when claimed */
+  ownerUserId?: string
+}
+
+export type MembershipTier = 'fan' | 'street' | 'vip'
+
+export type BattleSide = {
+  id: string
+  name: string
+  rapperId?: string
+  image: string
+  votes: number
+}
+
+export type Battle = {
+  id: string
+  title: string
+  subtitle: string
+  status: 'open' | 'closed'
+  endsAt: string
+  cover: string
+  sides: [BattleSide, BattleSide]
+  city?: string
 }
 
 export type RankItem = {
@@ -43,6 +70,24 @@ export type RankItem = {
   change: number
   streams: string
   hot?: boolean
+}
+
+/** Энэ 7 хоногийн Монгол дууны чарт (Spotify + апп дотор сонсох) */
+export type ChartSong = {
+  id: string
+  rank: number
+  title: string
+  artist: string
+  spotifyTrackId: string
+  cover: string
+  plays: string
+  change: number
+  weekOf: string
+  /** Апп дотор / background сонсох аудио (Media Session) */
+  audioUrl: string
+  /** YouTube клип (бүтэн player-д) */
+  youtubeId?: string
+  isNew?: boolean
 }
 
 export type Product = {
@@ -154,6 +199,10 @@ export type Livestream = {
   startsAt: string
   viewers?: number
   cover: string
+  /** Linked artist profile */
+  artistId?: string
+  hostUserId?: string
+  hostName?: string
 }
 
 export type WallComment = {
@@ -198,6 +247,8 @@ export type AnalyticsEvent = {
     | 'podcast_play'
     | 'wall_post'
     | 'live_view'
+    | 'chart_play'
+    | 'battle_vote'
   targetId: string
   amount?: number
   at: string
@@ -208,6 +259,7 @@ export type AppData = {
   videos: VideoItem[]
   rappers: Rapper[]
   rankings: RankItem[]
+  chartSongs: ChartSong[]
   products: Product[]
   sponsors: Sponsor[]
   polls: Poll[]
@@ -217,9 +269,12 @@ export type AppData = {
   dailyDrops: DailyDrop[]
   livestreams: Livestream[]
   wallPosts: WallPost[]
+  battles: Battle[]
+  adminEmails: string[]
   orders: Order[]
   ticketOrders: TicketOrder[]
   subscribers: Subscriber[]
   events: AnalyticsEvent[]
   lastYoutubeSync?: string
+  lastCloudSync?: string
 }

@@ -98,7 +98,10 @@ export function RapperDetailPage() {
           <div className="section-kicker">
             {rapper.city} · {rapper.years}
           </div>
-          <h1>{rapper.name}</h1>
+          <h1>
+            {rapper.name}
+            {rapper.verified ? ' ✓' : ''}
+          </h1>
           <p>{rapper.bio}</p>
           <div className="rapper-detail-actions">
             <button
@@ -115,6 +118,13 @@ export function RapperDetailPage() {
             >
               {fav ? '★ Follow-тай' : '☆ Follow'}
             </button>
+            {user &&
+              (rapper.ownerUserId === user.id ||
+                rapper.ownerEmail === user.email.toLowerCase()) && (
+                <Link to="/artist" className="btn btn-primary">
+                  Artist Hub · Live
+                </Link>
+              )}
             <span className="streams-pill">{rapper.streams} стрим</span>
           </div>
         </div>

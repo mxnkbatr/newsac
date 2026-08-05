@@ -53,13 +53,13 @@ export function ProfilePage() {
             <div className="section-kicker">Профайл</div>
             <h1>{user.name}</h1>
             <p>
-              {user.phone} ·{' '}
+              {user.email} ·{' '}
               {isMember
                 ? `Member · ${new Date(user.membershipUntil!).toLocaleDateString('mn-MN')}`
                 : 'Free'}
             </p>
           </div>
-          <button type="button" className="btn btn-ghost" onClick={logout}>
+          <button type="button" className="btn btn-ghost" onClick={() => void logout()}>
             Гарах
           </button>
         </div>
@@ -143,7 +143,16 @@ export function ProfilePage() {
                 {user.pushEnabled ? 'Push идэвхтэй' : 'Push мэдэгдэл асаах'}
               </button>
               <Link to="/membership" className="btn btn-ghost btn-block">
-                {isMember ? 'Membership идэвхтэй' : 'Membership авах'}
+                {isMember ? 'Fan Pass идэвхтэй' : 'Fan Pass авах'}
+              </Link>
+              <Link to="/artist" className="btn btn-ghost btn-block">
+                Artist Hub
+              </Link>
+              <Link to="/battle" className="btn btn-ghost btn-block">
+                Battle / Cypher
+              </Link>
+              <Link to="/admin" className="btn btn-ghost btn-block">
+                Admin panel
               </Link>
               <Link to="/wall" className="btn btn-ghost btn-block">
                 Community Wall

@@ -1,9 +1,12 @@
-import { NavLink, Outlet, useLocation, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { MiniPlayer } from './MiniPlayer'
+import { ChartMiniPlayer } from './ChartMiniPlayer'
+import { FullMusicPlayer } from './FullMusicPlayer'
 import { usePlayer } from '../context/PlayerContext'
+import { useChartPlayer } from '../context/ChartPlayerContext'
 import './Layout.css'
 import '../mobile-app.css'
 
@@ -29,7 +32,7 @@ const dock = [
   },
   {
     to: '/tickets',
-    label: 'Ticket',
+    label: 'Тасалбар',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 8h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4V8Zm4 2v6h2v-6H7Zm4 0v6h2v-6h-2Z" />
@@ -38,7 +41,7 @@ const dock = [
   },
   {
     to: '/shop',
-    label: 'Shop',
+    label: 'Дэлгүүр',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 3H8l1-3Z" />
@@ -46,26 +49,14 @@ const dock = [
     ),
   },
   {
-    to: '/wall',
-    label: 'Wall',
+    to: '/live',
+    label: 'Шууд',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 5h16v14H4V5Zm2 2v4h5V7H6Zm7 0v4h5V7h-5ZM6 13v4h5v-4H6Zm7 0v4h5v-4h-5Z" />
+        <path d="M12 5a7 7 0 0 1 7 7v1h2v4h-2.1A7 7 0 0 1 5.1 17H3v-4h2v-1a7 7 0 0 1 7-7Zm0 2a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5Zm-1 9.5a1.5 1.5 0 1 0 3 0H11Z" />
       </svg>
     ),
   },
-]
-
-const moreLinks = [
-  { to: '/live', label: 'Live' },
-  { to: '/news', label: 'Мэдээ' },
-  { to: '/podcasts', label: 'Podcast' },
-  { to: '/shorts', label: 'Shorts' },
-  { to: '/rappers', label: 'Рэпперүүд' },
-  { to: '/rankings', label: 'Топ' },
-  { to: '/feed', label: 'Миний feed' },
-  { to: '/membership', label: 'Membership' },
-  { to: '/profile', label: 'Профайл' },
 ]
 
 function buzz() {
@@ -78,50 +69,25 @@ function buzz() {
 
 export function Layout() {
   const { pathname } = useLocation()
-  const [moreOpen, setMoreOpen] = useState(false)
   const { current } = usePlayer()
+  const { current: chartSong } = useChartPlayer()
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    setMoreOpen(false)
   }, [pathname])
 
   return (
-    <div className={`layout app-shell ${current ? 'has-mini-player' : ''}`}>
+    <div
+      className={`layout app-shell ${current ? 'has-mini-player' : ''} ${chartSong ? 'has-chart-player' : ''}`}
+    >
       <Navbar />
       <main className={`layout-main ${current ? 'has-player' : ''}`} key={pathname}>
         <Outlet />
       </main>
       <Footer />
+      <ChartMiniPlayer />
+      <FullMusicPlayer />
       <MiniPlayer />
-
-      <div
-        className={`sheet-scrim ${moreOpen ? 'on' : ''}`}
-        onClick={() => setMoreOpen(false)}
-        aria-hidden={!moreOpen}
-      />
-
-      <div className={`app-more ${moreOpen ? 'open' : ''}`}>
-        <div className="app-more-panel" role="menu">
-          {moreLinks.map((l) => (
-            <Link key={l.to} to={l.to} role="menuitem" onClick={() => buzz()}>
-              {l.label}
-            </Link>
-          ))}
-        </div>
-        <button
-          type="button"
-          className="app-more-toggle"
-          aria-expanded={moreOpen}
-          aria-label="Цэс"
-          onClick={() => {
-            buzz()
-            setMoreOpen((v) => !v)
-          }}
-        >
-          {moreOpen ? '×' : '+'}
-        </button>
-      </div>
 
       <nav className="mobile-dock" aria-label="Мобайл цэс">
         {dock.map((item) => (

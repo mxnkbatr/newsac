@@ -16,6 +16,12 @@
   --nav-h: 72px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --max: 1240px;
+  /* App chrome clearances — mobile overrides in mobile-app.css */
+  --top-bar: 72px;
+  --dock-h: 0px;
+  --dock-clear: 0px;
+  --player-h: 0px;
+  --player-clear: 0px;
 }
 
 *,

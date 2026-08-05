@@ -2,7 +2,7 @@
   position: fixed;
   left: 0.65rem;
   right: 0.65rem;
-  bottom: calc(4.55rem + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--dock-h, 4.1rem) + 0.55rem + env(safe-area-inset-bottom, 0px));
   z-index: 88;
   border-radius: 18px;
   overflow: hidden;
@@ -92,14 +92,11 @@
 
 @media (max-width: 860px) {
   .layout-main.has-player {
-    padding-bottom: calc(9.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--player-clear);
   }
 
-  .app-shell.has-mini-player .app-more {
-    bottom: calc(9.1rem + env(safe-area-inset-bottom, 0px));
-  }
-
+  .app-shell.has-mini-player .app-more,
   .app-shell.has-mini-player .mobile-sheet-fab {
-    bottom: calc(9rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--player-clear) - 0.35rem);
   }
 }

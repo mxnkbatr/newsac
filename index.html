@@ -25,6 +25,33 @@
     <title>Newsac — Монголын хип-хоп зах зээл</title>
   </head>
   <body>
+    <div id="boot-splash" aria-hidden="true">
+      <style>
+        #boot-splash {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: grid;
+          place-items: center;
+          background: #050505;
+          transition: opacity 0.45s ease;
+        }
+        #boot-splash.hide {
+          opacity: 0;
+          pointer-events: none;
+        }
+        #boot-splash.boot-splash-synced {
+          opacity: 0;
+          pointer-events: none;
+        }
+        #boot-splash img {
+          width: 96px;
+          height: 96px;
+          object-fit: contain;
+        }
+      </style>
+      <img src="/logo.png" alt="" width="96" height="96" />
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

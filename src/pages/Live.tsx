@@ -123,21 +123,36 @@ export function LivePage() {
 
           <div className="live-list">
             <div className="section-kicker">Бүх нэвтрүүлэг</div>
-            {data.livestreams.map((l) => (
-              <article key={l.id} className={`live-row ${l.id === featured.id ? 'on' : ''}`}>
-                <img src={l.cover} alt="" loading="lazy" />
-                <div>
-                  <span className={`live-row-status ${l.status}`}>{l.status.toUpperCase()}</span>
-                  <strong>{l.title}</strong>
-                  <em>
-                    {new Date(l.startsAt).toLocaleString('mn-MN', {
-                      dateStyle: 'short',
-                      timeStyle: 'short',
-                    })}
-                  </em>
-                </div>
-              </article>
-            ))}
+            <p className="live-artist-cta">
+              Артист уу?{' '}
+              <Link to="/artist">Artist Hub</Link>-аас өөрийн live нээнэ үү.
+            </p>
+            {data.livestreams.map((l) => {
+              const host = l.artistId
+                ? data.rappers.find((r) => r.id === l.artistId)
+                : null
+              return (
+                <article key={l.id} className={`live-row ${l.id === featured.id ? 'on' : ''}`}>
+                  <img src={l.cover} alt="" loading="lazy" />
+                  <div>
+                    <span className={`live-row-status ${l.status}`}>{l.status.toUpperCase()}</span>
+                    <strong>{l.title}</strong>
+                    {(host || l.hostName) && (
+                      <em className="live-host">
+                        {host ? host.name : l.hostName}
+                        {host?.verified ? ' ✓' : ''}
+                      </em>
+                    )}
+                    <em>
+                      {new Date(l.startsAt).toLocaleString('mn-MN', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      })}
+                    </em>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </div>
       </section>

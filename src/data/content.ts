@@ -30,6 +30,9 @@ export type Rapper = {
   image: string
   tags: string[]
   streams: string
+  verified?: boolean
+  ownerEmail?: string
+  ownerUserId?: string
 }
 
 export type RankItem = {
@@ -169,6 +172,7 @@ export const rappers: Rapper[] = [
       'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1000&q=80',
     tags: ['Boom bap', 'Street', 'UG'],
     streams: '4.2M',
+    verified: true,
   },
   {
     id: 'luna',
@@ -183,6 +187,7 @@ export const rappers: Rapper[] = [
       'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=1000&q=80',
     tags: ['Melodic', 'Alt', 'New wave'],
     streams: '6.8M',
+    verified: true,
   },
   {
     id: 'khaan',
@@ -211,6 +216,7 @@ export const rappers: Rapper[] = [
       'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1000&q=80',
     tags: ['Trap', 'Hyper', 'Youth'],
     streams: '9.4M',
+    verified: true,
   },
 ]
 

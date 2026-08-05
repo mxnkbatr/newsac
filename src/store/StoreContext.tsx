@@ -7,10 +7,11 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { createSeed, isAdminCredential } from './seed'
+import { createSeed, isAdminCredential, isAdminEmail } from './seed'
 import type {
   AnalyticsEvent,
   AppData,
+  Battle,
   DailyDrop,
   Livestream,
   NewsItem,
@@ -19,6 +20,7 @@ import type {
   Product,
   Rapper,
   RankItem,
+  ChartSong,
   ShortClip,
   Show,
   PodcastEpisode,
@@ -30,8 +32,13 @@ import type {
   WallComment,
 } from './types'
 import { YOUTUBE_CHANNEL_URL } from '../data/brand'
+import {
+  fetchChannelVideos,
+  fetchMongolianYouTubeChart,
+} from '../lib/youtubeChart'
+import { pullAppSnapshot, pushAppSnapshot } from '../lib/cloudSync'
 
-const DATA_KEY = 'newsac_app_data_v4'
+const DATA_KEY = 'newsac_app_data_v6'
 const ADMIN_KEY = 'newsac_admin_session'
 
 type CartLine = { productId: string; qty: number }
@@ -42,6 +49,11 @@ type StoreValue = {
   isAdmin: boolean
   adminLogin: (password: string) => string | null
   adminLogout: () => void
+  grantAdmin: () => void
+  setAdminEmails: (emails: string[]) => void
+  addAdminEmail: (email: string) => string | null
+  removeAdminEmail: (email: string) => void
+  isEmailAdmin: (email: string) => boolean
   track: (type: AnalyticsEvent['type'], targetId: string, amount?: number) => void
   addToCart: (productId: string, qty?: number) => void
   setCartQty: (productId: string, qty: number) => void
@@ -50,6 +62,7 @@ type StoreValue = {
   subscribe: (channel: Subscriber['channel'], value: string) => string | null
   votePoll: (pollId: string, optionId: string) => void
   syncYoutube: () => Promise<number>
+  syncMusicChart: () => Promise<number>
   upsertNews: (item: NewsItem) => void
   deleteNews: (id: string) => void
   upsertVideo: (item: VideoItem) => void
@@ -83,6 +96,28 @@ type StoreValue = {
     method: TicketOrder['method'],
   ) => TicketOrder | string
   setRankings: (items: RankItem[]) => void
+  upsertChartSong: (item: ChartSong) => void
+  deleteChartSong: (id: string) => void
+  upsertBattle: (item: Battle) => void
+  deleteBattle: (id: string) => void
+  voteBattle: (battleId: string, sideId: string) => string | null
+  linkRapperOwner: (
+    rapperId: string,
+    ownerEmail: string,
+    ownerUserId?: string,
+  ) => string | null
+  claimRapperForUser: (userId: string, email: string) => Rapper | null
+  goLiveAsArtist: (input: {
+    artistId: string
+    hostUserId: string
+    hostName: string
+    title: string
+    youtubeId: string
+    cover?: string
+  }) => Livestream | string
+  endArtistLive: (livestreamId: string) => void
+  pushCloud: () => Promise<void>
+  pullCloud: () => Promise<'empty' | 'ok'>
   analyticsSummary: () => {
     newsClicks: { id: string; title: string; clicks: number }[]
     videoClicks: { id: string; title: string; clicks: number }[]
@@ -117,9 +152,12 @@ function loadData(): AppData {
       shows: parsed.shows?.length ? parsed.shows : seed.shows,
       podcasts: parsed.podcasts?.length ? parsed.podcasts : seed.podcasts,
       rankings: parsed.rankings?.length ? parsed.rankings : seed.rankings,
+      chartSongs: parsed.chartSongs?.length ? parsed.chartSongs : seed.chartSongs,
       dailyDrops: parsed.dailyDrops?.length ? parsed.dailyDrops : seed.dailyDrops,
       livestreams: parsed.livestreams?.length ? parsed.livestreams : seed.livestreams,
       wallPosts: parsed.wallPosts?.length ? parsed.wallPosts : seed.wallPosts,
+      battles: parsed.battles?.length ? parsed.battles : seed.battles,
+      adminEmails: parsed.adminEmails?.length ? parsed.adminEmails : seed.adminEmails,
       orders: parsed.orders || [],
       ticketOrders: parsed.ticketOrders || [],
       subscribers: parsed.subscribers || [],
@@ -202,6 +240,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       adminLogout() {
         localStorage.removeItem(ADMIN_KEY)
         setIsAdmin(false)
+      },
+      grantAdmin() {
+        localStorage.setItem(ADMIN_KEY, '1')
+        setIsAdmin(true)
+        window.dispatchEvent(new Event('newsac-admin'))
+      },
+      setAdminEmails(emails) {
+        const cleaned = [...new Set(emails.map((e) => e.trim().toLowerCase()).filter(Boolean))]
+        patch((prev) => ({ ...prev, adminEmails: cleaned }))
+      },
+      addAdminEmail(email) {
+        const e = email.trim().toLowerCase()
+        if (!e.includes('@') || !e.endsWith('@gmail.com')) {
+          return 'Зөвхөн Gmail (@gmail.com) нэмнэ.'
+        }
+        if (data.adminEmails.map((x) => x.toLowerCase()).includes(e)) {
+          return 'Энэ Gmail аль хэдийн admin.'
+        }
+        patch((prev) => ({ ...prev, adminEmails: [...prev.adminEmails, e] }))
+        return null
+      },
+      removeAdminEmail(email) {
+        const e = email.trim().toLowerCase()
+        patch((prev) => ({
+          ...prev,
+          adminEmails: prev.adminEmails.filter((x) => x.toLowerCase() !== e),
+        }))
+      },
+      isEmailAdmin(email) {
+        return isAdminEmail(email, data.adminEmails)
       },
       track,
       addToCart(productId, qty = 1) {
@@ -313,50 +381,78 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }))
       },
       async syncYoutube() {
-        // Demo sync: merge known channel videos if missing
-        const channelVideos: VideoItem[] = [
-          {
-            id: `yt-${Date.now()}-1`,
-            youtubeId: 'KIvdyoHN2oc',
-            title: 'БИДНИЙГ НААДАЖ БАЙХ ЗУУР...',
-            description: 'Авто sync · Newsac channel',
-            views: '68K',
-            duration: '',
-            published: 'саяхан',
-          },
-          {
-            id: `yt-${Date.now()}-2`,
-            youtubeId: '8t9wyTXfDXM',
-            title: 'ЗУНЫ ДУНД САР БА БИДНИЙ АНХААРАЛ!!!',
-            description: 'Авто sync · Newsac channel',
-            views: '30K',
-            duration: '',
-            published: 'саяхан',
-          },
-          {
-            id: `yt-${Date.now()}-3`,
-            youtubeId: 'jpymkXqVaYc',
-            title: 'KENDRICK LAMAR БА ТҮҮНИЙ АГУУ ЗАМНАЛ!!!',
-            description: 'Авто sync · Newsac channel',
-            views: '4.9K',
-            duration: '',
-            published: 'саяхан',
-          },
-        ]
+        const remote = await fetchChannelVideos('Newsacchannel', 24)
+        const channelVideos: VideoItem[] = remote.map((v) => ({
+          id: `yt-${v.youtubeId}`,
+          youtubeId: v.youtubeId,
+          title: v.title,
+          description: v.description,
+          views: v.views,
+          duration: v.duration,
+          published: v.published,
+        }))
         let added = 0
         patch((prev) => {
           const existing = new Set(prev.videos.map((v) => v.youtubeId))
           const fresh = channelVideos.filter((v) => !existing.has(v.youtubeId))
           added = fresh.length
+          // Refresh metadata for videos we already have
+          const byYt = new Map(channelVideos.map((v) => [v.youtubeId, v]))
+          const videos = [
+            ...fresh,
+            ...prev.videos.map((v) => {
+              const upd = byYt.get(v.youtubeId)
+              if (!upd) return v
+              return {
+                ...v,
+                title: upd.title,
+                description: upd.description,
+                views: upd.views,
+                duration: upd.duration,
+                published: upd.published,
+              }
+            }),
+          ]
           return {
             ...prev,
-            videos: [...fresh, ...prev.videos],
+            videos,
             lastYoutubeSync: new Date().toISOString(),
           }
         })
-        // Simulate network
-        await new Promise((r) => setTimeout(r, 600))
         return added
+      },
+      async syncMusicChart() {
+        const songs = await fetchMongolianYouTubeChart(20)
+        if (!songs.length) return 0
+
+        patch((prev) => {
+          const previousRanks = new Map(
+            prev.chartSongs
+              .filter((song) => song.youtubeId)
+              .map((song) => [song.youtubeId!, song.rank]),
+          )
+          const previousAudio = new Map(
+            prev.chartSongs
+              .filter((song) => song.youtubeId && song.audioUrl)
+              .map((song) => [song.youtubeId!, song.audioUrl]),
+          )
+
+          return {
+            ...prev,
+            chartSongs: songs.map((song) => {
+              const oldRank = song.youtubeId ? previousRanks.get(song.youtubeId) : undefined
+              return {
+                ...song,
+                change: oldRank ? oldRank - song.rank : 0,
+                audioUrl:
+                  (song.youtubeId && previousAudio.get(song.youtubeId)) || song.audioUrl,
+              }
+            }),
+            lastYoutubeSync: new Date().toISOString(),
+          }
+        })
+
+        return songs.length
       },
       upsertNews(item) {
         patch((prev) => {
@@ -610,6 +706,182 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setRankings(items) {
         patch((prev) => ({ ...prev, rankings: items }))
       },
+      upsertChartSong(item) {
+        patch((prev) => {
+          const i = prev.chartSongs.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const chartSongs = [...prev.chartSongs]
+            chartSongs[i] = item
+            return { ...prev, chartSongs }
+          }
+          return { ...prev, chartSongs: [item, ...prev.chartSongs] }
+        })
+      },
+      deleteChartSong(id) {
+        patch((prev) => ({ ...prev, chartSongs: prev.chartSongs.filter((n) => n.id !== id) }))
+      },
+      upsertBattle(item) {
+        patch((prev) => {
+          const i = prev.battles.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const battles = [...prev.battles]
+            battles[i] = item
+            return { ...prev, battles }
+          }
+          return { ...prev, battles: [item, ...prev.battles] }
+        })
+      },
+      deleteBattle(id) {
+        patch((prev) => ({ ...prev, battles: prev.battles.filter((n) => n.id !== id) }))
+      },
+      voteBattle(battleId, sideId) {
+        const battle = data.battles.find((b) => b.id === battleId)
+        if (!battle) return 'Battle олдсонгүй'
+        if (battle.status !== 'open') return 'Энэ battle хаагдсан'
+        if (+new Date(battle.endsAt) < Date.now()) return 'Санал хураалт дууссан'
+        if (!battle.sides.some((s) => s.id === sideId)) return 'Буруу сонголт'
+
+        patch((prev) => ({
+          ...prev,
+          battles: prev.battles.map((b) => {
+            if (b.id !== battleId) return b
+            return {
+              ...b,
+              sides: b.sides.map((s) =>
+                s.id === sideId ? { ...s, votes: s.votes + 1 } : s,
+              ) as Battle['sides'],
+            }
+          }),
+          events: [
+            {
+              id: uid(),
+              type: 'battle_vote',
+              targetId: `${battleId}:${sideId}`,
+              at: new Date().toISOString(),
+            },
+            ...prev.events,
+          ],
+        }))
+        return null
+      },
+      linkRapperOwner(rapperId, ownerEmail, ownerUserId) {
+        const email = ownerEmail.trim().toLowerCase()
+        if (!email) return 'Gmail оруулна уу'
+        const rapper = data.rappers.find((r) => r.id === rapperId)
+        if (!rapper) return 'Артист олдсонгүй'
+        patch((prev) => ({
+          ...prev,
+          rappers: prev.rappers.map((r) =>
+            r.id === rapperId
+              ? {
+                  ...r,
+                  ownerEmail: email,
+                  ownerUserId: ownerUserId || r.ownerUserId,
+                  verified: true,
+                }
+              : r,
+          ),
+        }))
+        return null
+      },
+      claimRapperForUser(userId, email) {
+        const e = email.trim().toLowerCase()
+        let claimed: Rapper | null = null
+        patch((prev) => {
+          const rappers = prev.rappers.map((r) => {
+            if (r.ownerUserId === userId || (r.ownerEmail && r.ownerEmail === e)) {
+              claimed = { ...r, ownerUserId: userId, ownerEmail: e, verified: true }
+              return claimed
+            }
+            return r
+          })
+          return { ...prev, rappers }
+        })
+        return claimed
+      },
+      goLiveAsArtist(input) {
+        const ytRaw = input.youtubeId.trim()
+        if (!ytRaw) return 'YouTube video / live ID оруулна уу'
+        const artist = data.rappers.find((r) => r.id === input.artistId)
+        if (!artist) return 'Артист олдсонгүй'
+        if (artist.ownerUserId && artist.ownerUserId !== input.hostUserId) {
+          return 'Энэ профайл таных биш'
+        }
+
+        const fromUrl = ytRaw.match(
+          /(?:youtu\.be\/|v=|\/live\/|\/embed\/)([a-zA-Z0-9_-]{6,})/,
+        )
+        const youtubeId = fromUrl ? fromUrl[1] : ytRaw
+
+        const live: Livestream = {
+          id: uid(),
+          title: input.title.trim() || `${artist.name} LIVE`,
+          status: 'live',
+          youtubeId,
+          startsAt: new Date().toISOString(),
+          viewers: 1,
+          cover: input.cover || artist.image,
+          artistId: artist.id,
+          hostUserId: input.hostUserId,
+          hostName: input.hostName,
+        }
+
+        patch((prev) => ({
+          ...prev,
+          livestreams: [
+            live,
+            ...prev.livestreams.map((l) =>
+              l.artistId === artist.id && l.status === 'live'
+                ? { ...l, status: 'ended' as const }
+                : l,
+            ),
+          ],
+        }))
+        return live
+      },
+      endArtistLive(livestreamId) {
+        patch((prev) => ({
+          ...prev,
+          livestreams: prev.livestreams.map((l) =>
+            l.id === livestreamId ? { ...l, status: 'ended' as const } : l,
+          ),
+        }))
+      },
+      async pushCloud() {
+        await pushAppSnapshot(data)
+        patch((prev) => ({ ...prev, lastCloudSync: new Date().toISOString() }))
+      },
+      async pullCloud() {
+        const remote = await pullAppSnapshot()
+        if (!remote || !Object.keys(remote).length) return 'empty'
+        const seed = createSeed()
+        setData({
+          ...seed,
+          ...remote,
+          news: remote.news?.length ? remote.news : seed.news,
+          videos: remote.videos?.length ? remote.videos : seed.videos,
+          rappers: remote.rappers?.length ? remote.rappers : seed.rappers,
+          products: remote.products?.length ? remote.products : seed.products,
+          sponsors: remote.sponsors?.length ? remote.sponsors : seed.sponsors,
+          polls: remote.polls?.length ? remote.polls : seed.polls,
+          shorts: remote.shorts?.length ? remote.shorts : seed.shorts,
+          shows: remote.shows?.length ? remote.shows : seed.shows,
+          podcasts: remote.podcasts?.length ? remote.podcasts : seed.podcasts,
+          rankings: remote.rankings?.length ? remote.rankings : seed.rankings,
+          chartSongs: remote.chartSongs?.length ? remote.chartSongs : seed.chartSongs,
+          dailyDrops: remote.dailyDrops?.length ? remote.dailyDrops : seed.dailyDrops,
+          livestreams: remote.livestreams?.length ? remote.livestreams : seed.livestreams,
+          wallPosts: remote.wallPosts?.length ? remote.wallPosts : seed.wallPosts,
+          battles: remote.battles?.length ? remote.battles : seed.battles,
+          adminEmails: remote.adminEmails?.length ? remote.adminEmails : seed.adminEmails,
+          orders: remote.orders || [],
+          ticketOrders: remote.ticketOrders || [],
+          subscribers: remote.subscribers || [],
+          events: remote.events || [],
+          lastCloudSync: new Date().toISOString(),
+        })
+        return 'ok'
+      },
       analyticsSummary() {
         const countBy = (type: AnalyticsEvent['type']) => {
           const map = new Map<string, number>()
@@ -660,3 +932,4 @@ export function useStore() {
 
 export { YOUTUBE_CHANNEL_URL }
 export { ADMIN_PASSWORD, ADMIN_PHONES } from './seed'
+export { isAdminEmail } from './seed'

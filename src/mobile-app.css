@@ -29,7 +29,7 @@
   .layout-main {
     flex: 1;
     min-height: 0;
-    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--dock-clear);
     animation: app-page-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
@@ -244,7 +244,7 @@
     position: fixed !important;
     left: 0.65rem;
     right: 0.65rem;
-    bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px));
+    bottom: var(--dock-clear);
     z-index: 80;
     max-height: 52svh;
     overflow: auto;
@@ -297,7 +297,7 @@
     display: flex;
     position: fixed;
     left: 50%;
-    bottom: calc(5.35rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--dock-clear) - 0.35rem);
     z-index: 78;
     transform: translateX(-50%);
     align-items: center;
@@ -327,7 +327,7 @@
     display: block;
     position: fixed;
     right: 0.85rem;
-    bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--dock-clear) - 0.3rem);
     z-index: 85;
   }
 
@@ -373,6 +373,15 @@
 
   .app-more-panel a:active {
     background: rgba(227, 27, 35, 0.16);
+  }
+
+  .app-credit {
+    margin: 0.35rem 0.45rem 0.2rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.38);
   }
 
   /* Soften flash on mobile */
@@ -432,5 +441,311 @@
   .app-more-panel,
   .page-flash.run {
     animation: none !important;
+  }
+}
+
+/* Production mobile pass
+   Keep the existing Newsac navigation chrome; make content feel like an
+   already-active native product rather than a responsive marketing site. */
+@media (max-width: 860px) {
+  :root {
+    --top-bar: calc(52px + env(safe-area-inset-top, 0px));
+    --dock-h: 4.1rem;
+    --dock-clear: calc(var(--dock-h) + 1.35rem + env(safe-area-inset-bottom, 0px));
+    --player-h: 4rem;
+    --player-clear: calc(var(--dock-clear) + var(--player-h));
+    --app-surface: #101114;
+    --app-surface-raised: #17181c;
+    --app-hairline: rgba(255, 255, 255, 0.075);
+  }
+
+  body,
+  .layout {
+    background:
+      radial-gradient(circle at 110% 10%, rgba(227, 27, 35, 0.08), transparent 28rem),
+      #08090b;
+  }
+
+  body::before {
+    opacity: 0.018;
+  }
+
+  .layout-main {
+    background: transparent;
+  }
+
+  /* Native content hierarchy */
+  .page-hero {
+    padding-bottom: 1.3rem;
+    background:
+      linear-gradient(180deg, rgba(227, 27, 35, 0.1), transparent 80%),
+      transparent;
+  }
+
+  .page-hero::after {
+    content: "";
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0;
+    left: 0.6rem;
+    height: 1px;
+    background: var(--app-hairline);
+  }
+
+  .page-hero h1 {
+    margin-bottom: 0.55rem;
+    line-height: 1.04;
+  }
+
+  .page-hero p {
+    max-width: 36ch;
+    line-height: 1.5;
+  }
+
+  .section {
+    padding: 1.9rem 0;
+  }
+
+  .section + .section {
+    border-top: 1px solid rgba(255, 255, 255, 0.035);
+  }
+
+  .section-head {
+    flex-direction: row;
+    align-items: end;
+    gap: 0.8rem;
+    margin-bottom: 1.05rem;
+  }
+
+  .section-head > div {
+    min-width: 0;
+  }
+
+  .section-kicker {
+    margin-bottom: 0.4rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+  }
+
+  .section-title {
+    max-width: 19ch;
+    font-size: clamp(1.25rem, 6vw, 1.65rem);
+    line-height: 1.08;
+  }
+
+  .section-link {
+    margin-left: auto;
+    color: rgba(244, 242, 238, 0.62);
+    font-size: 0.72rem;
+  }
+
+  /* Cinematic cover, app-sized instead of landing-page-sized */
+  .hero {
+    min-height: 470px;
+    height: min(60svh, 540px);
+    padding-bottom: 1.2rem;
+  }
+
+  .hero-media {
+    border-radius: 0 0 24px 24px;
+  }
+
+  .hero-media img {
+    min-height: 100%;
+  }
+
+  .hero-content {
+    padding-bottom: 0.2rem;
+  }
+
+  .hero-brand {
+    margin-bottom: 0.7rem;
+  }
+
+  .hero h1 {
+    margin-bottom: 0.55rem;
+    font-size: clamp(1.25rem, 6.5vw, 1.7rem);
+  }
+
+  .hero p {
+    margin-bottom: 1rem;
+    font-size: 0.83rem;
+  }
+
+  .hero-scroll {
+    display: none;
+  }
+
+  .hero-cta .btn {
+    min-height: 44px;
+    padding-inline: 0.75rem;
+    font-size: 0.61rem;
+  }
+
+  .fx-ticker {
+    background: #0c0d0f;
+  }
+
+  /* Shared tactile surfaces */
+  .news-row,
+  .rapper-card,
+  .shop-card,
+  .ticket-card,
+  .video-side-item,
+  .music-row,
+  .music-artist,
+  .battle-card,
+  .member-card,
+  .artist-live-form,
+  .artist-live-list,
+  .profile-card,
+  .wall-card,
+  .podcast-card,
+  .live-row {
+    border-color: var(--app-hairline);
+    background-color: var(--app-surface);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  .news-row:active,
+  .rapper-card:active,
+  .shop-card:active,
+  .ticket-card:active,
+  .video-side-item:active,
+  .music-row:active,
+  .music-artist:active,
+  .live-row:active {
+    transform: scale(0.985);
+  }
+
+  .news-row,
+  .video-side-item,
+  .music-row,
+  .music-artist,
+  .live-row {
+    transition:
+      transform 0.16s ease,
+      background 0.16s ease,
+      border-color 0.16s ease;
+  }
+
+  /* Controls: iOS-sized, clear states, no accidental tiny taps */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--red-hot);
+    outline-offset: 2px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    border-color: var(--app-hairline) !important;
+    border-radius: 13px !important;
+    background: var(--app-surface) !important;
+  }
+
+  textarea {
+    min-height: 104px;
+  }
+
+  .btn {
+    min-height: 46px;
+    border-radius: 13px;
+    letter-spacing: 0.06em;
+  }
+
+  .btn-primary {
+    box-shadow: 0 8px 24px rgba(227, 27, 35, 0.18);
+  }
+
+  .btn:disabled,
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* Familiar app rails */
+  .video-rail,
+  .rapper-strip,
+  .home-pods,
+  .home-shows {
+    margin-inline: -0.575rem;
+    padding-inline: 0.575rem;
+    scroll-padding-inline: 0.575rem;
+    scrollbar-width: none;
+  }
+
+  .video-rail::-webkit-scrollbar,
+  .rapper-strip::-webkit-scrollbar,
+  .home-pods::-webkit-scrollbar,
+  .home-shows::-webkit-scrollbar {
+    display: none;
+  }
+
+  .checkout-result,
+  .member-active,
+  .empty-note {
+    border-radius: 12px;
+  }
+
+  /* Music is desktop/notebook-only for now */
+  .desktop-music-only,
+  .desktop-editorial-only,
+  .chart-mini,
+  .full-player {
+    display: none !important;
+  }
+
+  .home-chart li {
+    grid-template-columns: 36px 48px 1fr;
+  }
+
+  /* Refined motion: keep feedback, remove marketing-style decoration. */
+  .hero-logo,
+  .fx-glitch {
+    animation: none !important;
+  }
+
+  .fx-glitch::before,
+  .fx-glitch::after,
+  .hero-beam {
+    display: none !important;
+  }
+
+  .hero-grain {
+    opacity: 0.045;
+  }
+
+  img {
+    background: linear-gradient(135deg, #15161a, #0d0e10);
+  }
+}
+
+@media (max-width: 390px) {
+  .hero {
+    min-height: 450px;
+    height: 58svh;
+  }
+
+  .section-head {
+    align-items: center;
+  }
+
+  .section-link {
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

@@ -1,0 +1,150 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  background: #050505;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.splash-out {
+  animation: splash-fade 0.5s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+}
+
+@keyframes splash-fade {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.splash-glow {
+  position: absolute;
+  width: min(90vw, 480px);
+  height: min(90vw, 480px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(227, 27, 35, 0.38), transparent 68%);
+  filter: blur(8px);
+  animation: splash-glow 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes splash-glow {
+  from {
+    transform: scale(0.88);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.splash-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.splash-mark {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  animation: splash-rise 0.85s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+@keyframes splash-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.splash-logo {
+  width: clamp(88px, 22vw, 120px);
+  height: clamp(88px, 22vw, 120px);
+  object-fit: contain;
+  animation: splash-float 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 12px 28px rgba(227, 27, 35, 0.35));
+}
+
+@keyframes splash-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.splash-word {
+  font-family: var(--font-display), "Unbounded", system-ui, sans-serif;
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.splash-tag {
+  color: rgba(244, 242, 238, 0.45);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.splash-beam {
+  position: absolute;
+  bottom: 28%;
+  left: 50%;
+  width: min(56vw, 280px);
+  height: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--red, #e31b23), transparent);
+  animation: splash-beam 1.6s ease-in-out infinite;
+}
+
+@keyframes splash-beam {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateX(-50%) scaleX(0.75);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+.splash-credit {
+  position: absolute;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(244, 242, 238, 0.32);
+  letter-spacing: 0.02em;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-logo,
+  .splash-glow,
+  .splash-beam,
+  .splash-mark {
+    animation: none;
+  }
+}

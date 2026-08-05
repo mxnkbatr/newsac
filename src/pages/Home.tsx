@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useStore } from '../store/StoreContext'
 import { NewsletterBox, PollWidget, SponsorSlot } from '../components/Widgets'
 import type { DailyDrop } from '../store/types'
+import { useChartPlayer } from '../context/ChartPlayerContext'
 import './Home.css'
 
 function dropHref(drop: DailyDrop) {
@@ -33,12 +34,12 @@ function TodayStrip() {
     .sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt))[0]
 
   return (
-    <section className="section today-strip">
+    <section className="section today-strip desktop-editorial-only">
       <div className="container">
         <div className="section-head reveal">
           <div>
             <div className="section-kicker">Өнөөдөр</div>
-            <h2 className="section-title">Today</h2>
+            <h2 className="section-title">Өнөөдөр</h2>
           </div>
           <Link to="/wall" className="section-link">
             Wall →
@@ -92,13 +93,128 @@ function TodayStrip() {
   )
 }
 
+function AppCommandCenter() {
+  const { user, isMember } = useAuth()
+  const { data } = useStore()
+  const live = data.livestreams.find((item) => item.status === 'live')
+  const topSong = [...data.chartSongs].sort((a, b) => a.rank - b.rank)[0]
+  const openBattle = data.battles.find((item) => item.status === 'open')
+  const latestDrop = [...data.dailyDrops].sort((a, b) => b.date.localeCompare(a.date))[0]
+  const nextShow = [...data.shows]
+    .filter((item) => item.active && +new Date(item.date) >= Date.now())
+    .sort((a, b) => +new Date(a.date) - +new Date(b.date))[0]
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Өглөөний мэнд' : hour < 18 ? 'Өдрийн мэнд' : 'Оройн мэнд'
+
+  const stories = [
+    {
+      to: latestDrop ? dropHref(latestDrop) : '/feed',
+      label: 'Шинэ',
+      image: latestDrop?.image,
+      status: 'ШИНЭ',
+      tone: 'drop',
+    },
+    {
+      to: '/live',
+      label: 'Шууд',
+      image: live?.cover,
+      status: live ? 'LIVE' : 'УДАХГҮЙ',
+      tone: live ? 'live' : 'soon',
+    },
+    {
+      to: '/battle',
+      label: 'Battle',
+      image: openBattle?.cover,
+      status: openBattle ? 'САНАЛ' : 'УДАХГҮЙ',
+      tone: 'battle',
+    },
+    {
+      to: '/tickets',
+      label: 'Тасалбар',
+      image: nextShow?.image,
+      status: nextShow
+        ? new Date(nextShow.date)
+            .toLocaleDateString('mn-MN', { month: 'short', day: 'numeric' })
+            .toUpperCase()
+        : 'EVENT',
+      tone: 'ticket',
+    },
+  ]
+
+  return (
+    <section className="app-command">
+      <div className="container">
+        <div className="app-command-head">
+          <div>
+            <span>{greeting}</span>
+            <strong>{user?.name || 'Newsac фэн'}</strong>
+          </div>
+          <Link to={user ? '/profile' : '/auth'} className="app-command-profile">
+            <span>{user?.name?.slice(0, 1).toUpperCase() || 'N'}</span>
+            <div>
+              <strong>{isMember ? 'Fan Pass' : user ? 'Үнэгүй эрх' : 'Нэвтрэх'}</strong>
+              <small>{isMember ? 'Идэвхтэй' : 'Профайл'}</small>
+            </div>
+            <b>›</b>
+          </Link>
+        </div>
+
+        {topSong && (
+          <Link to="/music" className="now-listening desktop-music-only">
+            <span className="now-listening-cover">
+              <img src={topSong.cover} alt="" />
+              <i aria-hidden="true">▶</i>
+            </span>
+            <span className="now-listening-copy">
+              <small>Одоо сонс · Чарт #{topSong.rank}</small>
+              <strong>{topSong.title}</strong>
+              <em>
+                {topSong.artist} · {topSong.plays}
+              </em>
+            </span>
+            <span className="now-listening-wave" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <b aria-hidden="true">›</b>
+          </Link>
+        )}
+
+        <div className="story-rail" aria-label="Newsac шинэ зүйлс">
+          {stories.map((story) => (
+            <Link
+              key={story.label}
+              to={story.to}
+              className={`story-chip tone-${story.tone}`}
+            >
+              <span className="story-ring">
+                {story.image ? (
+                  <img src={story.image} alt="" />
+                ) : (
+                  <span className="story-fallback">{story.label.slice(0, 1)}</span>
+                )}
+                <i>{story.status}</i>
+              </span>
+              <strong>{story.label}</strong>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function Home() {
   const { user, reactTo } = useAuth()
   const { data, track } = useStore()
+  const { playSong, current: chartCurrent, playing: chartPlaying } = useChartPlayer()
   const news = data.news
   const videos = data.videos
   const rappers = data.rappers
   const rankings = data.rankings
+  const topSongs = [...data.chartSongs].sort((a, b) => a.rank - b.rank).slice(0, 5)
 
   return (
     <div className="home">
@@ -143,14 +259,9 @@ export function Home() {
               </span>
               Бичлэг үзэх
             </Link>
-            <a
-              href={YOUTUBE_CHANNEL_URL}
-              className="btn btn-ghost hero-btn-side fx-press"
-              target="_blank"
-              rel="noreferrer"
-            >
-              YouTube суваг
-            </a>
+            <Link to="/live" className="btn btn-ghost hero-btn-side fx-press">
+              Шууд үзэх
+            </Link>
           </div>
         </div>
 
@@ -160,7 +271,7 @@ export function Home() {
         </div>
       </section>
 
-      <div className="fx-ticker" aria-hidden="true">
+      <div className="fx-ticker desktop-editorial-only" aria-hidden="true">
         <div className="fx-ticker-track">
           {[0, 1].map((copy) => (
             <div key={copy} className="fx-ticker-copy">
@@ -189,6 +300,7 @@ export function Home() {
         </div>
       </div>
 
+      <AppCommandCenter />
       <TodayStrip />
 
       <section className="section">
@@ -227,7 +339,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section section-alt">
+      <section className="section section-alt desktop-editorial-only">
         <div className="container">
           <SponsorSlot slot="home" />
           <div className="home-widgets">
@@ -335,6 +447,45 @@ export function Home() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="section section-alt desktop-music-only">
+        <div className="container">
+          <div className="section-head reveal">
+            <div>
+              <div className="section-kicker">Spotify · Топ</div>
+              <h2 className="section-title">Энэ 7 хоногийн Монгол дуунууд</h2>
+            </div>
+            <Link to="/rankings" className="section-link">
+              Бүтэн чарт →
+            </Link>
+          </div>
+
+          <ol className="home-chart reveal reveal-delay-1">
+            {topSongs.map((song) => {
+              const active = chartCurrent?.id === song.id
+              return (
+                <li key={song.id} className={active ? 'on' : ''}>
+                  <span>{String(song.rank).padStart(2, '0')}</span>
+                  <img src={song.cover} alt="" loading="lazy" />
+                  <div>
+                    <strong>{song.title}</strong>
+                    <em>
+                      {song.artist} · {song.plays}
+                    </em>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary desktop-music-only"
+                    onClick={() => playSong(song)}
+                  >
+                    {active && chartPlaying ? '❚❚' : '▶'}
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
         </div>
       </section>
 

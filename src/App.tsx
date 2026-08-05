@@ -2,9 +2,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { StoreProvider } from './store/StoreContext'
 import { PlayerProvider } from './context/PlayerContext'
+import { ChartPlayerProvider } from './context/ChartPlayerContext'
 import { Layout } from './components/Layout'
 import { RevealObserver } from './components/RevealObserver'
 import { EffectsLayer } from './components/EffectsLayer'
+import { SplashScreen } from './components/SplashScreen'
+import { AdminSessionSync } from './components/AdminSessionSync'
 import { Home } from './pages/Home'
 import { NewsPage, NewsDetailPage } from './pages/News'
 import { VideosPage } from './pages/Videos'
@@ -19,6 +22,9 @@ import { FeedPage } from './pages/Feed'
 import { PodcastsPage } from './pages/Podcasts'
 import { LivePage } from './pages/Live'
 import { WallPage } from './pages/Wall'
+import { MusicPage } from './pages/Music'
+import { ArtistStudioPage } from './pages/ArtistStudio'
+import { BattlePage } from './pages/Battle'
 import { AdminPage } from './pages/Admin'
 import './effects.css'
 
@@ -27,7 +33,10 @@ export default function App() {
     <AuthProvider>
       <StoreProvider>
         <PlayerProvider>
+          <ChartPlayerProvider>
           <BrowserRouter>
+            <SplashScreen />
+            <AdminSessionSync />
             <EffectsLayer />
             <RevealObserver />
             <Routes>
@@ -44,6 +53,9 @@ export default function App() {
                 <Route path="podcasts" element={<PodcastsPage />} />
                 <Route path="live" element={<LivePage />} />
                 <Route path="wall" element={<WallPage />} />
+                <Route path="music" element={<MusicPage />} />
+                <Route path="battle" element={<BattlePage />} />
+                <Route path="artist" element={<ArtistStudioPage />} />
                 <Route path="shorts" element={<ShortsPage />} />
                 <Route path="feed" element={<FeedPage />} />
                 <Route path="membership" element={<MembershipPage />} />
@@ -53,6 +65,7 @@ export default function App() {
               <Route path="admin" element={<AdminPage />} />
             </Routes>
           </BrowserRouter>
+          </ChartPlayerProvider>
         </PlayerProvider>
       </StoreProvider>
     </AuthProvider>

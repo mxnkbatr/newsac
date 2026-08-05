@@ -10,11 +10,25 @@ export function normalizePhone(value: string) {
   return value.replace(/\D/g, '')
 }
 
+export function envAdminEmails(): string[] {
+  const raw = import.meta.env.VITE_ADMIN_EMAILS as string | undefined
+  if (!raw) return []
+  return raw
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean)
+}
+
 export function isAdminCredential(value: string) {
   const raw = value.trim()
   if (raw === ADMIN_PASSWORD) return true
   const phone = normalizePhone(raw)
   return (ADMIN_PHONES as readonly string[]).includes(phone)
+}
+
+export function isAdminEmail(email: string, list: string[]) {
+  const e = email.trim().toLowerCase()
+  return Boolean(e) && list.map((x) => x.toLowerCase()).includes(e)
 }
 
 export function createSeed(): AppData {
@@ -30,6 +44,125 @@ export function createSeed(): AppData {
     videos: seededVideos,
     rappers,
     rankings: rankings.map((r, i) => ({ ...r, hot: i < 3 })),
+    chartSongs: [
+      {
+        id: 'chart-1',
+        rank: 1,
+        title: 'UB Night',
+        artist: 'Thunder',
+        spotifyTrackId: '0VjIjW4GlUZAMYd2vXMi3b',
+        cover:
+          'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?auto=format&fit=crop&w=400&q=80',
+        plays: '1.2M',
+        change: 2,
+        weekOf: new Date().toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        youtubeId: 'UryRJd1vWoY',
+        isNew: true,
+      },
+      {
+        id: 'chart-2',
+        rank: 2,
+        title: 'Glass City',
+        artist: 'Luna Vee',
+        spotifyTrackId: '7qiZfU4dY1lWllzX7mPBI3',
+        cover:
+          'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=400&q=80',
+        plays: '980K',
+        change: 0,
+        weekOf: new Date().toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        youtubeId: '0THTfeMzZx8',
+        isNew: true,
+      },
+      {
+        id: 'chart-3',
+        rank: 3,
+        title: 'Neon 88',
+        artist: 'NEON.88',
+        spotifyTrackId: '3n3Ppam7vgaVa1iaRMc98X',
+        cover:
+          'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=400&q=80',
+        plays: '870K',
+        change: 1,
+        weekOf: new Date().toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+        youtubeId: 'EpTCrO5BjiQ',
+        isNew: true,
+      },
+      {
+        id: 'chart-4',
+        rank: 4,
+        title: 'Northbound',
+        artist: 'Khaan',
+        spotifyTrackId: '0eGsygTp906u18L0Oimnem',
+        cover:
+          'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80',
+        plays: '720K',
+        change: -1,
+        weekOf: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+        youtubeId: 'dIhMXJG0wec',
+      },
+      {
+        id: 'chart-5',
+        rank: 5,
+        title: 'Block Cypher',
+        artist: 'Crew X',
+        spotifyTrackId: '2takcwOaAZWiXQijPHIx7B',
+        cover:
+          'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=400&q=80',
+        plays: '640K',
+        change: 3,
+        weekOf: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+        youtubeId: 'UryRJd1vWoY',
+        isNew: true,
+      },
+      {
+        id: 'chart-6',
+        rank: 6,
+        title: 'Market Fire',
+        artist: 'Newsac',
+        spotifyTrackId: '4uLU6hMCjMI75M1A2tKUQC',
+        cover:
+          'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=400&q=80',
+        plays: '510K',
+        change: -2,
+        weekOf: new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+        youtubeId: '0THTfeMzZx8',
+      },
+      {
+        id: 'chart-7',
+        rank: 7,
+        title: 'Afterparty',
+        artist: 'Thunder · Luna Vee',
+        spotifyTrackId: '5CQ30W69DwJxW7d5688wlp',
+        cover:
+          'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+        plays: '490K',
+        change: 0,
+        weekOf: new Date(Date.now() - 4 * 86400000).toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+        youtubeId: 'EpTCrO5BjiQ',
+      },
+      {
+        id: 'chart-8',
+        rank: 8,
+        title: 'UG Session',
+        artist: 'Underground',
+        spotifyTrackId: '1zHlj4dQ8ZAtrayhuDDmkY',
+        cover:
+          'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=400&q=80',
+        plays: '420K',
+        change: 4,
+        weekOf: new Date(Date.now() - 1 * 86400000).toISOString().slice(0, 10),
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+        youtubeId: 'dIhMXJG0wec',
+        isNew: true,
+      },
+    ],
     products: [
       {
         id: 'tee-red',
@@ -371,10 +504,70 @@ export function createSeed(): AppData {
         comments: [],
       },
     ],
+    battles: [
+      {
+        id: 'battle-1',
+        title: 'UB Cypher · Thunder vs NEON.88',
+        subtitle: 'Энэ 7 хоногийн фэн санал · ялагч дараагийн Live-д нээлттэй слот авна',
+        status: 'open',
+        endsAt: new Date(Date.now() + 5 * 86400000).toISOString(),
+        cover:
+          'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?auto=format&fit=crop&w=1400&q=80',
+        city: 'Улаанбаатар',
+        sides: [
+          {
+            id: 'side-thunder',
+            name: 'Thunder',
+            rapperId: 'thunder',
+            image:
+              'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=80',
+            votes: 842,
+          },
+          {
+            id: 'side-neon',
+            name: 'NEON.88',
+            rapperId: 'neon',
+            image:
+              'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
+            votes: 791,
+          },
+        ],
+      },
+      {
+        id: 'battle-2',
+        title: 'Region Drop · Khaan vs Luna Vee',
+        subtitle: 'Дархан story vs UB melodic — аль нь чиний чихэнд?',
+        status: 'open',
+        endsAt: new Date(Date.now() + 9 * 86400000).toISOString(),
+        cover:
+          'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&q=80',
+        city: 'Дархан / УБ',
+        sides: [
+          {
+            id: 'side-khaan',
+            name: 'Khaan',
+            rapperId: 'khaan',
+            image:
+              'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&q=80',
+            votes: 512,
+          },
+          {
+            id: 'side-luna',
+            name: 'Luna Vee',
+            rapperId: 'luna',
+            image:
+              'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=600&q=80',
+            votes: 640,
+          },
+        ],
+      },
+    ],
+    adminEmails: envAdminEmails(),
     orders: [],
     ticketOrders: [],
     subscribers: [],
     events: [],
     lastYoutubeSync: undefined,
+    lastCloudSync: undefined,
   }
 }

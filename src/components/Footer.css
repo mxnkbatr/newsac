@@ -73,6 +73,10 @@
   font-size: 0.8rem;
 }
 
+.footer-credit {
+  color: var(--ink-faint);
+}
+
 .footer-pulse {
   font-family: var(--font-display);
   letter-spacing: 0.16em;

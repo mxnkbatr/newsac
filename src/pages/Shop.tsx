@@ -203,50 +203,94 @@ export function ShopPage() {
 }
 
 export function MembershipPage() {
-  const { user, isMember, activateMembership } = useAuth()
-  const [done, setDone] = useState(false)
+  const { user, isMember, membershipTier, activateMembership } = useAuth()
+  const [done, setDone] = useState<string | null>(null)
+
+  const tiers = [
+    {
+      id: 'fan' as const,
+      name: 'Fan Pass',
+      price: '9,900₮',
+      months: 1,
+      perks: ['Wall early react', 'Daily Drop мэдэгдэл', 'Battle санал'],
+    },
+    {
+      id: 'street' as const,
+      name: 'Street Pass',
+      price: '19,900₮',
+      months: 1,
+      perks: [
+        'Fan Pass бүгд',
+        'Early video / member news',
+        'Podcast members-only',
+        'Ticket early access',
+      ],
+    },
+    {
+      id: 'vip' as const,
+      name: 'VIP Pass',
+      price: '49,900₮',
+      months: 1,
+      perks: [
+        'Street Pass бүгд',
+        'VIP шоуны эрт худалдаа',
+        'Artist Hub live replay',
+        'Sponsor-free Music (удахгүй)',
+      ],
+    },
+  ]
 
   return (
     <div>
       <header className="page-hero">
         <div className="container">
-          <div className="section-kicker">Membership</div>
-          <h1>Newsac Member</h1>
-          <p>Early video, private шинжилгээ, Discord/чат хандалт — сар бүр.</p>
+          <div className="section-kicker">Fan Pass</div>
+          <h1>Newsac Pass</h1>
+          <p>
+            Complex-style membership — early ticket, exclusive drop, live replay.
+            {isMember && membershipTier
+              ? ` Одоо: ${membershipTier.toUpperCase()} · ${new Date(user!.membershipUntil!).toLocaleDateString('mn-MN')} хүртэл.`
+              : ''}
+          </p>
         </div>
       </header>
       <section className="section">
-        <div className="container member-grid">
-          <div className="member-card">
-            <h2>Сар бүр · 19,900₮</h2>
-            <ul>
-              <li>Early access бичлэг</li>
-              <li>Private зах зээлийн PDF</li>
-              <li>Member Discord / чат</li>
-              <li>Санал асуулгад илүү жин</li>
-            </ul>
-            {!user ? (
-              <Link to="/auth" className="btn btn-primary">
-                Эхлээд нэвтрэх
-              </Link>
-            ) : isMember ? (
-              <p className="member-active">
-                Идэвхтэй · {new Date(user.membershipUntil!).toLocaleDateString('mn-MN')} хүртэл
-              </p>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  activateMembership(1)
-                  setDone(true)
-                }}
-              >
-                QPay-аар идэвхжүүлэх (demo)
-              </button>
-            )}
-            {done && <p className="checkout-result">Membership идэвхжлээ!</p>}
-          </div>
+        <div className="container member-grid member-grid-tiers">
+          {tiers.map((tier) => (
+            <div
+              key={tier.id}
+              className={`member-card ${membershipTier === tier.id && isMember ? 'is-active' : ''}`}
+            >
+              <h2>
+                {tier.name}
+                <span>{tier.price}/сар</span>
+              </h2>
+              <ul>
+                {tier.perks.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+              {!user ? (
+                <Link to="/auth" className="btn btn-primary">
+                  Эхлээд нэвтрэх
+                </Link>
+              ) : isMember && membershipTier === tier.id ? (
+                <p className="member-active">Идэвхтэй</p>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    activateMembership(tier.months, tier.id)
+                    setDone(tier.name)
+                  }}
+                >
+                  QPay-аар авах (demo)
+                </button>
+              )}
+            </div>
+          ))}
+          {done && <p className="checkout-result">{done} идэвхжлээ!</p>}
         </div>
       </section>
     </div>

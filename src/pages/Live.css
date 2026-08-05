@@ -101,6 +101,22 @@
   gap: 0.75rem;
 }
 
+.live-artist-cta {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.live-artist-cta a {
+  color: var(--accent, #e31b23);
+}
+
+.live-host {
+  color: var(--ink) !important;
+  opacity: 0.85 !important;
+  font-style: normal !important;
+}
+
 .live-row {
   display: grid;
   grid-template-columns: 96px 1fr;

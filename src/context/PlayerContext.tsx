@@ -44,12 +44,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const onEnd = () => setPlaying(false)
     const onPlay = () => setPlaying(true)
     const onPause = () => setPlaying(false)
+    const onStopPodcast = () => {
+      audio.pause()
+      audio.removeAttribute('src')
+      setCurrent(null)
+      setPlaying(false)
+      setProgress(0)
+      setDuration(0)
+    }
 
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('loadedmetadata', onMeta)
     audio.addEventListener('ended', onEnd)
     audio.addEventListener('play', onPlay)
     audio.addEventListener('pause', onPause)
+    window.addEventListener('newsac-stop-podcast', onStopPodcast)
 
     return () => {
       audio.pause()
@@ -58,7 +67,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('ended', onEnd)
       audio.removeEventListener('play', onPlay)
       audio.removeEventListener('pause', onPause)
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
+      window.removeEventListener('newsac-stop-podcast', onStopPodcast)
       audioRef.current = null
     }
   }, [])
@@ -67,6 +76,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     async (ep: PodcastEpisode) => {
       const audio = audioRef.current
       if (!audio) return
+      window.dispatchEvent(new Event('newsac-stop-chart'))
       if (current?.id === ep.id) {
         if (audio.paused) void audio.play()
         else audio.pause()

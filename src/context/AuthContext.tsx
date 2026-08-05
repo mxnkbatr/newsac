@@ -1,227 +1,295 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react'
-import { isAdminCredential, normalizePhone } from '../store/seed'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { supabase, supabaseConfigured } from '../lib/supabase'
+import type { MembershipTier } from '../store/types'
 
 export type User = {
   id: string
   name: string
-  phone: string
+  email: string
   joinedAt: string
   favorites: string[]
   reactions: Record<string, 'fire' | 'cold'>
   membershipUntil?: string | null
+  membershipTier?: MembershipTier | null
   pushEnabled?: boolean
   votedPolls?: string[]
+  votedBattles?: string[]
 }
 
 type AuthContextValue = {
   user: User | null
-  register: (name: string, phone: string, password: string) => string | null
-  login: (phone: string, password: string) => string | null
-  logout: () => void
+  loading: boolean
+  register: (name: string, email: string, password: string) => Promise<string | null>
+  login: (email: string, password: string) => Promise<string | null>
+  signInWithGoogle: () => Promise<string | null>
+  logout: () => Promise<void>
   toggleFavorite: (rapperId: string) => boolean
   reactTo: (id: string, kind: 'fire' | 'cold') => void
-  activateMembership: (months?: number) => void
+  activateMembership: (months?: number, tier?: MembershipTier) => void
   isMember: boolean
+  membershipTier: MembershipTier | null
   setPushEnabled: (on: boolean) => void
   markPollVoted: (pollId: string) => void
   hasVotedPoll: (pollId: string) => boolean
+  markBattleVoted: (battleId: string) => void
+  hasVotedBattle: (battleId: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-const USERS_KEY = 'newsac_users'
-const SESSION_KEY = 'newsac_session'
-const ADMIN_KEY = 'newsac_admin_session'
+const PROFILES_KEY = 'newsac_profiles_v3'
 
-type StoredUser = User & { password: string; email?: string }
-
-function isValidMnPhone(phone: string) {
-  return /^[89]\d{7}$/.test(phone)
+type ProfileData = {
+  favorites: string[]
+  reactions: Record<string, 'fire' | 'cold'>
+  membershipUntil?: string | null
+  membershipTier?: MembershipTier | null
+  pushEnabled?: boolean
+  votedPolls?: string[]
+  votedBattles?: string[]
 }
 
-function migrateUser(raw: StoredUser & { email?: string }): StoredUser | null {
-  const phone = normalizePhone(raw.phone || raw.email || '')
-  if (!phone) return null
-  return {
-    id: raw.id,
-    name: raw.name,
-    phone,
-    password: raw.password,
-    joinedAt: raw.joinedAt,
-    favorites: raw.favorites || [],
-    reactions: raw.reactions || {},
-    membershipUntil: raw.membershipUntil ?? null,
-    pushEnabled: raw.pushEnabled ?? false,
-    votedPolls: raw.votedPolls || [],
-  }
+const emptyProfile = (): ProfileData => ({
+  favorites: [],
+  reactions: {},
+  membershipUntil: null,
+  membershipTier: null,
+  pushEnabled: false,
+  votedPolls: [],
+  votedBattles: [],
+})
+
+function isGmail(email: string) {
+  return /^[^\s@]+@gmail\.com$/i.test(email.trim())
 }
 
-function readUsers(): StoredUser[] {
+function readProfiles(): Record<string, ProfileData> {
   try {
-    const parsed = JSON.parse(localStorage.getItem(USERS_KEY) || '[]') as StoredUser[]
-    return parsed.map(migrateUser).filter((u): u is StoredUser => Boolean(u))
+    return JSON.parse(localStorage.getItem(PROFILES_KEY) || '{}') as Record<string, ProfileData>
   } catch {
-    return []
+    return {}
   }
 }
 
-function writeUsers(users: StoredUser[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
+function writeProfile(id: string, data: ProfileData) {
+  const all = readProfiles()
+  all[id] = data
+  localStorage.setItem(PROFILES_KEY, JSON.stringify(all))
 }
 
-function strip(u: StoredUser): User {
-  const { password: _, email: __, ...safe } = u
-  return safe
+function getProfile(id: string): ProfileData {
+  return { ...emptyProfile(), ...readProfiles()[id] }
 }
 
-function syncAdminSession(phone: string, on: boolean) {
-  if (!isAdminCredential(phone)) return
-  if (on) {
-    localStorage.setItem(ADMIN_KEY, '1')
-    window.dispatchEvent(new Event('newsac-admin'))
+function mapUser(su: SupabaseUser): User {
+  const profile = getProfile(su.id)
+  const email = (su.email || '').toLowerCase()
+  const meta = su.user_metadata || {}
+  const name =
+    (typeof meta.full_name === 'string' && meta.full_name) ||
+    (typeof meta.name === 'string' && meta.name) ||
+    email.split('@')[0] ||
+    'Newsac'
+  return {
+    id: su.id,
+    name,
+    email,
+    joinedAt: su.created_at,
+    favorites: profile.favorites || [],
+    reactions: profile.reactions || {},
+    membershipUntil: profile.membershipUntil ?? null,
+    membershipTier: profile.membershipTier ?? null,
+    pushEnabled: profile.pushEnabled ?? false,
+    votedPolls: profile.votedPolls || [],
+    votedBattles: profile.votedBattles || [],
   }
+}
+
+function patchProfile(userId: string, patch: Partial<ProfileData>): ProfileData {
+  const next = { ...getProfile(userId), ...patch }
+  writeProfile(userId, next)
+  return next
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const applySessionUser = useCallback((su: SupabaseUser | null) => {
+    setUser(su ? mapUser(su) : null)
+  }, [])
 
   useEffect(() => {
-    const sessionId = localStorage.getItem(SESSION_KEY)
-    if (!sessionId) return
-    const found = readUsers().find((u) => u.id === sessionId)
-    if (found) {
-      setUser(strip(found))
-      syncAdminSession(found.phone, true)
+    let mounted = true
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return
+      applySessionUser(data.session?.user ?? null)
+      setLoading(false)
+    })
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      applySessionUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    return () => {
+      mounted = false
+      sub.subscription.unsubscribe()
     }
-  }, [])
+  }, [applySessionUser])
 
   const isMember = Boolean(
     user?.membershipUntil && new Date(user.membershipUntil).getTime() > Date.now(),
   )
+  const membershipTier = isMember ? user?.membershipTier || 'fan' : null
+
+  const refreshFromProfile = useCallback((userId: string, name: string, email: string, joinedAt: string) => {
+    const profile = getProfile(userId)
+    setUser({
+      id: userId,
+      name,
+      email,
+      joinedAt,
+      favorites: profile.favorites || [],
+      reactions: profile.reactions || {},
+      membershipUntil: profile.membershipUntil ?? null,
+      membershipTier: profile.membershipTier ?? null,
+      pushEnabled: profile.pushEnabled ?? false,
+      votedPolls: profile.votedPolls || [],
+      votedBattles: profile.votedBattles || [],
+    })
+  }, [])
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
+      loading,
       isMember,
-      register(name, phoneRaw, password) {
-        const phone = normalizePhone(phoneRaw)
-        if (!isValidMnPhone(phone)) {
-          return 'Утасны дугаар буруу. 8 оронтой (жишээ: 99112233).'
-        }
-        const users = readUsers()
-        if (users.some((u) => u.phone === phone)) {
-          return 'Энэ утас аль хэдийн бүртгэлтэй байна.'
-        }
+      membershipTier,
+      async register(name, emailRaw, password) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
         if (password.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.'
-        const next: StoredUser = {
-          id: crypto.randomUUID(),
-          name: name.trim(),
-          phone,
+        if (!name.trim()) return 'Нэрээ оруулна уу.'
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
           password,
-          joinedAt: new Date().toISOString(),
-          favorites: [],
-          reactions: {},
-          membershipUntil: null,
-          pushEnabled: false,
-          votedPolls: [],
+          options: {
+            data: { full_name: name.trim(), name: name.trim() },
+            emailRedirectTo: `${window.location.origin}/auth`,
+          },
+        })
+        if (error) return error.message
+        if (data.user && !data.session) {
+          return 'Баталгаажуулах линк Gmail рүү илгээлээ. Имэйлээ шалгана уу.'
         }
-        users.push(next)
-        writeUsers(users)
-        localStorage.setItem(SESSION_KEY, next.id)
-        syncAdminSession(phone, true)
-        setUser(strip(next))
+        if (data.user) writeProfile(data.user.id, emptyProfile())
         return null
       },
-      login(phoneRaw, password) {
-        const phone = normalizePhone(phoneRaw)
-        const found = readUsers().find((u) => u.phone === phone && u.password === password)
-        if (!found) return 'Утас эсвэл нууц үг буруу байна.'
-        localStorage.setItem(SESSION_KEY, found.id)
-        syncAdminSession(found.phone, true)
-        setUser(strip(found))
+      async login(emailRaw, password) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
+
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+          if (error.message.toLowerCase().includes('invalid')) {
+            return 'Gmail эсвэл нууц үг буруу байна.'
+          }
+          return error.message
+        }
         return null
       },
-      logout() {
-        localStorage.removeItem(SESSION_KEY)
+      async signInWithGoogle() {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/auth`,
+            queryParams: { prompt: 'select_account' },
+          },
+        })
+        if (error) return error.message
+        return null
+      },
+      async logout() {
+        await supabase.auth.signOut()
         setUser(null)
       },
       toggleFavorite(rapperId) {
         if (!user) return false
-        const users = readUsers()
-        const idx = users.findIndex((u) => u.id === user.id)
-        if (idx < 0) return false
-        const favs = new Set(users[idx].favorites)
+        const favs = new Set(user.favorites)
         let added = false
         if (favs.has(rapperId)) favs.delete(rapperId)
         else {
           favs.add(rapperId)
           added = true
         }
-        users[idx].favorites = [...favs]
-        writeUsers(users)
-        setUser(strip(users[idx]))
+        patchProfile(user.id, { favorites: [...favs] })
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
         return added
       },
       reactTo(id, kind) {
         if (!user) return
-        const users = readUsers()
-        const idx = users.findIndex((u) => u.id === user.id)
-        if (idx < 0) return
-        const current = users[idx].reactions[id]
-        if (current === kind) delete users[idx].reactions[id]
-        else users[idx].reactions[id] = kind
-        writeUsers(users)
-        setUser(strip(users[idx]))
+        const reactions = { ...user.reactions }
+        if (reactions[id] === kind) delete reactions[id]
+        else reactions[id] = kind
+        patchProfile(user.id, { reactions })
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
       },
-      activateMembership(months = 1) {
+      activateMembership(months = 1, tier = 'fan') {
         if (!user) return
-        const users = readUsers()
-        const idx = users.findIndex((u) => u.id === user.id)
-        if (idx < 0) return
         const base = Math.max(
           Date.now(),
-          users[idx].membershipUntil
-            ? new Date(users[idx].membershipUntil!).getTime()
-            : Date.now(),
+          user.membershipUntil ? new Date(user.membershipUntil).getTime() : Date.now(),
         )
         const until = new Date(base)
         until.setMonth(until.getMonth() + months)
-        users[idx].membershipUntil = until.toISOString()
-        writeUsers(users)
-        setUser(strip(users[idx]))
+        patchProfile(user.id, {
+          membershipUntil: until.toISOString(),
+          membershipTier: tier,
+        })
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
       },
       setPushEnabled(on) {
         if (!user) return
-        const users = readUsers()
-        const idx = users.findIndex((u) => u.id === user.id)
-        if (idx < 0) return
-        users[idx].pushEnabled = on
-        writeUsers(users)
-        setUser(strip(users[idx]))
+        patchProfile(user.id, { pushEnabled: on })
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
       },
       markPollVoted(pollId) {
         if (!user) return
-        const users = readUsers()
-        const idx = users.findIndex((u) => u.id === user.id)
-        if (idx < 0) return
-        const set = new Set(users[idx].votedPolls || [])
+        const set = new Set(user.votedPolls || [])
         set.add(pollId)
-        users[idx].votedPolls = [...set]
-        writeUsers(users)
-        setUser(strip(users[idx]))
+        patchProfile(user.id, { votedPolls: [...set] })
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
       },
       hasVotedPoll(pollId) {
         return Boolean(user?.votedPolls?.includes(pollId))
       },
+      markBattleVoted(battleId) {
+        if (!user) return
+        const set = new Set(user.votedBattles || [])
+        set.add(battleId)
+        patchProfile(user.id, { votedBattles: [...set] })
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
+      },
+      hasVotedBattle(battleId) {
+        return Boolean(user?.votedBattles?.includes(battleId))
+      },
     }),
-    [user, isMember],
+    [user, loading, isMember, membershipTier, refreshFromProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
