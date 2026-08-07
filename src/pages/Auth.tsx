@@ -99,7 +99,7 @@ export function AuthPage() {
     setInfo('Шинэ код дахин илгээлээ. Gmail-ээ шалгана уу.')
   }
 
-  function onComplete(e: FormEvent) {
+  async function onComplete(e: FormEvent) {
     e.preventDefault()
     setError(null)
     const parsed = parseDemo()
@@ -107,7 +107,7 @@ export function AuthPage() {
       setError(parsed.err)
       return
     }
-    const err = saveDemographics(parsed.demo!)
+    const err = await saveDemographics(parsed.demo!)
     if (err) setError(err)
   }
 

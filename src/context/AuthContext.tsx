@@ -53,7 +53,7 @@ type AuthContextValue = {
   resendSignupCode: (email: string) => Promise<string | null>
   login: (email: string, password: string) => Promise<string | null>
   signInWithGoogle: (demo?: AuthDemographics) => Promise<string | null>
-  saveDemographics: (demo: AuthDemographics) => string | null
+  saveDemographics: (demo: AuthDemographics) => Promise<string | null>
   logout: () => Promise<void>
   toggleFavorite: (rapperId: string) => boolean
   reactTo: (id: string, kind: 'fire' | 'cold') => void
@@ -155,17 +155,39 @@ function getProfile(id: string): ProfileData {
   return { ...emptyProfile(), ...readProfiles()[id] }
 }
 
+function metaNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+function metaGender(value: unknown): Gender | null {
+  return value === 'male' || value === 'female' ? value : null
+}
+
 function mapUser(su: SupabaseUser): User {
   const pending = readPendingDemo()
   let profile = getProfile(su.id)
+  const meta = su.user_metadata || {}
+  const fromMetaAge = metaNumber(meta.age)
+  const fromMetaGender = metaGender(meta.gender)
+
+  // Supabase metadata → local (deploy/device солиход нас·хүйс дахин асуухгүй)
+  if (!isProfileComplete(profile) && fromMetaAge && fromMetaGender) {
+    profile = patchProfile(su.id, { age: fromMetaAge, gender: fromMetaGender })
+  }
+
   if (pending && !isProfileComplete(profile)) {
     profile = patchProfile(su.id, { age: pending.age, gender: pending.gender })
     clearPendingDemo()
   } else if (pending && isProfileComplete(profile)) {
     clearPendingDemo()
   }
+
   const email = (su.email || '').toLowerCase()
-  const meta = su.user_metadata || {}
   const name =
     (typeof meta.full_name === 'string' && meta.full_name) ||
     (typeof meta.name === 'string' && meta.name) ||
@@ -176,8 +198,8 @@ function mapUser(su: SupabaseUser): User {
     name,
     email,
     joinedAt: su.created_at,
-    age: profile.age ?? null,
-    gender: profile.gender ?? null,
+    age: profile.age ?? fromMetaAge ?? null,
+    gender: profile.gender ?? fromMetaGender ?? null,
     favorites: profile.favorites || [],
     reactions: profile.reactions || {},
     membershipUntil: profile.membershipUntil ?? null,
@@ -246,7 +268,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const profileComplete = Boolean(user && isProfileComplete(getProfile(user.id)))
+  const profileComplete = Boolean(
+    user &&
+      user.age &&
+      user.age >= 13 &&
+      (user.gender === 'male' || user.gender === 'female'),
+  )
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -360,12 +387,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) return error.message
         return null
       },
-      saveDemographics(demo) {
+      async saveDemographics(demo) {
         if (!user) return 'Эхлээд Gmail-ээр нэвтэрнэ үү.'
         const err = validateDemographics(demo)
         if (err) return err
         patchProfile(user.id, { age: demo.age, gender: demo.gender })
         clearPendingDemo()
+        const { error } = await supabase.auth.updateUser({
+          data: { age: demo.age, gender: demo.gender },
+        })
+        if (error) return error.message
         refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
         return null
       },

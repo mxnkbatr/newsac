@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { createSeed, isAdminCredential, isAdminEmail } from './seed'
+import { createSeed, envAdminEmails, isAdminCredential, isAdminEmail } from './seed'
 import { normalizeYouTubeId, parseYouTubeId, youtubeThumb } from '../lib/youtube'
 import type {
   AboutPage,
@@ -343,7 +343,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }))
       },
       isEmailAdmin(email) {
-        return isAdminEmail(email, data.adminEmails)
+        const list = Array.from(
+          new Set([
+            ...data.adminEmails.map((e) => e.toLowerCase()),
+            ...envAdminEmails(),
+          ]),
+        )
+        return isAdminEmail(email, list)
       },
       track,
       addToCart(productId, qty = 1) {
@@ -1162,7 +1168,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           nbaSacfun: remote.nbaSacfun?.length ? remote.nbaSacfun : seed.nbaSacfun,
           about: remote.about?.name ? { ...seed.about, ...remote.about } : seed.about,
           siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || {}) },
-          adminEmails: remote.adminEmails?.length ? remote.adminEmails : seed.adminEmails,
+          adminEmails: Array.from(
+            new Set([
+              ...(remote.adminEmails || []).map((e) => e.toLowerCase()),
+              ...seed.adminEmails.map((e) => e.toLowerCase()),
+              ...envAdminEmails(),
+            ]),
+          ),
           orders: remote.orders || [],
           ticketOrders: remote.ticketOrders || [],
           subscribers: remote.subscribers || [],

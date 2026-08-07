@@ -13,17 +13,27 @@ export const ADMIN_PASSWORD = 'newsac2026'
 /** Утасны дугаар — admin нэвтрэх код */
 export const ADMIN_PHONES = ['99918122', '90939291'] as const
 
+/** Built-in admin Gmails (production works even if env missing at build). */
+export const DEFAULT_ADMIN_EMAILS = [
+  'd.monkh2007@gmail.com',
+  'tsbatbaatar99@gmail.com',
+] as const
+
 export function normalizePhone(value: string) {
   return value.replace(/\D/g, '')
 }
 
 export function envAdminEmails(): string[] {
   const raw = import.meta.env.VITE_ADMIN_EMAILS as string | undefined
-  if (!raw) return []
-  return raw
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean)
+  const fromEnv = raw
+    ? raw
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+    : []
+  return Array.from(
+    new Set([...DEFAULT_ADMIN_EMAILS.map((e) => e.toLowerCase()), ...fromEnv]),
+  )
 }
 
 export function isAdminCredential(value: string) {
