@@ -326,6 +326,21 @@
   padding-bottom: 3rem;
 }
 
+.videos-channel-label {
+  margin-bottom: 1rem;
+}
+
+.videos-channel-kicker {
+  display: inline-block;
+  margin: 0;
+  text-decoration: none;
+  color: var(--red);
+}
+
+.videos-channel-kicker:hover {
+  color: var(--red-hot);
+}
+
 @media (max-width: 860px) {
   .section.videos-section {
     padding-top: 1.35rem;

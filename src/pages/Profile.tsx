@@ -39,9 +39,11 @@ export function ProfilePage() {
   const reacted = data.videos.filter((v) => user.reactions[v.id])
   const gender = genderLabel(user.gender)
   const memberLabel = isMember
-    ? membershipTier === 'artist'
-      ? 'Artist Pass'
-      : 'Fan Pass'
+    ? membershipTier === 'vip'
+      ? 'VIP Pass'
+      : membershipTier === 'street'
+        ? 'Street Pass'
+        : 'Fan Pass'
     : 'Free'
   const memberUntil = isMember && user.membershipUntil
     ? new Date(user.membershipUntil).toLocaleDateString('mn-MN')
@@ -91,6 +93,7 @@ export function ProfilePage() {
             <span className={`prof-chip prof-chip-tier ${isMember ? 'on' : ''}`}>
               {memberLabel}
             </span>
+            {canOpenAdmin ? <span className="prof-chip prof-chip-admin">Admin</span> : null}
           </div>
           {(memberUntil || joined) && (
             <p className="prof-meta">
@@ -217,7 +220,7 @@ export function ProfilePage() {
                   </span>
                   <div className="prof-row-body">
                     <strong>{v.title}</strong>
-                    <em>{v.artist || 'Newsac'}</em>
+                    <em>{v.description?.trim() || 'Newsac'}</em>
                   </div>
                   <span className="prof-chevron" aria-hidden="true">
                     ›
@@ -303,10 +306,11 @@ export function ProfilePage() {
           </li>
           {canOpenAdmin && (
             <li>
-              <Link to="/admin" className="prof-menu-item">
+              <Link to="/admin" className="prof-menu-item prof-menu-item-admin">
                 <span className="prof-menu-icon admin" aria-hidden="true" />
                 <span className="prof-menu-text">
                   <strong>Admin panel</strong>
+                  <em>Контент · CMS · тохиргоо</em>
                 </span>
                 <span className="prof-chevron" aria-hidden="true">
                   ›

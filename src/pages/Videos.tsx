@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
 import { SponsorSlot } from '../components/Widgets'
+import { YOUTUBE_CHANNEL_URL, YOUTUBE_HANDLE } from '../data/brand'
 import { parseYouTubeId, youtubeEmbedSrc, youtubeThumb } from '../lib/youtube'
 import './Pages.css'
 
@@ -61,6 +62,16 @@ export function VideosPage() {
   return (
     <div>
       <section className="section videos-section">
+        <div className="container videos-channel-label">
+          <a
+            className="section-kicker videos-channel-kicker"
+            href={YOUTUBE_CHANNEL_URL}
+            target="_blank"
+            rel="noreferrer"
+          >
+            YouTube · {YOUTUBE_HANDLE}
+          </a>
+        </div>
         <div className="container">
           <SponsorSlot slot="videos" />
         </div>
