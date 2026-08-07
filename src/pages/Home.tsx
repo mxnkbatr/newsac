@@ -5,21 +5,33 @@ import { useStore } from '../store/StoreContext'
 import { NewsletterBox, PollWidget, SponsorSlot } from '../components/Widgets'
 import type { DailyDrop } from '../store/types'
 import { useChartPlayer } from '../context/ChartPlayerContext'
+import { youtubeThumb } from '../lib/youtube'
 import './Home.css'
 
 function dropHref(drop: DailyDrop) {
+  if (drop.kind === 'video' && (drop.youtubeId || drop.targetId)) {
+    const v = drop.youtubeId || drop.targetId
+    return `/videos?v=${encodeURIComponent(v)}`
+  }
+  if (drop.kind === 'short') {
+    return drop.youtubeId
+      ? `/reels?v=${encodeURIComponent(drop.youtubeId)}`
+      : '/reels'
+  }
   switch (drop.kind) {
     case 'news':
       return `/news/${drop.targetId}`
-    case 'video':
-      return '/videos'
     case 'podcast':
       return '/podcasts'
-    case 'short':
-      return '/shorts'
     default:
       return '/'
   }
+}
+
+function dropImage(drop: DailyDrop) {
+  if (drop.image?.trim()) return drop.image
+  if (drop.youtubeId) return youtubeThumb(drop.youtubeId)
+  return drop.image
 }
 
 function TodayStrip() {
@@ -50,7 +62,7 @@ function TodayStrip() {
           {drop && (
             <Link to={dropHref(drop)} className="today-drop">
               <div className="today-drop-media fx-media">
-                <img src={drop.image} alt="" loading="lazy" />
+                <img src={dropImage(drop)} alt="" loading="lazy" />
               </div>
               <div className="today-drop-body">
                 <span>ӨНӨӨДРИЙН DROP · {drop.kind.toUpperCase()}</span>
@@ -96,58 +108,18 @@ function TodayStrip() {
 function AppCommandCenter() {
   const { user, isMember } = useAuth()
   const { data } = useStore()
-  const live = data.livestreams.find((item) => item.status === 'live')
   const topSong = [...data.chartSongs].sort((a, b) => a.rank - b.rank)[0]
-  const openBattle = data.battles.find((item) => item.status === 'open')
-  const latestDrop = [...data.dailyDrops].sort((a, b) => b.date.localeCompare(a.date))[0]
-  const nextShow = [...data.shows]
-    .filter((item) => item.active && +new Date(item.date) >= Date.now())
-    .sort((a, b) => +new Date(a.date) - +new Date(b.date))[0]
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Өглөөний мэнд' : hour < 18 ? 'Өдрийн мэнд' : 'Оройн мэнд'
-
-  const stories = [
-    {
-      to: latestDrop ? dropHref(latestDrop) : '/feed',
-      label: 'Шинэ',
-      image: latestDrop?.image,
-      status: 'ШИНЭ',
-      tone: 'drop',
-    },
-    {
-      to: '/live',
-      label: 'Шууд',
-      image: live?.cover,
-      status: live ? 'LIVE' : 'УДАХГҮЙ',
-      tone: live ? 'live' : 'soon',
-    },
-    {
-      to: '/battle',
-      label: 'Battle',
-      image: openBattle?.cover,
-      status: openBattle ? 'САНАЛ' : 'УДАХГҮЙ',
-      tone: 'battle',
-    },
-    {
-      to: '/tickets',
-      label: 'Тасалбар',
-      image: nextShow?.image,
-      status: nextShow
-        ? new Date(nextShow.date)
-            .toLocaleDateString('mn-MN', { month: 'short', day: 'numeric' })
-            .toUpperCase()
-        : 'EVENT',
-      tone: 'ticket',
-    },
-  ]
+  const stories = [...(data.homeStories || [])]
+    .filter((s) => s.active)
+    .sort((a, b) => a.order - b.order)
 
   return (
     <section className="app-command">
       <div className="container">
         <div className="app-command-head">
           <div>
-            <span>{greeting}</span>
-            <strong>{user?.name || 'Newsac фэн'}</strong>
+            <span>Welcome to Newsac</span>
+            <strong>Newsac Nation</strong>
           </div>
           <Link to={user ? '/profile' : '/auth'} className="app-command-profile">
             <span>{user?.name?.slice(0, 1).toUpperCase() || 'N'}</span>
@@ -183,23 +155,35 @@ function AppCommandCenter() {
         )}
 
         <div className="story-rail" aria-label="Newsac шинэ зүйлс">
-          {stories.map((story) => (
-            <Link
-              key={story.label}
-              to={story.to}
-              className={`story-chip tone-${story.tone}`}
-            >
-              <span className="story-ring">
-                {story.image ? (
-                  <img src={story.image} alt="" />
-                ) : (
-                  <span className="story-fallback">{story.label.slice(0, 1)}</span>
-                )}
-                <i>{story.status}</i>
-              </span>
-              <strong>{story.label}</strong>
-            </Link>
-          ))}
+          <div className="story-chip tone-live story-chip-ig" aria-hidden="true">
+            <span className="story-ring">
+              <img src="/logo.png" alt="" />
+              <i>IG</i>
+            </span>
+            <strong>Instagram</strong>
+          </div>
+          {stories.map((story) => {
+            const thumb =
+              story.image?.trim() ||
+              (story.youtubeId ? youtubeThumb(story.youtubeId) : '')
+            return (
+              <div
+                key={story.id}
+                className={`story-chip tone-${story.tone || 'default'}`}
+                aria-hidden="true"
+              >
+                <span className="story-ring">
+                  {thumb ? (
+                    <img src={thumb} alt="" />
+                  ) : (
+                    <span className="story-fallback">{story.label.slice(0, 1)}</span>
+                  )}
+                  <i>{story.status}</i>
+                </span>
+                <strong>{story.label}</strong>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -216,13 +200,24 @@ export function Home() {
   const rankings = data.rankings
   const topSongs = [...data.chartSongs].sort((a, b) => a.rank - b.rank).slice(0, 5)
 
+  const hotNews = (() => {
+    const byId = new Map(news.map((n) => [n.id, n]))
+    const picked = (data.homeHotNewsIds || [])
+      .map((id) => byId.get(id))
+      .filter((n): n is (typeof news)[number] => Boolean(n))
+    if (picked.length >= 3) return picked.slice(0, 3)
+    const fill = news.filter((n) => !picked.some((p) => p.id === n.id))
+    return [...picked, ...fill].slice(0, 3)
+  })()
+
   return (
     <div className="home">
       <section className="hero">
         <div className="hero-media" aria-hidden="true">
           <img
-            src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=2000&q=80"
+            src="/hero-newsac.jpg"
             alt=""
+            fetchPriority="high"
           />
           <div className="hero-shade" />
           <div className="hero-grain" />
@@ -258,9 +253,6 @@ export function Home() {
                 ▶
               </span>
               Бичлэг үзэх
-            </Link>
-            <Link to="/live" className="btn btn-ghost hero-btn-side fx-press">
-              Шууд үзэх
             </Link>
           </div>
         </div>
@@ -307,8 +299,8 @@ export function Home() {
         <div className="container">
           <div className="section-head reveal">
             <div>
-              <div className="section-kicker">Мэдээ</div>
-              <h2 className="section-title">Зах зээлийн халуун сэдэв</h2>
+              <div className="section-kicker">Entertainment</div>
+              <h2 className="section-title">Монгол entertainment · халуун 3</h2>
             </div>
             <Link to="/news" className="section-link">
               Бүгдийг үзэх →
@@ -316,7 +308,7 @@ export function Home() {
           </div>
 
           <div className="news-feature reveal reveal-delay-1">
-            {news.slice(0, 3).map((item, i) => (
+            {hotNews.map((item, i) => (
               <Link
                 key={item.id}
                 to={`/news/${item.id}`}
@@ -450,15 +442,15 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section section-alt desktop-music-only">
+      <section className="section section-alt">
         <div className="container">
           <div className="section-head reveal">
             <div>
-              <div className="section-kicker">Spotify · Топ</div>
-              <h2 className="section-title">Энэ 7 хоногийн Монгол дуунууд</h2>
+              <div className="section-kicker">Шинэ дуу</div>
+              <h2 className="section-title">Энэ 7 хоногт цацагдсан дуунууд</h2>
             </div>
             <Link to="/rankings" className="section-link">
-              Бүтэн чарт →
+              Бүтэн жагсаалт →
             </Link>
           </div>
 
@@ -470,7 +462,10 @@ export function Home() {
                   <span>{String(song.rank).padStart(2, '0')}</span>
                   <img src={song.cover} alt="" loading="lazy" />
                   <div>
-                    <strong>{song.title}</strong>
+                    <strong>
+                      {song.title}
+                      {song.isNew ? <i className="home-chart-new"> · ШИНЭ</i> : null}
+                    </strong>
                     <em>
                       {song.artist} · {song.plays}
                     </em>
@@ -486,60 +481,19 @@ export function Home() {
               )
             })}
           </ol>
-        </div>
-      </section>
 
-      <section className="section section-alt">
-        <div className="container rank-home">
-          <div className="reveal">
-            <div className="section-kicker">Хэмжүүр</div>
-            <h2 className="section-title">Долоо хоногийн рейтинг</h2>
-            <p className="rank-note">
-              Стрим, сошиал engagement, медиа дурдлагыг нэгтгэсэн Newsac индекс.
-            </p>
-            <Link to="/rankings" className="btn btn-primary" style={{ marginTop: '1.5rem' }}>
-              Бүрэн чарт
-            </Link>
-          </div>
-
-          <ol className="rank-mini reveal reveal-delay-2">
-            {rankings.slice(0, 5).map((r, i) => (
-              <li key={r.id}>
-                <span className="rank-n">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <strong>{r.name}</strong>
-                  <em>{r.track}</em>
-                </div>
-                <span className={`rank-delta ${r.change > 0 ? 'up' : r.change < 0 ? 'down' : ''}`}>
-                  {r.change > 0 ? `+${r.change}` : r.change}
-                </span>
-              </li>
-            ))}
-          </ol>
+          {!topSongs.length && (
+            <p className="rank-note">Одоогоор энэ 7 хоногийн дуу бүртгэгдээгүй.</p>
+          )}
         </div>
       </section>
 
       <section className="section section-alt">
         <div className="container">
-          <div className="section-head reveal">
-            <div>
-              <div className="section-kicker">Podcast</div>
-              <h2 className="section-title">Сонсоод яваарай</h2>
-            </div>
-            <Link to="/podcasts" className="section-link">
-              Бүх цуврал →
-            </Link>
-          </div>
-          <div className="home-pods reveal reveal-delay-1">
-            {data.podcasts.slice(0, 3).map((ep) => (
-              <Link key={ep.id} to="/podcasts" className="home-pod-card">
-                <img src={ep.cover} alt="" loading="lazy" />
-                <div>
-                  <span>{ep.duration}</span>
-                  <strong>{ep.title}</strong>
-                </div>
-              </Link>
-            ))}
+          <div className="home-originals reveal">
+            <div className="section-kicker">Series</div>
+            <h2 className="section-title">Newsac Originals</h2>
+            <p className="home-originals-soon">Coming soon...</p>
           </div>
         </div>
       </section>
@@ -549,7 +503,7 @@ export function Home() {
           <div className="section-head reveal">
             <div>
               <div className="section-kicker">Live · Tickets</div>
-              <h2 className="section-title">Удахгүй болох тоглолтууд</h2>
+              <h2 className="section-title">Tickets Drop Soon</h2>
             </div>
             <Link to="/tickets" className="section-link">
               Бүх тасалбар →
@@ -560,9 +514,17 @@ export function Home() {
               .filter((s) => s.active)
               .slice(0, 3)
               .map((show) => (
-                <Link key={show.id} to="/tickets" className="home-show-card">
+                <Link key={show.id} to="/tickets" className="home-show-card is-locked">
                   <div className="fx-media">
                     <img src={show.image} alt="" loading="lazy" />
+                    <span className="home-show-lock" aria-label="Тун удахгүй">
+                      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M17 8h-1V6a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm7 13H7v-9h10v9Zm-5-2a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+                        />
+                      </svg>
+                    </span>
                   </div>
                   <div>
                     <span>

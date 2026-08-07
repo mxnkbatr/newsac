@@ -7,6 +7,7 @@ import { Layout } from './components/Layout'
 import { RevealObserver } from './components/RevealObserver'
 import { EffectsLayer } from './components/EffectsLayer'
 import { SplashScreen } from './components/SplashScreen'
+import { Onboarding } from './components/Onboarding'
 import { AdminSessionSync } from './components/AdminSessionSync'
 import { Home } from './pages/Home'
 import { NewsPage, NewsDetailPage } from './pages/News'
@@ -18,13 +19,35 @@ import { ProfilePage } from './pages/Profile'
 import { ShopPage, MembershipPage } from './pages/Shop'
 import { TicketsPage } from './pages/Tickets'
 import { ShortsPage } from './pages/Shorts'
-import { FeedPage } from './pages/Feed'
+import { ReelsPage } from './pages/Reels'
 import { PodcastsPage } from './pages/Podcasts'
 import { LivePage } from './pages/Live'
 import { WallPage } from './pages/Wall'
 import { MusicPage } from './pages/Music'
 import { ArtistStudioPage } from './pages/ArtistStudio'
 import { BattlePage } from './pages/Battle'
+import {
+  NbaPage,
+  NbaUpdatesPage,
+  NbaUpdateDetailPage,
+  NbaHotPage,
+  NbaHotDetailPage,
+  NbaMambaPage,
+  NbaFreeAgencyPage,
+  NbaFreeAgencyDetailPage,
+  NbaSacfunPage,
+  NbaYoutubePage,
+  NbaQuizPage,
+} from './pages/Nba'
+import { AboutPage } from './pages/About'
+import {
+  ContactPage,
+  PartnershipPage,
+  AdvertisePage,
+  PrivacyPage,
+  TermsPage,
+} from './pages/Corporate'
+import { YoutubePostsPage } from './pages/YoutubePosts'
 import { AdminPage } from './pages/Admin'
 import './effects.css'
 
@@ -36,6 +59,7 @@ export default function App() {
           <ChartPlayerProvider>
           <BrowserRouter>
             <SplashScreen />
+            <Onboarding />
             <AdminSessionSync />
             <EffectsLayer />
             <RevealObserver />
@@ -55,9 +79,27 @@ export default function App() {
                 <Route path="wall" element={<WallPage />} />
                 <Route path="music" element={<MusicPage />} />
                 <Route path="battle" element={<BattlePage />} />
+                <Route path="nba" element={<NbaPage />} />
+                <Route path="nba/updates" element={<NbaUpdatesPage />} />
+                <Route path="nba/updates/:id" element={<NbaUpdateDetailPage />} />
+                <Route path="nba/hot" element={<NbaHotPage />} />
+                <Route path="nba/hot/:id" element={<NbaHotDetailPage />} />
+                <Route path="nba/mamba" element={<NbaMambaPage />} />
+                <Route path="nba/free-agency" element={<NbaFreeAgencyPage />} />
+                <Route path="nba/free-agency/:id" element={<NbaFreeAgencyDetailPage />} />
+                <Route path="nba/sacfun" element={<NbaSacfunPage />} />
+                <Route path="nba/youtube" element={<NbaYoutubePage />} />
+                <Route path="nba/quiz" element={<NbaQuizPage />} />
+                <Route path="posts" element={<YoutubePostsPage />} />
+                <Route path="about" element={<AboutPage />} />
+                <Route path="contact" element={<ContactPage />} />
+                <Route path="partnership" element={<PartnershipPage />} />
+                <Route path="advertise" element={<AdvertisePage />} />
+                <Route path="privacy" element={<PrivacyPage />} />
+                <Route path="terms" element={<TermsPage />} />
                 <Route path="artist" element={<ArtistStudioPage />} />
                 <Route path="shorts" element={<ShortsPage />} />
-                <Route path="feed" element={<FeedPage />} />
+                <Route path="reels" element={<ReelsPage />} />
                 <Route path="membership" element={<MembershipPage />} />
                 <Route path="profile" element={<ProfilePage />} />
               </Route>

@@ -17,6 +17,26 @@
   transform: translateY(-2px);
 }
 
+.sponsor-slot-empty {
+  pointer-events: none;
+  border-style: dashed;
+}
+
+.sponsor-slot-empty:hover {
+  transform: none;
+  border-color: var(--line);
+}
+
+.sponsor-slot-placeholder {
+  width: 120px;
+  height: 88px;
+  flex-shrink: 0;
+  background:
+    linear-gradient(135deg, rgba(227, 27, 35, 0.22), transparent 62%),
+    var(--bg);
+  border-right: 1px solid var(--line);
+}
+
 .sponsor-slot img {
   width: 100%;
   height: 88px;
@@ -167,7 +187,7 @@
   .sponsor-slot {
     grid-template-columns: 72px 1fr;
     gap: 0.7rem;
-    margin: 0.65rem 0;
+    margin: 1rem 0;
     border-radius: 14px;
     border-color: rgba(255, 255, 255, 0.075);
     background: #101114;

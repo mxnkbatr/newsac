@@ -6,7 +6,9 @@ import './Navbar.css'
 const links = [
   { to: '/news', label: 'Мэдээ' },
   { to: '/videos', label: 'Бичлэг' },
+  { to: '/posts', label: 'Posts' },
   { to: '/live', label: 'Live' },
+  { to: '/nba', label: 'NBA' },
   { to: '/wall', label: 'Wall' },
   { to: '/podcasts', label: 'Podcast' },
   { to: '/tickets', label: 'Тасалбар' },
@@ -15,15 +17,21 @@ const links = [
 
 const mobileMoreLinks = [
   { to: '/news', label: 'Мэдээ', icon: 'N' },
-  { to: '/rankings', label: 'Топ', icon: '#' },
+  { to: '/videos', label: 'Бичлэг', icon: '▶' },
+  { to: '/posts', label: 'YT Posts', icon: '✎' },
+  { to: '/nba', label: 'NBA', icon: 'NB' },
   { to: '/battle', label: 'Battle', icon: '⚡' },
   { to: '/rappers', label: 'Артистууд', icon: 'A' },
   { to: '/podcasts', label: 'Podcast', icon: 'P' },
-  { to: '/shorts', label: 'Shorts', icon: '▶' },
+  { to: '/reels', label: 'Reels', icon: '▶' },
+  { to: '/shorts', label: 'Live Cypher', icon: '⚡' },
   { to: '/wall', label: 'Wall', icon: 'W' },
-  { to: '/feed', label: 'Миний feed', icon: 'F' },
   { to: '/membership', label: 'Fan Pass', icon: '★' },
-  { to: '/artist', label: 'Artist Hub', icon: 'H' },
+  { to: '/artist', label: 'Artist Profile', icon: 'AP' },
+  { to: '/about', label: 'Бидний тухай', icon: 'ℹ' },
+  { to: '/contact', label: 'Холбоо барих', icon: '@' },
+  { to: '/partnership', label: 'Хамтран ажиллах', icon: '🤝' },
+  { to: '/advertise', label: 'Сурталчилгаа', icon: '◈' },
 ]
 
 export function Navbar() {

@@ -12,6 +12,16 @@ export const newsFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
   { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
   { key: 'body', label: 'Бүрэн текст', type: 'textarea' },
+  {
+    key: 'region',
+    label: 'Төрөл',
+    type: 'select',
+    half: true,
+    options: [
+      { value: 'domestic', label: 'Дотоод мэдээ' },
+      { value: 'foreign', label: 'Гадаад мэдээ' },
+    ],
+  },
   { key: 'category', label: 'Ангилал', half: true },
   { key: 'date', label: 'Огноо', half: true, placeholder: '2026.08.06' },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
@@ -21,7 +31,12 @@ export const newsFields: FieldDef[] = [
 
 export const videoFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
-  { key: 'youtubeId', label: 'YouTube ID', required: true },
+  {
+    key: 'youtubeId',
+    label: 'YouTube линк / ID',
+    required: true,
+    placeholder: 'https://youtu.be/... эсвэл ID',
+  },
   { key: 'description', label: 'Тайлбар', type: 'textarea' },
   { key: 'views', label: 'Үзэлт', half: true },
   { key: 'duration', label: 'Үргэлжлэх', half: true, placeholder: '3:21' },
@@ -33,6 +48,16 @@ export const rapperFields: FieldDef[] = [
   { key: 'name', label: 'Нэр', required: true },
   { key: 'aka', label: 'AKA', half: true },
   { key: 'city', label: 'Хот', half: true },
+  {
+    key: 'region',
+    label: 'Төрөл',
+    type: 'select',
+    half: true,
+    options: [
+      { value: 'domestic', label: 'Дотоод артист' },
+      { value: 'foreign', label: 'Гадаад рэппер' },
+    ],
+  },
   { key: 'years', label: 'Жил', half: true },
   { key: 'streams', label: 'Streams', half: true },
   { key: 'bio', label: 'Bio', type: 'textarea' },
@@ -101,12 +126,50 @@ export const dropFields: FieldDef[] = [
       { value: 'news', label: 'News' },
       { value: 'video', label: 'Video' },
       { value: 'podcast', label: 'Podcast' },
-      { value: 'short', label: 'Short' },
+      { value: 'short', label: 'Short / Reel' },
     ],
   },
   { key: 'targetId', label: 'Target ID', required: true },
+  {
+    key: 'youtubeId',
+    label: 'YouTube линк / ID',
+    placeholder: 'Video/Short бол заавал',
+  },
   { key: 'teaser', label: 'Teaser', type: 'textarea' },
-  { key: 'image', label: 'Зураг URL', type: 'url' },
+  { key: 'image', label: 'Зураг URL (хоосон бол YT thumb)', type: 'url' },
+]
+
+export const homeStoryFields: FieldDef[] = [
+  { key: 'label', label: 'Нэр (доорх текст)', required: true },
+  { key: 'status', label: 'Badge (жишээ: ШИНЭ)', required: true, half: true },
+  { key: 'order', label: 'Дараалал', type: 'number', half: true },
+  {
+    key: 'youtubeId',
+    label: 'YouTube линк / ID',
+    required: true,
+    placeholder: 'https://youtube.com/watch?v=... эсвэл shorts/...',
+  },
+  { key: 'href', label: 'Нөөц линк (заавал биш)', placeholder: '/reels' },
+  {
+    key: 'tone',
+    label: 'Өнгө',
+    type: 'select',
+    options: [
+      { value: 'drop', label: 'Drop / Шинэ' },
+      { value: 'live', label: 'Live' },
+      { value: 'soon', label: 'Удахгүй' },
+      { value: 'battle', label: 'Battle' },
+      { value: 'ticket', label: 'Тасалбар' },
+      { value: 'default', label: 'Default' },
+    ],
+  },
+  {
+    key: 'image',
+    label: 'Зураг (хоосон бол YouTube thumbnail)',
+    type: 'image',
+    placeholder: 'https://...',
+  },
+  { key: 'active', label: 'Идэвхтэй (нүүр дээр харагдана)', type: 'checkbox' },
 ]
 
 export const liveFields: FieldDef[] = [
@@ -121,7 +184,7 @@ export const liveFields: FieldDef[] = [
       { value: 'ended', label: 'Ended' },
     ],
   },
-  { key: 'youtubeId', label: 'YouTube ID' },
+  { key: 'youtubeId', label: 'YouTube линк / ID', placeholder: 'https://youtu.be/...' },
   { key: 'startsAt', label: 'Эхлэх (ISO)' },
   { key: 'viewers', label: 'Үзэгчид', type: 'number', half: true },
   { key: 'cover', label: 'Cover URL', type: 'url', half: true },
@@ -147,6 +210,9 @@ export const sponsorFields: FieldDef[] = [
       { value: 'home', label: 'Home' },
       { value: 'videos', label: 'Videos' },
       { value: 'shop', label: 'Shop' },
+      { value: 'news', label: 'Мэдээ' },
+      { value: 'nba', label: 'NBA' },
+      { value: 'battle', label: 'Battle' },
     ],
   },
   { key: 'cpm', label: 'CPM', type: 'number', half: true },
@@ -162,7 +228,11 @@ export const chartFields: FieldDef[] = [
   { key: 'weekOf', label: 'Долоо хоног', half: true },
   { key: 'spotifyTrackId', label: 'Spotify track ID', half: true },
   { key: 'audioUrl', label: 'Audio URL', type: 'url' },
-  { key: 'youtubeId', label: 'YouTube ID' },
+  {
+    key: 'youtubeId',
+    label: 'YouTube линк / ID',
+    placeholder: 'https://youtu.be/...',
+  },
   { key: 'cover', label: 'Cover URL', type: 'url' },
   { key: 'isNew', label: 'Шинэ', type: 'checkbox' },
 ]
@@ -199,3 +269,25 @@ export const IMG = {
   sideB: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
   audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
 }
+
+export const shortFields: FieldDef[] = [
+  { key: 'title', label: 'Гарчиг', required: true },
+  {
+    key: 'youtubeId',
+    label: 'YouTube линк / ID (Shorts OK)',
+    required: true,
+    placeholder: 'https://youtube.com/shorts/...',
+  },
+  { key: 'start', label: 'Эхлэх сек', type: 'number', half: true },
+  { key: 'rapperId', label: 'Артист ID (заавал биш)', half: true },
+]
+
+export const pollFields: FieldDef[] = [
+  { key: 'question', label: 'Асуулт', required: true },
+  { key: 'optionA', label: 'Сонголт 1', required: true, half: true },
+  { key: 'optionB', label: 'Сонголт 2', required: true, half: true },
+  { key: 'optionC', label: 'Сонголт 3 (заавал биш)', half: true },
+  { key: 'optionD', label: 'Сонголт 4 (заавал биш)', half: true },
+  { key: 'endsAt', label: 'Дуусах (ISO)', placeholder: '2026-12-31T23:59:00.000Z' },
+  { key: 'active', label: 'Идэвхтэй', type: 'checkbox' },
+]

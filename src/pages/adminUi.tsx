@@ -5,7 +5,14 @@ import {
   type ReactNode,
 } from 'react'
 
-export type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'url'
+export type FieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'select'
+  | 'checkbox'
+  | 'url'
+  | 'image'
 
 export type FieldDef = {
   key: string
@@ -18,6 +25,35 @@ export type FieldDef = {
 }
 
 export type ToastState = { text: string; error?: boolean } | null
+
+/** Phone gallery/camera → compressed data URL for story images */
+function fileToCompressedDataUrl(file: File, maxSide = 640, quality = 0.72): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('read failed'))
+    reader.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('image failed'))
+      img.onload = () => {
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
+        const w = Math.max(1, Math.round(img.width * scale))
+        const h = Math.max(1, Math.round(img.height * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('canvas'))
+          return
+        }
+        ctx.drawImage(img, 0, 0, w, h)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      }
+      img.src = String(reader.result)
+    }
+    reader.readAsDataURL(file)
+  })
+}
 
 export function Toast({ toast }: { toast: ToastState }) {
   if (!toast) return null
@@ -91,6 +127,45 @@ function Field({
         />
         {def.label}
       </label>
+    )
+  }
+
+  if (type === 'image') {
+    const src = String(value || '')
+    return (
+      <div className="admin-field admin-field-image">
+        <label htmlFor={`f-${def.key}`}>{def.label}</label>
+        {src ? (
+          <div className="admin-image-preview">
+            <img src={src} alt="" />
+          </div>
+        ) : null}
+        <label className="admin-image-pick">
+          <input
+            id={`f-${def.key}-file`}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              void fileToCompressedDataUrl(file)
+                .then((url) => onChange(url))
+                .catch(() => {
+                  /* ignore */
+                })
+            }}
+          />
+          📷 Зураг сонгох / аваах
+        </label>
+        <input
+          id={`f-${def.key}`}
+          type="url"
+          value={src.startsWith('data:') ? '' : src}
+          placeholder={def.placeholder || 'эсвэл зураг URL'}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
     )
   }
 

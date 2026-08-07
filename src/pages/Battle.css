@@ -109,3 +109,101 @@
 .battle-side-meta .btn {
   width: 100%;
 }
+
+.battle-empty {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  padding: 2.4rem 1.25rem 2.6rem;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 70% 80% at 50% 0%, rgba(227, 27, 35, 0.16), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  animation: battle-empty-in 0.45s var(--ease) both;
+}
+
+@keyframes battle-empty-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.battle-empty-mark {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 0.35rem;
+}
+
+.battle-empty-mark span {
+  position: absolute;
+  top: 50%;
+  width: 34px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(244, 242, 238, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.battle-empty-mark span:first-child {
+  left: 8px;
+  transform: translateY(-50%) rotate(-8deg);
+}
+
+.battle-empty-mark span:last-child {
+  right: 8px;
+  transform: translateY(-50%) rotate(8deg);
+  border-color: rgba(227, 27, 35, 0.45);
+  background: rgba(227, 27, 35, 0.12);
+}
+
+.battle-empty-kicker {
+  margin: 0;
+  color: var(--red-hot);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.battle-empty h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 4.5vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.battle-empty > p:not(.battle-empty-kicker) {
+  margin: 0;
+  max-width: 28rem;
+  color: var(--ink-dim);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.battle-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.battle-empty-actions .btn {
+  min-width: 8.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-empty {
+    animation: none;
+  }
+}

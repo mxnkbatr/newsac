@@ -1,0 +1,99 @@
+.ig-story {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  background: #000;
+  color: #fff;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+
+.ig-story-progress {
+  display: flex;
+  gap: 4px;
+  padding: 10px 12px 0;
+}
+
+.ig-story-bar {
+  flex: 1;
+  height: 2.5px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+}
+
+.ig-story-bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #fff;
+  border-radius: inherit;
+}
+
+.ig-story-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem 0.35rem;
+}
+
+.ig-story-top strong {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: -0.01em;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ig-story-close,
+.ig-story-ext {
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ig-story-stage {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.5rem 0 1rem;
+}
+
+.ig-story-media {
+  max-width: min(100%, 480px);
+  max-height: calc(100dvh - 7.5rem);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.ig-story-hit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 42%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ig-story-hit.left {
+  left: 0;
+}
+
+.ig-story-hit.right {
+  right: 0;
+}

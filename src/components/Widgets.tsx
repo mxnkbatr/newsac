@@ -4,10 +4,30 @@ import { useStore } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
 import './Widgets.css'
 
-export function SponsorSlot({ slot }: { slot: 'home' | 'videos' | 'shop' }) {
+export function SponsorSlot({
+  slot,
+  alwaysShow = false,
+}: {
+  slot: 'home' | 'videos' | 'shop' | 'news' | 'nba' | 'battle'
+  alwaysShow?: boolean
+}) {
   const { data, track } = useStore()
   const sponsor = data.sponsors.find((s) => s.active && s.slot === slot)
-  if (!sponsor) return null
+
+  if (!sponsor && !alwaysShow) return null
+
+  if (!sponsor) {
+    return (
+      <div className="sponsor-slot sponsor-slot-empty" aria-label="Рекламны орон зай">
+        <div className="sponsor-slot-placeholder" aria-hidden="true" />
+        <div>
+          <span className="sponsor-kicker">Ad space</span>
+          <strong>Таны рекламны орон зай</strong>
+          <p>Энд брендийн реклам байрлана.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <a
@@ -20,7 +40,7 @@ export function SponsorSlot({ slot }: { slot: 'home' | 'videos' | 'shop' }) {
       <img src={sponsor.image} alt="" />
       <div>
         <span className="sponsor-kicker">Sponsor</span>
-        <strong>{sponsor.name}</strong>
+        <strong>Таны рекламны орон зай</strong>
         <p>{sponsor.tagline}</p>
       </div>
     </a>

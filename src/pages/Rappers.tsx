@@ -1,11 +1,25 @@
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
+import type { NewsRegion } from '../store/types'
 import './Pages.css'
+
+function rapperRegion(r: { region?: NewsRegion }) {
+  return r.region === 'foreign' ? 'foreign' : 'domestic'
+}
 
 export function RappersPage() {
   const { data, track } = useStore()
   const { user, toggleFavorite } = useAuth()
+  const [tab, setTab] = useState<NewsRegion>('domestic')
+
+  const filtered = useMemo(
+    () => data.rappers.filter((r) => rapperRegion(r) === tab),
+    [data.rappers, tab],
+  )
+  const domesticCount = data.rappers.filter((r) => rapperRegion(r) === 'domestic').length
+  const foreignCount = data.rappers.filter((r) => rapperRegion(r) === 'foreign').length
 
   return (
     <div>
@@ -13,13 +27,42 @@ export function RappersPage() {
         <div className="container">
           <div className="section-kicker">Артист</div>
           <h1>Рэпперүүдийн түүх</h1>
-          <p>UG-ээс чарт хүртэл — follow хийгээд feed-дээ ав.</p>
+          <p>Дотоод UG-ээс дэлхийн легенд хүртэл — follow хийгээд feed-дээ ав.</p>
+          <div className="news-region-tabs" role="tablist" aria-label="Артист төрөл">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'domestic'}
+              className={tab === 'domestic' ? 'active' : ''}
+              onClick={() => setTab('domestic')}
+            >
+              Дотоод артист
+              <span>{domesticCount}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'foreign'}
+              className={tab === 'foreign' ? 'active' : ''}
+              onClick={() => setTab('foreign')}
+            >
+              Гадаад рэппер
+              <span>{foreignCount}</span>
+            </button>
+          </div>
         </div>
       </header>
 
       <section className="section">
         <div className="container rapper-grid">
-          {data.rappers.map((r) => {
+          {filtered.length === 0 && (
+            <p className="empty-note">
+              {tab === 'domestic'
+                ? 'Одоогоор дотоод артист байхгүй.'
+                : 'Одоогоор гадаад рэппер байхгүй.'}
+            </p>
+          )}
+          {filtered.map((r) => {
             const fav = user?.favorites.includes(r.id)
             return (
               <article key={r.id} className="rapper-card">
@@ -31,6 +74,7 @@ export function RappersPage() {
                     <div>
                       <h2>
                         <Link to={`/rappers/${r.id}`}>{r.name}</Link>
+                        {r.verified ? ' ✓' : ''}
                       </h2>
                       <span>
                         {r.aka} · {r.city}
@@ -88,6 +132,7 @@ export function RapperDetailPage() {
   }
 
   const fav = user?.favorites.includes(rapper.id)
+  const regionLabel = rapperRegion(rapper) === 'foreign' ? 'Гадаад' : 'Дотоод'
 
   return (
     <article>
@@ -96,7 +141,7 @@ export function RapperDetailPage() {
         <div className="rapper-detail-shade" />
         <div className="container rapper-detail-content">
           <div className="section-kicker">
-            {rapper.city} · {rapper.years}
+            {regionLabel} · {rapper.city} · {rapper.years}
           </div>
           <h1>
             {rapper.name}
@@ -122,7 +167,7 @@ export function RapperDetailPage() {
               (rapper.ownerUserId === user.id ||
                 rapper.ownerEmail === user.email.toLowerCase()) && (
                 <Link to="/artist" className="btn btn-primary">
-                  Artist Hub · Live
+                  Artist Profile
                 </Link>
               )}
             <span className="streams-pill">{rapper.streams} стрим</span>
@@ -140,8 +185,12 @@ export function RapperDetailPage() {
           {rapper.story.split('\n\n').map((para) => (
             <p key={para.slice(0, 24)}>{para}</p>
           ))}
-          <Link to="/feed" className="section-link" style={{ marginTop: '1rem', display: 'inline-block' }}>
-            Миний feed →
+          <Link
+            to="/rappers"
+            className="section-link"
+            style={{ marginTop: '1rem', display: 'inline-block' }}
+          >
+            ← Бүх артист
           </Link>
         </div>
       </section>

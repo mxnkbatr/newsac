@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './SplashScreen.css'
 
 // Fast enough to feel native; long branded intros make a live app feel slow.
-const MIN_MS = 850
+const MIN_MS = 1100
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<'in' | 'out' | 'gone'>('in')
@@ -37,7 +37,7 @@ export function SplashScreen() {
       <div className="splash-grain" />
       <div className="splash-mark">
         <img src="/logo.png" alt="" className="splash-logo" />
-        <strong className="splash-word">Newsac</strong>
+        <strong className="splash-domain">newsac.mn</strong>
         <span className="splash-tag">Hip-hop market culture</span>
       </div>
       <div className="splash-beam" />

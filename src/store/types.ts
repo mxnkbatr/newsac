@@ -1,3 +1,14 @@
+export type NewsComment = {
+  id: string
+  newsId: string
+  authorName: string
+  authorId?: string
+  text: string
+  createdAt: string
+}
+
+export type NewsRegion = 'domestic' | 'foreign'
+
 export type NewsItem = {
   id: string
   title: string
@@ -7,7 +18,10 @@ export type NewsItem = {
   date: string
   readMin: number
   image: string
+  /** Дотоод / Гадаад мэдээ */
+  region?: NewsRegion
   membersOnly?: boolean
+  comments?: NewsComment[]
 }
 
 export type VideoItem = {
@@ -33,6 +47,8 @@ export type Rapper = {
   image: string
   tags: string[]
   streams: string
+  /** domestic = дотоод, foreign = гадаад */
+  region?: 'domestic' | 'foreign'
   /** Verified artist on Newsac */
   verified?: boolean
   /** Linked fan/account email (Gmail) */
@@ -107,7 +123,7 @@ export type Sponsor = {
   tagline: string
   url: string
   image: string
-  slot: 'home' | 'videos' | 'shop'
+  slot: 'home' | 'videos' | 'shop' | 'news' | 'nba' | 'battle'
   active: boolean
   cpm: number
 }
@@ -189,6 +205,22 @@ export type DailyDrop = {
   targetId: string
   teaser: string
   image: string
+  /** YouTube ID — video/short drop шууд тоглуулахад */
+  youtubeId?: string
+}
+
+/** Нүүрний story-rail (Instagram-style дугуйнууд) */
+export type HomeStory = {
+  id: string
+  label: string
+  status: string
+  href: string
+  image: string
+  /** YouTube ID / линк — дархад шууд тоглоно */
+  youtubeId?: string
+  tone: 'drop' | 'live' | 'soon' | 'battle' | 'ticket' | 'default'
+  order: number
+  active: boolean
 }
 
 export type Livestream = {
@@ -254,6 +286,72 @@ export type AnalyticsEvent = {
   at: string
 }
 
+export type AboutPage = {
+  name: string
+  role: string
+  photo: string
+  bio: string
+  location?: string
+}
+
+/** Хуудасны Coming soon / нууцлаг горим */
+export type SiteFlags = {
+  ticketsClassified: boolean
+  shopSoon: boolean
+  cypherSoon: boolean
+  artistSoon: boolean
+  /** Newsac Pass / membership coming soon */
+  passSoon: boolean
+}
+
+export type NbaStory = {
+  id: string
+  tag: string
+  title: string
+  blurb: string
+  body: string[]
+  when: string
+  readMin: number
+  image: string
+}
+
+export type NbaHot = {
+  id: string
+  rank: number
+  title: string
+  team: string
+  heat: string
+  blurb: string
+  body: string[]
+  readMin: number
+}
+
+export type NbaFreeAgent = {
+  id: string
+  rank: number
+  name: string
+  position: string
+  lastTeam: string
+  age: string
+  note: string
+  detail: string[]
+  fit: string
+}
+
+export type NbaQuizQ = {
+  id: string
+  q: string
+  choices: string[]
+  answer: number
+  explain: string
+}
+
+export type NbaSacfunBit = {
+  id: string
+  title: string
+  text: string
+}
+
 export type AppData = {
   news: NewsItem[]
   videos: VideoItem[]
@@ -267,9 +365,19 @@ export type AppData = {
   shows: Show[]
   podcasts: PodcastEpisode[]
   dailyDrops: DailyDrop[]
+  homeStories: HomeStory[]
   livestreams: Livestream[]
   wallPosts: WallPost[]
   battles: Battle[]
+  nbaUpdates: NbaStory[]
+  nbaHotNews: NbaHot[]
+  nbaFreeAgents: NbaFreeAgent[]
+  nbaQuiz: NbaQuizQ[]
+  nbaSacfun: NbaSacfunBit[]
+  /** Нүүр дээрх халуун 3 мэдээний ID (дараалал чухал) */
+  homeHotNewsIds: string[]
+  about: AboutPage
+  siteFlags: SiteFlags
   adminEmails: string[]
   orders: Order[]
   ticketOrders: TicketOrder[]

@@ -323,3 +323,151 @@
     font-size: 1rem;
   }
 }
+
+.shop-soon-page {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(227, 27, 35, 0.26), transparent 55%),
+    var(--bg);
+  min-height: 70svh;
+}
+
+.shop-soon-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 2.5rem 0 2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.shop-soon-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 40%, rgba(227, 27, 35, 0.32), transparent 42%),
+    radial-gradient(circle at 90% 20%, rgba(227, 27, 35, 0.16), transparent 40%);
+  pointer-events: none;
+}
+
+.shop-soon-hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.shop-soon-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 7vw, 3.4rem);
+  letter-spacing: -0.03em;
+  margin: 0.35rem 0 0.75rem;
+  line-height: 0.98;
+}
+
+.shop-soon-hero p {
+  margin: 0 0 1.1rem;
+  color: var(--ink-dim);
+  max-width: 38ch;
+  line-height: 1.55;
+}
+
+.shop-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(227, 27, 35, 0.55);
+  background: rgba(227, 27, 35, 0.12);
+  padding: 0.55rem 0.85rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: #fff;
+}
+
+.shop-soon-badge .shop-lock {
+  position: static;
+  width: 1.7rem;
+  height: 1.7rem;
+  box-shadow: none;
+}
+
+.shop-soon-badge .shop-lock svg {
+  width: 18px;
+  height: 18px;
+}
+
+.shop-soon-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(227, 27, 35, 0.4);
+  background: var(--bg-2);
+  padding: 3rem 1.35rem;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+
+.shop-soon-glow {
+  position: absolute;
+  inset: -30%;
+  z-index: -1;
+  background: conic-gradient(
+    from 120deg,
+    transparent,
+    rgba(227, 27, 35, 0.22),
+    transparent 40%,
+    rgba(227, 27, 35, 0.12),
+    transparent 70%
+  );
+  animation: shop-spin 16s linear infinite;
+  pointer-events: none;
+}
+
+.shop-lock {
+  width: 4.25rem;
+  height: 4.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.28), transparent 45%),
+    linear-gradient(145deg, rgba(227, 27, 35, 0.98), rgba(70, 6, 10, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 0 0 8px rgba(227, 27, 35, 0.14),
+    0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+.shop-soon-stage strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-top: 0.35rem;
+}
+
+.shop-soon-stage > p {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--ink-dim);
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.shop-soon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+@keyframes shop-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-soon-glow {
+    animation: none;
+  }
+}

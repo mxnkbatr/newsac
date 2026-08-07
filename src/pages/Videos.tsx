@@ -1,15 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
-import { YOUTUBE_CHANNEL_URL, YOUTUBE_HANDLE } from '../data/brand'
 import { useAuth } from '../context/AuthContext'
 import { SponsorSlot } from '../components/Widgets'
+import { parseYouTubeId, youtubeEmbedSrc, youtubeThumb } from '../lib/youtube'
 import './Pages.css'
 
 export function VideosPage() {
   const { data, track } = useStore()
-  const [activeId, setActiveId] = useState(data.videos[0]?.id)
+  const [params] = useSearchParams()
+  const paramV = parseYouTubeId(params.get('v') || '') || params.get('v') || ''
+  const fromParam = data.videos.find(
+    (v) => v.youtubeId === paramV || v.id === params.get('id') || v.id === paramV,
+  )
+  const [activeId, setActiveId] = useState(fromParam?.id || data.videos[0]?.id)
   const { user, reactTo, isMember } = useAuth()
+
+  useEffect(() => {
+    if (fromParam) setActiveId(fromParam.id)
+  }, [fromParam])
 
   useEffect(() => {
     if (!data.videos.find((v) => v.id === activeId) && data.videos[0]) {
@@ -17,12 +26,23 @@ export function VideosPage() {
     }
   }, [data.videos, activeId])
 
-  const current = data.videos.find((v) => v.id === activeId) || data.videos[0]
+  const current =
+    data.videos.find((v) => v.id === activeId) ||
+    fromParam ||
+    data.videos[0] ||
+    (paramV
+      ? {
+          id: `yt-${paramV}`,
+          youtubeId: paramV,
+          title: 'YouTube бичлэг',
+          description: '',
+          views: '',
+          duration: '',
+          published: '',
+        }
+      : undefined)
   const embed = useMemo(
-    () =>
-      current
-        ? `https://www.youtube-nocookie.com/embed/${current.youtubeId}?rel=0`
-        : '',
+    () => (current ? youtubeEmbedSrc(current.youtubeId, { nocookie: true }) : ''),
     [current],
   )
 
@@ -40,24 +60,7 @@ export function VideosPage() {
 
   return (
     <div>
-      <header className="page-hero">
-        <div className="container">
-          <div className="section-kicker">YouTube · {YOUTUBE_HANDLE}</div>
-          <h1>Бичлэгүүд</h1>
-          <p>Зах зээлийн шинжилгээ, тойм, халуун сэдэв — Newsac сувгаас.</p>
-          <a
-            href={YOUTUBE_CHANNEL_URL}
-            className="btn btn-primary"
-            target="_blank"
-            rel="noreferrer"
-            style={{ marginTop: '1.25rem' }}
-          >
-            Сувагт орох
-          </a>
-        </div>
-      </header>
-
-      <section className="section">
+      <section className="section videos-section">
         <div className="container">
           <SponsorSlot slot="videos" />
         </div>
@@ -66,10 +69,10 @@ export function VideosPage() {
             <div className="video-frame">
               {locked ? (
                 <div className="member-lock">
+                  <div className="member-lock-shade" aria-hidden />
                   <p>Early / Member бичлэг</p>
-                  <Link to="/membership" className="btn btn-primary">
-                    Нээх
-                  </Link>
+                  <strong className="member-lock-brand">Newsac Originals</strong>
+                  <span className="member-lock-soon">Coming soon...</span>
                 </div>
               ) : (
                 <iframe
@@ -124,7 +127,7 @@ export function VideosPage() {
                 }}
               >
                 <img
-                  src={`https://i.ytimg.com/vi/${v.youtubeId}/mqdefault.jpg`}
+                  src={youtubeThumb(v.youtubeId, 'mqdefault')}
                   alt=""
                   loading="lazy"
                 />

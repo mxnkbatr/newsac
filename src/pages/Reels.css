@@ -1,0 +1,177 @@
+.reels-page {
+  position: relative;
+  height: calc(100dvh - 52px - env(safe-area-inset-top, 0px));
+  max-height: 100dvh;
+  background: #000;
+  overflow: hidden;
+}
+
+.reels-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.65), transparent);
+  pointer-events: none;
+}
+
+.reels-top a,
+.reels-top strong,
+.reels-top span {
+  pointer-events: auto;
+}
+
+.reels-back {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.reels-top strong {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.reels-top span {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.78rem;
+}
+
+.reels-scroller {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+
+.reels-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.reel-slide {
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+}
+
+.reel-stage {
+  position: relative;
+  width: min(100%, 480px);
+  height: 100%;
+  margin: 0 auto;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.reel-stage iframe,
+.reel-stage img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+  display: block;
+}
+
+.reel-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 45%, rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+}
+
+.reel-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  padding: 1.1rem 1.1rem 0;
+  z-index: 2;
+}
+
+.reel-meta span {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.reel-meta h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: #fff;
+  max-width: 18ch;
+}
+
+.reel-meta em {
+  display: block;
+  margin-top: 0.35rem;
+  font-style: normal;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.reels-nav {
+  position: absolute;
+  right: 0.75rem;
+  bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 6;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.reels-nav button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.reels-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.reels-empty {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 0;
+}
+
+.reels-empty h1 {
+  margin: 0.35rem 0 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .reels-page {
+    height: calc(100dvh - 72px);
+  }
+
+  .reel-stage {
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Hide bottom nav chrome feel a bit on reels via body class optional - skip */
+@media (max-width: 719px) {
+  .reels-page {
+    height: calc(100dvh - 52px - 64px - env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -1,17 +1,100 @@
+.cypher-soon-page {
+  min-height: 60vh;
+}
+
+.cypher-soon-hero {
+  padding: 2.5rem 0 1.5rem;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(227, 27, 35, 0.28), transparent 55%),
+    linear-gradient(180deg, #120606, transparent);
+  border-bottom: 1px solid var(--line);
+}
+
+.cypher-soon-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  margin: 0.35rem 0 0.75rem;
+}
+
+.cypher-soon-hero p {
+  color: var(--ink-dim);
+  max-width: 42ch;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.cypher-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  color: var(--ink-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.cypher-soon-stage {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  display: grid;
+  gap: 0.85rem;
+  max-width: 640px;
+}
+
+.cypher-soon-glow {
+  position: absolute;
+  inset: auto -20% -40% auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(227, 27, 35, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.cypher-soon-stage strong {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.cypher-soon-stage > p {
+  position: relative;
+  margin: 0;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  max-width: 48ch;
+}
+
+.cypher-soon-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+/* legacy shorts (unused) */
 .shorts-page {
-  min-height: calc(100svh - var(--nav-h));
-  padding: calc(var(--nav-h) + 0.75rem) 0 calc(5.5rem + env(safe-area-inset-bottom, 0px));
-  background: #050505;
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
 }
 
 .shorts-stage {
-  position: relative;
-  width: min(100% - 1.25rem, 420px);
-  margin: 0 auto;
+  width: min(420px, 100%);
   aspect-ratio: 9 / 16;
-  max-height: calc(100svh - var(--nav-h) - 6.5rem);
   background: #000;
   border: 1px solid var(--line);
+  position: relative;
   overflow: hidden;
 }
 
@@ -26,49 +109,45 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 1rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.92));
-  pointer-events: none;
+  padding: 1.25rem 1rem 4.5rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
 }
 
 .shorts-meta a {
-  pointer-events: auto;
+  color: inherit;
 }
 
 .shorts-meta span {
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--red);
-  font-weight: 700;
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.35rem;
 }
 
 .shorts-meta h1 {
-  font-size: 1.05rem;
-  margin: 0.35rem 0 0.5rem;
-  line-height: 1.25;
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .shorts-nav {
   position: absolute;
-  right: 0.65rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: grid;
-  gap: 0.45rem;
+  right: 0.75rem;
+  bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .shorts-nav button {
-  border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.65);
-  color: var(--ink);
-  padding: 0.55rem 0.6rem;
-  font-size: 0.68rem;
-  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  backdrop-filter: blur(8px);
 }
 
 .shorts-nav button:disabled {
   opacity: 0.35;
+  cursor: default;
 }

@@ -1,92 +1,101 @@
 import { Link } from 'react-router-dom'
-import { YOUTUBE_CHANNEL_URL } from '../data/brand'
+import {
+  BRAND_DOMAIN,
+  CONTACT_EMAIL,
+  PARTNERSHIP_EMAIL,
+  SOCIAL,
+  YOUTUBE_HANDLE,
+} from '../data/brand'
 import './Footer.css'
+
+const year = new Date().getFullYear()
 
 export function Footer() {
   return (
-    <footer className="footer">
-      <div className="container footer-grid">
+    <footer className="footer" id="site-footer">
+      <div className="container footer-top">
         <div className="footer-brand">
           <div className="footer-logo-row">
-            <img src="/logo.png" alt="" width={40} height={40} />
-            <strong>Newsac</strong>
+            <img src="/logo.png" alt="" width={44} height={44} />
+            <div>
+              <strong>Newsac</strong>
+              <em>{BRAND_DOMAIN}</em>
+            </div>
           </div>
           <p>
-            Монголын хип-хоп зах зээлийн мэдээ, шинжилгээ, рэпперийн түүх — нэг
-            платформ дээр.
+            One platform. Endless entertainment — Монголын болон дэлхийн хип-хоп, хөгжим,
+            спорт, соёлын төв.
           </p>
         </div>
 
-        <div>
-          <h4>Цэс</h4>
+        <div className="footer-col">
+          <h4>Компани</h4>
           <ul>
             <li>
-              <Link to="/news">Мэдээ</Link>
+              <Link to="/about">Бидний тухай</Link>
             </li>
             <li>
-              <Link to="/videos">Бичлэг</Link>
+              <Link to="/contact">Холбоо барих</Link>
             </li>
             <li>
-              <Link to="/live">Шууд</Link>
+              <Link to="/partnership">Хамтран ажиллах</Link>
             </li>
             <li>
-              <Link to="/wall">Wall</Link>
-            </li>
-            <li>
-              <Link to="/rappers">Рэпперүүд</Link>
-            </li>
-            <li>
-              <Link to="/rankings">Рейтинг</Link>
+              <Link to="/advertise">Сурталчилгаа байршуулах</Link>
             </li>
           </ul>
         </div>
 
-        <div>
-          <h4>Оролцох</h4>
-          <ul>
+        <div className="footer-col">
+          <h4>Холбоо барих</h4>
+          <ul className="footer-contact">
             <li>
-              <Link to="/podcasts">Podcast</Link>
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
             </li>
             <li>
-              <Link to="/tickets">Тасалбар</Link>
+              <a href={`mailto:${PARTNERSHIP_EMAIL}`}>{PARTNERSHIP_EMAIL}</a>
             </li>
+          </ul>
+          <h4 className="footer-social-label">Social</h4>
+          <ul className="footer-social">
             <li>
-              <Link to="/shop">Дэлгүүр</Link>
-            </li>
-            <li>
-              <Link to="/shorts">Shorts</Link>
-            </li>
-            <li>
-              <Link to="/membership">Fan Pass</Link>
-            </li>
-            <li>
-              <Link to="/battle">Battle</Link>
-            </li>
-            <li>
-              <Link to="/artist">Artist Hub</Link>
-            </li>
-            <li>
-              <Link to="/admin">Admin</Link>
-            </li>
-            <li>
-              <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noreferrer">
-                YouTube
+              <a href={SOCIAL.facebook} target="_blank" rel="noreferrer">
+                Facebook
               </a>
             </li>
             <li>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer">
+              <a href={SOCIAL.instagram} target="_blank" rel="noreferrer">
                 Instagram
+              </a>
+            </li>
+            <li>
+              <a href={SOCIAL.youtube} target="_blank" rel="noreferrer">
+                YouTube {YOUTUBE_HANDLE}
               </a>
             </li>
           </ul>
         </div>
+
+        <div className="footer-col footer-app">
+          <h4>Newsac App</h4>
+          <p>Тун удахгүй.. App Store / Google Play</p>
+          <div className="footer-store-row" aria-hidden="true">
+            <span className="footer-store">App Store</span>
+            <span className="footer-store">Google Play</span>
+          </div>
+        </div>
       </div>
+
       <div className="container footer-bottom">
         <span>
-          © {new Date().getFullYear()} Newsac. Бүх эрх хуулиар хамгаалагдсан.
-          <span className="footer-credit"> · Developed by Munkhbaatar Dorjsuren</span>
+          © {year} Newsac.mn
+          <br className="footer-br" />
+          All Rights Reserved.
         </span>
-        <span className="footer-pulse">LIVE CULTURE</span>
+        <nav className="footer-legal" aria-label="Legal">
+          <Link to="/privacy">Privacy Policy</Link>
+          <Link to="/terms">Terms &amp; Conditions</Link>
+        </nav>
       </div>
     </footer>
   )

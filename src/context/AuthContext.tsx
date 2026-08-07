@@ -11,11 +11,15 @@ import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import type { MembershipTier } from '../store/types'
 
+export type Gender = 'male' | 'female'
+
 export type User = {
   id: string
   name: string
   email: string
   joinedAt: string
+  age?: number | null
+  gender?: Gender | null
   favorites: string[]
   reactions: Record<string, 'fire' | 'cold'>
   membershipUntil?: string | null
@@ -25,12 +29,31 @@ export type User = {
   votedBattles?: string[]
 }
 
+export type AuthDemographics = {
+  age: number
+  gender: Gender
+}
+
+export type RegisterResult =
+  | { status: 'ok' }
+  | { status: 'verify'; email: string }
+  | { status: 'error'; message: string }
+
 type AuthContextValue = {
   user: User | null
   loading: boolean
-  register: (name: string, email: string, password: string) => Promise<string | null>
+  profileComplete: boolean
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    demo: AuthDemographics,
+  ) => Promise<RegisterResult>
+  verifySignupCode: (email: string, code: string) => Promise<string | null>
+  resendSignupCode: (email: string) => Promise<string | null>
   login: (email: string, password: string) => Promise<string | null>
-  signInWithGoogle: () => Promise<string | null>
+  signInWithGoogle: (demo?: AuthDemographics) => Promise<string | null>
+  saveDemographics: (demo: AuthDemographics) => string | null
   logout: () => Promise<void>
   toggleFavorite: (rapperId: string) => boolean
   reactTo: (id: string, kind: 'fire' | 'cold') => void
@@ -47,8 +70,11 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 const PROFILES_KEY = 'newsac_profiles_v3'
+const PENDING_DEMO_KEY = 'newsac_pending_demo_v1'
 
 type ProfileData = {
+  age?: number | null
+  gender?: Gender | null
   favorites: string[]
   reactions: Record<string, 'fire' | 'cold'>
   membershipUntil?: string | null
@@ -59,6 +85,8 @@ type ProfileData = {
 }
 
 const emptyProfile = (): ProfileData => ({
+  age: null,
+  gender: null,
   favorites: [],
   reactions: {},
   membershipUntil: null,
@@ -70,6 +98,43 @@ const emptyProfile = (): ProfileData => ({
 
 function isGmail(email: string) {
   return /^[^\s@]+@gmail\.com$/i.test(email.trim())
+}
+
+function validateDemographics(demo: AuthDemographics): string | null {
+  if (!Number.isFinite(demo.age) || demo.age < 13 || demo.age > 100) {
+    return 'Насаа 13–100 хооронд оруулна уу.'
+  }
+  if (demo.gender !== 'male' && demo.gender !== 'female') {
+    return 'Хүйсээ сонгоно уу.'
+  }
+  return null
+}
+
+function isProfileComplete(profile: ProfileData) {
+  return Boolean(
+    profile.age &&
+      profile.age >= 13 &&
+      (profile.gender === 'male' || profile.gender === 'female'),
+  )
+}
+
+function readPendingDemo(): AuthDemographics | null {
+  try {
+    const raw = sessionStorage.getItem(PENDING_DEMO_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as AuthDemographics
+    return validateDemographics(parsed) ? null : parsed
+  } catch {
+    return null
+  }
+}
+
+function writePendingDemo(demo: AuthDemographics) {
+  sessionStorage.setItem(PENDING_DEMO_KEY, JSON.stringify(demo))
+}
+
+function clearPendingDemo() {
+  sessionStorage.removeItem(PENDING_DEMO_KEY)
 }
 
 function readProfiles(): Record<string, ProfileData> {
@@ -91,7 +156,14 @@ function getProfile(id: string): ProfileData {
 }
 
 function mapUser(su: SupabaseUser): User {
-  const profile = getProfile(su.id)
+  const pending = readPendingDemo()
+  let profile = getProfile(su.id)
+  if (pending && !isProfileComplete(profile)) {
+    profile = patchProfile(su.id, { age: pending.age, gender: pending.gender })
+    clearPendingDemo()
+  } else if (pending && isProfileComplete(profile)) {
+    clearPendingDemo()
+  }
   const email = (su.email || '').toLowerCase()
   const meta = su.user_metadata || {}
   const name =
@@ -104,6 +176,8 @@ function mapUser(su: SupabaseUser): User {
     name,
     email,
     joinedAt: su.created_at,
+    age: profile.age ?? null,
+    gender: profile.gender ?? null,
     favorites: profile.favorites || [],
     reactions: profile.reactions || {},
     membershipUntil: profile.membershipUntil ?? null,
@@ -160,6 +234,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name,
       email,
       joinedAt,
+      age: profile.age ?? null,
+      gender: profile.gender ?? null,
       favorites: profile.favorites || [],
       reactions: profile.reactions || {},
       membershipUntil: profile.membershipUntil ?? null,
@@ -170,32 +246,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const profileComplete = Boolean(user && isProfileComplete(getProfile(user.id)))
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       loading,
+      profileComplete,
       isMember,
       membershipTier,
-      async register(name, emailRaw, password) {
-        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+      async register(name, emailRaw, password, demo) {
+        if (!supabaseConfigured) {
+          return { status: 'error', message: 'Supabase тохируулаагүй байна (.env.local).' }
+        }
         const email = emailRaw.trim().toLowerCase()
-        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
-        if (password.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.'
-        if (!name.trim()) return 'Нэрээ оруулна уу.'
+        if (!isGmail(email)) {
+          return { status: 'error', message: 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.' }
+        }
+        if (password.length < 6) {
+          return { status: 'error', message: 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.' }
+        }
+        if (!name.trim()) return { status: 'error', message: 'Нэрээ оруулна уу.' }
+        const demoErr = validateDemographics(demo)
+        if (demoErr) return { status: 'error', message: demoErr }
 
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { full_name: name.trim(), name: name.trim() },
+            data: {
+              full_name: name.trim(),
+              name: name.trim(),
+              age: demo.age,
+              gender: demo.gender,
+            },
             emailRedirectTo: `${window.location.origin}/auth`,
           },
         })
-        if (error) return error.message
-        if (data.user && !data.session) {
-          return 'Баталгаажуулах линк Gmail рүү илгээлээ. Имэйлээ шалгана уу.'
+        if (error) return { status: 'error', message: error.message }
+        if (data.user) {
+          writeProfile(data.user.id, {
+            ...emptyProfile(),
+            age: demo.age,
+            gender: demo.gender,
+          })
         }
-        if (data.user) writeProfile(data.user.id, emptyProfile())
+        if (data.user && !data.session) {
+          return { status: 'verify', email }
+        }
+        return { status: 'ok' }
+      },
+      async verifySignupCode(emailRaw, codeRaw) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        const token = codeRaw.replace(/\s/g, '')
+        if (!/^\d{6}$/.test(token)) return '6 оронтой кодыг зөв оруулна уу.'
+
+        const { error } = await supabase.auth.verifyOtp({
+          email,
+          token,
+          type: 'signup',
+        })
+        if (error) {
+          const msg = error.message.toLowerCase()
+          if (msg.includes('expired') || msg.includes('invalid')) {
+            return 'Код буруу эсвэл хугацаа дууссан. Дахин илгээнэ үү.'
+          }
+          return error.message
+        }
+        return null
+      },
+      async resendSignupCode(emailRaw) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
+
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email,
+          options: { emailRedirectTo: `${window.location.origin}/auth` },
+        })
+        if (error) return error.message
         return null
       },
       async login(emailRaw, password) {
@@ -212,8 +343,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return null
       },
-      async signInWithGoogle() {
+      async signInWithGoogle(demo) {
         if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        if (demo) {
+          const err = validateDemographics(demo)
+          if (err) return err
+          writePendingDemo(demo)
+        }
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -222,6 +358,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         })
         if (error) return error.message
+        return null
+      },
+      saveDemographics(demo) {
+        if (!user) return 'Эхлээд Gmail-ээр нэвтэрнэ үү.'
+        const err = validateDemographics(demo)
+        if (err) return err
+        patchProfile(user.id, { age: demo.age, gender: demo.gender })
+        clearPendingDemo()
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
         return null
       },
       async logout() {
@@ -289,7 +434,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return Boolean(user?.votedBattles?.includes(battleId))
       },
     }),
-    [user, loading, isMember, membershipTier, refreshFromProfile],
+    [user, loading, profileComplete, isMember, membershipTier, refreshFromProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

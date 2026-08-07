@@ -1,0 +1,228 @@
+.about-page {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(227, 27, 35, 0.22), transparent 55%),
+    radial-gradient(ellipse 45% 30% at 100% 40%, rgba(227, 27, 35, 0.08), transparent 50%),
+    var(--bg);
+  min-height: 70svh;
+  padding-bottom: 2rem;
+}
+
+.about-hero {
+  padding: 2rem 0 1.5rem;
+}
+
+.about-hero-inner {
+  max-width: 40rem;
+}
+
+.about-kicker {
+  margin: 0 0 0.75rem;
+  color: var(--red-hot);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.about-brand {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 10vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin-bottom: 0.55rem;
+}
+
+.about-slogan {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+
+.about-hero h1 {
+  margin: 0 0 1.1rem;
+}
+
+.about-lead {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: clamp(1.02rem, 2.8vw, 1.15rem);
+  line-height: 1.65;
+  max-width: 38rem;
+}
+
+.about-section {
+  padding: 1.75rem 0;
+}
+
+.about-section-alt {
+  border-block: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.about-prose {
+  max-width: 40rem;
+}
+
+.about-prose h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 4vw, 1.55rem);
+  letter-spacing: -0.02em;
+}
+
+.about-prose p {
+  margin: 0 0 1rem;
+  color: var(--ink-dim);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.about-pillars {
+  list-style: none;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.about-pillars li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.about-pillars strong {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+}
+
+.about-pillars span {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.about-founder {
+  display: grid;
+  gap: 1.75rem;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+.about-photo {
+  position: relative;
+  width: min(100%, 320px);
+  margin: 0 auto;
+  aspect-ratio: 4 / 5;
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+  filter: contrast(1.05) saturate(0.92);
+}
+
+.about-photo-frame {
+  position: absolute;
+  inset: 0.65rem -0.65rem -0.65rem 0.65rem;
+  border: 1px solid rgba(227, 27, 35, 0.55);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.about-founder-copy h2 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  letter-spacing: -0.03em;
+}
+
+.about-role {
+  margin: 0 0 0.35rem;
+  color: var(--red);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.about-loc {
+  margin: 0 0 1rem;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+
+.about-bio {
+  margin: 0 0 1.35rem;
+  color: var(--ink-dim);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  max-width: 38ch;
+}
+
+.about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.about-welcome {
+  margin: 1.5rem 0 2rem;
+  padding: 2rem 0;
+  text-align: center;
+  border-top: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 60% 80% at 50% 0%, rgba(227, 27, 35, 0.14), transparent 60%);
+}
+
+.about-welcome h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 4.5vw, 1.85rem);
+  letter-spacing: -0.02em;
+}
+
+.about-welcome p:not(.about-kicker) {
+  margin: 0 auto;
+  max-width: 34rem;
+  color: var(--ink-dim);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@media (min-width: 720px) {
+  .about-pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 860px) {
+  .about-hero {
+    padding: 3rem 0 2rem;
+  }
+
+  .about-founder {
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 3rem;
+  }
+
+  .about-photo {
+    margin: 0;
+    width: 100%;
+    max-width: 360px;
+  }
+}

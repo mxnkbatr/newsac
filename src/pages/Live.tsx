@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
+import { youtubeEmbedSrc, youtubeWatchUrl } from '../lib/youtube'
 import './Pages.css'
 import './Live.css'
 
@@ -74,7 +75,7 @@ export function LivePage() {
             <div className="live-embed fx-media">
               <iframe
                 title={featured.title}
-                src={`https://www.youtube.com/embed/${featured.youtubeId}?autoplay=1`}
+                src={youtubeEmbedSrc(featured.youtubeId, { autoplay: true })}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
@@ -108,7 +109,7 @@ export function LivePage() {
                     {featured.youtubeId && (
                       <a
                         className="btn btn-ghost"
-                        href={`https://www.youtube.com/watch?v=${featured.youtubeId}`}
+                        href={youtubeWatchUrl(featured.youtubeId)}
                         target="_blank"
                         rel="noreferrer"
                       >
@@ -125,7 +126,7 @@ export function LivePage() {
             <div className="section-kicker">Бүх нэвтрүүлэг</div>
             <p className="live-artist-cta">
               Артист уу?{' '}
-              <Link to="/artist">Artist Hub</Link>-аас өөрийн live нээнэ үү.
+              <Link to="/artist">Artist Profile</Link>-аас өөрийн live нээнэ үү.
             </p>
             {data.livestreams.map((l) => {
               const host = l.artistId

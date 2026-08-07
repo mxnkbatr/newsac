@@ -1,0 +1,145 @@
+.corp-page {
+  background:
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(227, 27, 35, 0.16), transparent 55%),
+    var(--bg);
+  min-height: 60svh;
+}
+
+.corp-hero {
+  padding: 2.25rem 0 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.corp-kicker {
+  margin: 0 0 0.65rem;
+  color: var(--red-hot);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.corp-hero h1 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.corp-lead {
+  margin: 0;
+  max-width: 38rem;
+  color: var(--ink-dim);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.corp-body {
+  max-width: 42rem;
+  display: grid;
+  gap: 1.15rem;
+}
+
+.corp-body > p {
+  margin: 0;
+  color: var(--ink-dim);
+  line-height: 1.65;
+  font-size: 1rem;
+}
+
+.corp-body h2 {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.corp-cards {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.corp-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.05rem 1.15rem;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.corp-card:hover {
+  border-color: rgba(227, 27, 35, 0.45);
+  background: rgba(227, 27, 35, 0.08);
+}
+
+.corp-card span {
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.corp-card strong {
+  font-size: 1.05rem;
+  word-break: break-all;
+}
+
+.corp-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.1rem;
+}
+
+.corp-links a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.corp-links a:hover {
+  color: var(--red-hot);
+}
+
+.corp-bullets {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--ink-dim);
+  line-height: 1.7;
+}
+
+.corp-note {
+  margin: 0.5rem 0 0 !important;
+  font-size: 0.9rem !important;
+}
+
+.corp-note a {
+  color: var(--red-hot);
+}
+
+.corp-legal p + p {
+  margin-top: 0.85rem;
+}
+
+.corp-legal a {
+  color: var(--red-hot);
+}
+
+@media (min-width: 720px) {
+  .corp-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .corp-hero {
+    padding: 3rem 0 1.75rem;
+  }
+}

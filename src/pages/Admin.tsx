@@ -5,10 +5,13 @@ import { useAuth } from '../context/AuthContext'
 import type {
   Battle,
   DailyDrop,
+  HomeStory,
   Livestream,
   NewsItem,
+  Poll,
   Product,
   Rapper,
+  ShortClip,
   Sponsor,
 } from '../store/types'
 import {
@@ -16,11 +19,14 @@ import {
   battleFields,
   chartFields,
   dropFields,
+  homeStoryFields,
   liveFields,
   newsFields,
   podcastFields,
+  pollFields,
   productFields,
   rapperFields,
+  shortFields,
   showFields,
   sponsorFields,
   todayDot,
@@ -28,6 +34,7 @@ import {
   videoFields,
   wallFields,
 } from './adminFields'
+import { parseYouTubeId, youtubeThumb } from '../lib/youtube'
 import {
   EditorModal,
   EntityList,
@@ -36,37 +43,50 @@ import {
   type FieldDef,
   type ToastState,
 } from './adminUi'
+import { buildHubStages, type AdminTab } from './adminHub'
+import { AdminNbaPanel, type NbaSub } from './AdminNbaPanel'
 import './Admin.css'
 
-type Tab =
-  | 'analytics'
-  | 'news'
-  | 'videos'
-  | 'rappers'
-  | 'shop'
-  | 'tickets'
-  | 'podcasts'
-  | 'drop'
-  | 'live'
-  | 'wall'
-  | 'sponsors'
-  | 'audience'
-  | 'staff'
-  | 'chart'
-  | 'sync'
-  | 'cloud'
-  | 'battle'
+type Tab = AdminTab
+
+function ytFrom(value: unknown) {
+  const raw = String(value || '').trim()
+  return parseYouTubeId(raw) || raw
+}
+
+function ytThumbOr(value: unknown, fallback: string) {
+  const id = parseYouTubeId(String(value || ''))
+  return id ? youtubeThumb(id) : fallback
+}
 
 const NAV_GROUPS: { label: string; items: { id: Tab; label: string }[] }[] = [
-  { label: 'Overview', items: [{ id: 'analytics', label: 'Аналитик' }] },
+  {
+    label: 'Эхэнд',
+    items: [
+      { id: 'news', label: 'Мэдээ' },
+      { id: 'nba', label: 'NBA' },
+      { id: 'hub', label: 'Төв' },
+    ],
+  },
   {
     label: 'Контент',
     items: [
-      { id: 'news', label: 'Мэдээ' },
       { id: 'videos', label: 'Бичлэг' },
+      { id: 'stories', label: 'Story' },
+      { id: 'reels', label: 'Reels' },
       { id: 'podcasts', label: 'Podcast' },
       { id: 'drop', label: 'Drop' },
-      { id: 'rappers', label: 'Рэппер' },
+      { id: 'rappers', label: 'Артист' },
+    ],
+  },
+  {
+    label: 'Community',
+    items: [
+      { id: 'live', label: 'Live' },
+      { id: 'wall', label: 'Wall' },
+      { id: 'battle', label: 'Battle' },
+      { id: 'polls', label: 'Poll' },
+      { id: 'chart', label: 'Топ дуу' },
     ],
   },
   {
@@ -78,21 +98,15 @@ const NAV_GROUPS: { label: string; items: { id: Tab; label: string }[] }[] = [
     ],
   },
   {
-    label: 'Community',
+    label: 'Систем',
     items: [
-      { id: 'live', label: 'Live' },
-      { id: 'wall', label: 'Wall' },
-      { id: 'battle', label: 'Battle' },
-      { id: 'chart', label: 'Топ дуу' },
-      { id: 'audience', label: 'Жагсаалт' },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
+      { id: 'pages', label: 'Горим' },
+      { id: 'analytics', label: 'Аналитик' },
+      { id: 'about', label: 'Тухай' },
       { id: 'staff', label: 'Staff' },
       { id: 'sync', label: 'YouTube' },
       { id: 'cloud', label: 'Cloud' },
+      { id: 'audience', label: 'Жагсаалт' },
     ],
   },
 ]
@@ -110,7 +124,9 @@ export function AdminPage() {
   const { user, signInWithGoogle, loading: authLoading } = useAuth()
   const [password, setPassword] = useState('')
   const [err, setErr] = useState<string | null>(null)
-  const [tab, setTab] = useState<Tab>('analytics')
+  const [tab, setTab] = useState<Tab>('news')
+  const [newsRegion, setNewsRegion] = useState<'all' | 'domestic' | 'foreign'>('all')
+  const [nbaSub, setNbaSub] = useState<NbaSub>('hub')
   const [search, setSearch] = useState('')
   const [toast, setToast] = useState<ToastState>(null)
   const [syncMsg, setSyncMsg] = useState<string | null>(null)
@@ -121,6 +137,7 @@ export function AdminPage() {
   const [chartSyncMsg, setChartSyncMsg] = useState<string | null>(null)
   const [cloudBusy, setCloudBusy] = useState(false)
   const [cloudMsg, setCloudMsg] = useState<string | null>(null)
+  const [aboutDraft, setAboutDraft] = useState(() => store.data.about)
   const [editor, setEditor] = useState<EditorState | null>(null)
   const [confirmDel, setConfirmDel] = useState<{
     label: string
@@ -128,7 +145,15 @@ export function AdminPage() {
   } | null>(null)
 
   const summary = useMemo(() => store.analyticsSummary(), [store.data])
+  const hubStages = useMemo(() => buildHubStages(store.data), [store.data])
   const canEnterWithGoogle = Boolean(user && store.isEmailAdmin(user.email))
+  const flags = store.data.siteFlags || {
+    ticketsClassified: true,
+    shopSoon: true,
+    cypherSoon: true,
+    artistSoon: true,
+    passSoon: true,
+  }
 
   useEffect(() => {
     if (!toast) return
@@ -138,7 +163,8 @@ export function AdminPage() {
 
   useEffect(() => {
     setSearch('')
-  }, [tab])
+    if (tab === 'about') setAboutDraft(store.data.about)
+  }, [tab, store.data.about])
 
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
@@ -264,6 +290,135 @@ export function AdminPage() {
         </nav>
 
         <div className="admin-body">
+          {tab === 'hub' && (
+            <div className="admin-hub">
+              <div className="admin-panel-head">
+                <div>
+                  <h2>Удирдлагын төв</h2>
+                  <p>
+                    Сайтын бүх хэсэг — шат дамжлагатай. Дарж тухайн удирдлага руу орно.
+                  </p>
+                </div>
+                <button type="button" className="btn btn-ghost" onClick={() => setTab('pages')}>
+                  Хуудас горим
+                </button>
+              </div>
+
+              <div className="admin-hub-summary">
+                <div>
+                  <span>Мэдээ</span>
+                  <strong>{store.data.news.length}</strong>
+                </div>
+                <div>
+                  <span>Артист</span>
+                  <strong>{store.data.rappers.length}</strong>
+                </div>
+                <div>
+                  <span>Story</span>
+                  <strong>{store.data.homeStories.filter((s) => s.active).length}</strong>
+                </div>
+                <div>
+                  <span>Тоглолт</span>
+                  <strong>{store.data.shows.length}</strong>
+                </div>
+              </div>
+
+              {hubStages.map((stage) => (
+                <section key={stage.step} className="admin-hub-stage">
+                  <header>
+                    <span className="admin-hub-step">Шат {stage.step}</span>
+                    <div>
+                      <h3>{stage.title}</h3>
+                      <p>{stage.desc}</p>
+                    </div>
+                  </header>
+                  <ul className="admin-hub-list">
+                    {stage.items.map((item) => (
+                      <li key={`${stage.step}-${item.id}-${item.label}`}>
+                        <div>
+                          <strong>{item.label}</strong>
+                          <span>{item.note}</span>
+                          {item.page && <em>{item.page}</em>}
+                        </div>
+                        <div className="admin-hub-actions">
+                          <b>{item.count}</b>
+                          <span className="admin-hub-ready">Бэлэн</span>
+                          <button type="button" onClick={() => setTab(item.id)}>
+                            Удирдах
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
+
+          {tab === 'pages' && (
+            <div>
+              <div className="admin-panel-head">
+                <div>
+                  <h2>Хуудасны горим</h2>
+                  <p>Coming soon / Classified — нэг дороос асаах/унтраах</p>
+                </div>
+              </div>
+              <div className="admin-flag-list">
+                {(
+                  [
+                    {
+                      key: 'ticketsClassified' as const,
+                      label: 'Тасалбар CLASSIFIED',
+                      desc: 'Тоглолтын зураг/мэдээлэл нууцлагдсан',
+                      page: '/tickets',
+                    },
+                    {
+                      key: 'shopSoon' as const,
+                      label: 'Shop Coming soon',
+                      desc: 'Дэлгүүр түгжээтэй',
+                      page: '/shop',
+                    },
+                    {
+                      key: 'cypherSoon' as const,
+                      label: 'Live Cypher Coming soon',
+                      desc: 'Cypher хуудас түгжээтэй',
+                      page: '/shorts',
+                    },
+                    {
+                      key: 'artistSoon' as const,
+                      label: 'Artist Profile Coming soon',
+                      desc: 'Artist Profile түгжээтэй',
+                      page: '/artist',
+                    },
+                    {
+                      key: 'passSoon' as const,
+                      label: 'Newsac Pass Coming soon',
+                      desc: 'Membership / Fan Pass түгжээтэй',
+                      page: '/membership',
+                    },
+                  ] as const
+                ).map((f) => (
+                  <label key={f.key} className="admin-flag-row">
+                    <div>
+                      <strong>{f.label}</strong>
+                      <span>
+                        {f.desc} · {f.page}
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(flags[f.key])}
+                      onChange={(e) => {
+                        store.setSiteFlags({ [f.key]: e.target.checked })
+                        notify(e.target.checked ? `${f.label} асаалттай` : `${f.label} унтарлаа`)
+                      }}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {tab === 'analytics' && (
             <div className="admin-analytics">
               <div className="admin-panel-head">
@@ -352,16 +507,117 @@ export function AdminPage() {
             </div>
           )}
 
+          {tab === 'nba' && (
+            <AdminNbaPanel
+              sub={nbaSub}
+              setSub={setNbaSub}
+              setTab={(t) => setTab(t)}
+              search={search}
+              setSearch={setSearch}
+              openEditor={openEditor}
+              askDelete={askDelete}
+              notify={notify}
+            />
+          )}
+
           {tab === 'news' && (
-            <EntityList
+            <>
+              <div className="admin-seg" role="tablist" aria-label="Мэдээний төрөл">
+                {(
+                  [
+                    { id: 'all', label: 'Бүгд' },
+                    { id: 'domestic', label: 'Дотоод' },
+                    { id: 'foreign', label: 'Гадаад' },
+                  ] as const
+                ).map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={newsRegion === r.id}
+                    className={newsRegion === r.id ? 'active' : ''}
+                    onClick={() => setNewsRegion(r.id)}
+                  >
+                    {r.label}
+                    <i>
+                      {r.id === 'all'
+                        ? store.data.news.length
+                        : store.data.news.filter((n) =>
+                            r.id === 'foreign'
+                              ? n.region === 'foreign'
+                              : n.region !== 'foreign',
+                          ).length}
+                    </i>
+                  </button>
+                ))}
+              </div>
+              <div className="staff-box" style={{ marginBottom: '1.25rem' }}>
+                <h3>Нүүр · халуун 3 мэдээ</h3>
+                <p>
+                  Home дээрх «Монгол entertainment · халуун 3» хэсгийн 3 мэдээг эндээс солино.
+                  1-р байр = том lead кард.
+                </p>
+                <div className="admin-hot-slots">
+                  {[0, 1, 2].map((slot) => {
+                    const current =
+                      store.data.homeHotNewsIds?.[slot] ||
+                      store.data.news[slot]?.id ||
+                      ''
+                    return (
+                      <label key={slot} className="admin-field">
+                        <span>
+                          {slot + 1}-р мэдээ
+                          {slot === 0 ? ' (lead)' : ''}
+                        </span>
+                        <select
+                          value={current}
+                          onChange={(e) => {
+                            const next = [
+                              store.data.homeHotNewsIds?.[0] ||
+                                store.data.news[0]?.id ||
+                                '',
+                              store.data.homeHotNewsIds?.[1] ||
+                                store.data.news[1]?.id ||
+                                '',
+                              store.data.homeHotNewsIds?.[2] ||
+                                store.data.news[2]?.id ||
+                                '',
+                            ]
+                            next[slot] = e.target.value
+                            store.setHomeHotNewsIds(next)
+                            notify(`Hot #${slot + 1} шинэчлэгдлээ`)
+                          }}
+                        >
+                          {store.data.news.map((n) => (
+                            <option key={n.id} value={n.id}>
+                              {n.title}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+              <EntityList
               title="Мэдээ"
-              description="Нийтлэл нэмэх, засах, устгах"
+              description="Дотоод / гадаад мэдээ · нэмэх, засах, устгах"
               search={search}
               onSearch={setSearch}
-              items={store.data.news.map((n) => ({
+              items={store.data.news
+                .filter((n) =>
+                  newsRegion === 'all'
+                    ? true
+                    : newsRegion === 'foreign'
+                      ? n.region === 'foreign'
+                      : n.region !== 'foreign',
+                )
+                .map((n) => ({
                 id: n.id,
                 label: n.title,
-                meta: `${n.category} · ${n.date}`,
+                meta: `${n.region === 'foreign' ? 'Гадаад' : 'Дотоод'} · ${n.category} · ${n.date}${
+                  (store.data.homeHotNewsIds || []).includes(n.id) ? ' · HOT' : ''
+                }`,
               }))}
               onCreate={() =>
                 openEditor(
@@ -371,6 +627,7 @@ export function AdminPage() {
                     title: '',
                     excerpt: '',
                     body: '',
+                    region: 'domestic',
                     category: 'Мэдээ',
                     date: todayDot(),
                     readMin: 3,
@@ -383,6 +640,7 @@ export function AdminPage() {
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
                       body: String(v.body || v.excerpt),
+                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       category: String(v.category || 'Мэдээ'),
                       date: String(v.date || todayDot()),
                       readMin: Number(v.readMin) || 3,
@@ -397,16 +655,22 @@ export function AdminPage() {
               onEdit={(id) => {
                 const n = store.data.news.find((x) => x.id === id)
                 if (!n) return
+                const { comments: _comments, ...newsEdit } = n
                 openEditor(
                   'Мэдээ засах',
                   newsFields,
-                  { ...n, membersOnly: Boolean(n.membersOnly) },
+                  {
+                    ...newsEdit,
+                    region: n.region === 'foreign' ? 'foreign' : 'domestic',
+                    membersOnly: Boolean(n.membersOnly),
+                  },
                   (v) => {
                     store.upsertNews({
                       ...n,
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
                       body: String(v.body),
+                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       category: String(v.category),
                       date: String(v.date),
                       readMin: Number(v.readMin) || 3,
@@ -426,6 +690,7 @@ export function AdminPage() {
                 })
               }}
             />
+            </>
           )}
 
           {tab === 'videos' && (
@@ -453,10 +718,11 @@ export function AdminPage() {
                     membersOnly: false,
                   },
                   (v) => {
+                    const youtubeId = ytFrom(v.youtubeId)
                     store.upsertVideo({
                       id: crypto.randomUUID(),
                       title: String(v.title).trim(),
-                      youtubeId: String(v.youtubeId).trim(),
+                      youtubeId,
                       description: String(v.description || 'Admin-аас нэмсэн'),
                       views: String(v.views || '0'),
                       duration: String(v.duration || ''),
@@ -478,7 +744,7 @@ export function AdminPage() {
                     store.upsertVideo({
                       ...n,
                       title: String(v.title).trim(),
-                      youtubeId: String(v.youtubeId).trim(),
+                      youtubeId: ytFrom(v.youtubeId),
                       description: String(v.description),
                       views: String(v.views),
                       duration: String(v.duration),
@@ -509,7 +775,12 @@ export function AdminPage() {
               items={store.data.rappers.map((n) => ({
                 id: n.id,
                 label: n.name,
-                meta: [n.city, n.verified ? 'verified' : '', n.ownerEmail || '']
+                meta: [
+                  n.region === 'foreign' ? 'Гадаад' : 'Дотоод',
+                  n.city,
+                  n.verified ? 'verified' : '',
+                  n.ownerEmail || '',
+                ]
                   .filter(Boolean)
                   .join(' · '),
               }))}
@@ -521,6 +792,7 @@ export function AdminPage() {
                     name: '',
                     aka: '',
                     city: 'Улаанбаатар',
+                    region: 'domestic',
                     years: '2024 — одоо',
                     streams: '0',
                     bio: '',
@@ -547,6 +819,7 @@ export function AdminPage() {
                         .map((t) => t.trim())
                         .filter(Boolean),
                       streams: String(v.streams || '0'),
+                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       verified: Boolean(v.verified),
                       ownerEmail:
                         String(v.ownerEmail || '')
@@ -567,6 +840,7 @@ export function AdminPage() {
                   rapperFields,
                   {
                     ...n,
+                    region: n.region === 'foreign' ? 'foreign' : 'domestic',
                     tags: n.tags.join(', '),
                     ownerEmail: n.ownerEmail || '',
                     verified: Boolean(n.verified),
@@ -590,10 +864,11 @@ export function AdminPage() {
                         .map((t) => t.trim())
                         .filter(Boolean),
                       streams: String(v.streams),
+                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       verified: Boolean(v.verified),
                       ownerEmail,
                     })
-                    if (ownerEmail) store.linkRapperOwner(n.id, ownerEmail)
+                    if (ownerEmail) store.linkRapperOwner(id, ownerEmail)
                     notify('Рэппер хадгалагдлаа')
                   },
                   n.name,
@@ -869,20 +1144,23 @@ export function AdminPage() {
                   {
                     title: '',
                     date: todayIso(),
-                    kind: 'podcast',
+                    kind: 'video',
                     targetId: '',
+                    youtubeId: '',
                     teaser: '',
-                    image: IMG.podcast,
+                    image: '',
                   },
                   (v) => {
+                    const youtubeId = ytFrom(v.youtubeId) || undefined
                     store.upsertDailyDrop({
                       id: crypto.randomUUID(),
                       title: String(v.title).trim(),
                       date: String(v.date),
                       kind: v.kind as DailyDrop['kind'],
-                      targetId: String(v.targetId).trim(),
+                      targetId: String(v.targetId).trim() || youtubeId || crypto.randomUUID(),
                       teaser: String(v.teaser || 'Өнөөдрийн drop'),
-                      image: String(v.image),
+                      youtubeId,
+                      image: String(v.image || '').trim() || ytThumbOr(youtubeId, IMG.podcast),
                     })
                     notify('Drop нэмэгдлээ')
                   },
@@ -894,8 +1172,9 @@ export function AdminPage() {
                 openEditor(
                   'Drop засах',
                   dropFields,
-                  { ...n },
+                  { ...n, youtubeId: n.youtubeId || '' },
                   (v) => {
+                    const youtubeId = ytFrom(v.youtubeId) || undefined
                     store.upsertDailyDrop({
                       ...n,
                       title: String(v.title).trim(),
@@ -903,7 +1182,8 @@ export function AdminPage() {
                       kind: v.kind as DailyDrop['kind'],
                       targetId: String(v.targetId).trim(),
                       teaser: String(v.teaser),
-                      image: String(v.image),
+                      youtubeId,
+                      image: String(v.image || '').trim() || ytThumbOr(youtubeId, n.image),
                     })
                     notify('Drop хадгалагдлаа')
                   },
@@ -914,6 +1194,85 @@ export function AdminPage() {
                 const n = store.data.dailyDrops.find((x) => x.id === id)
                 askDelete(n?.title || 'drop', () => {
                   store.deleteDailyDrop(id)
+                  notify('Устгагдлаа')
+                })
+              }}
+            />
+          )}
+
+          {tab === 'stories' && (
+            <EntityList
+              title="Story"
+              description="Нүүрний story — YouTube + Instagram (@newsac_channel live, Meta API холбогдсон үед)"
+              search={search}
+              onSearch={setSearch}
+              items={[...store.data.homeStories]
+                .sort((a, b) => a.order - b.order)
+                .map((n) => ({
+                  id: n.id,
+                  label: n.label,
+                  meta: `${n.status} · #${n.order}${n.active ? '' : ' · OFF'}`,
+                }))}
+              onCreate={() =>
+                openEditor(
+                  'Шинэ story',
+                  homeStoryFields,
+                  {
+                    label: '',
+                    status: 'ШИНЭ',
+                    href: '/reels',
+                    youtubeId: '',
+                    image: '',
+                    tone: 'drop',
+                    order: (store.data.homeStories.length || 0) + 1,
+                    active: true,
+                  },
+                  (v) => {
+                    const youtubeId = ytFrom(v.youtubeId)
+                    store.upsertHomeStory({
+                      id: crypto.randomUUID(),
+                      label: String(v.label).trim(),
+                      status: String(v.status).trim() || 'ШИНЭ',
+                      href: String(v.href).trim() || '/reels',
+                      youtubeId,
+                      image: String(v.image || '').trim() || ytThumbOr(youtubeId, IMG.podcast),
+                      tone: v.tone as HomeStory['tone'],
+                      order: Number(v.order) || 1,
+                      active: Boolean(v.active),
+                    })
+                    notify('Story нэмэгдлээ')
+                  },
+                )
+              }
+              onEdit={(id) => {
+                const n = store.data.homeStories.find((x) => x.id === id)
+                if (!n) return
+                openEditor(
+                  'Story засах',
+                  homeStoryFields,
+                  { ...n, youtubeId: n.youtubeId || '' },
+                  (v) => {
+                    const youtubeId = ytFrom(v.youtubeId)
+                    store.upsertHomeStory({
+                      ...n,
+                      label: String(v.label).trim(),
+                      status: String(v.status).trim(),
+                      href: String(v.href).trim() || '/reels',
+                      youtubeId,
+                      image: String(v.image || '').trim() || ytThumbOr(youtubeId, n.image),
+                      tone: v.tone as HomeStory['tone'],
+                      order: Number(v.order) || n.order,
+                      active: Boolean(v.active),
+                    })
+                    notify('Story хадгалагдлаа')
+                  },
+                  n.label,
+                )
+              }}
+              onDelete={(id) => {
+                const n = store.data.homeStories.find((x) => x.id === id)
+                askDelete(n?.label || 'story', () => {
+                  store.deleteHomeStory(id)
                   notify('Устгагдлаа')
                 })
               }}
@@ -950,7 +1309,7 @@ export function AdminPage() {
                       id: crypto.randomUUID(),
                       title: String(v.title).trim(),
                       status,
-                      youtubeId: String(v.youtubeId || '').trim() || undefined,
+                      youtubeId: ytFrom(v.youtubeId) || undefined,
                       startsAt: String(v.startsAt),
                       viewers: Number(v.viewers) || (status === 'live' ? 120 : 0),
                       cover: String(v.cover),
@@ -980,7 +1339,7 @@ export function AdminPage() {
                       ...n,
                       title: String(v.title).trim(),
                       status: v.status as Livestream['status'],
-                      youtubeId: String(v.youtubeId || '').trim() || undefined,
+                      youtubeId: ytFrom(v.youtubeId) || undefined,
                       startsAt: String(v.startsAt),
                       viewers: Number(v.viewers) || 0,
                       cover: String(v.cover),
@@ -1214,7 +1573,7 @@ export function AdminPage() {
                       change: Number(v.change) || 0,
                       weekOf: String(v.weekOf || todayIso()),
                       audioUrl: String(v.audioUrl || ''),
-                      youtubeId: String(v.youtubeId || '').trim() || undefined,
+                      youtubeId: ytFrom(v.youtubeId) || undefined,
                       isNew: Boolean(v.isNew),
                     })
                     notify('Дуу нэмэгдлээ')
@@ -1240,7 +1599,7 @@ export function AdminPage() {
                       change: Number(v.change) || 0,
                       weekOf: String(v.weekOf),
                       audioUrl: String(v.audioUrl || ''),
-                      youtubeId: String(v.youtubeId || '').trim() || undefined,
+                      youtubeId: ytFrom(v.youtubeId) || undefined,
                       isNew: Boolean(v.isNew),
                     })
                     notify('Дуу хадгалагдлаа')
@@ -1357,6 +1716,178 @@ export function AdminPage() {
             />
           )}
 
+          {tab === 'reels' && (
+            <EntityList
+              title="Reels"
+              description="Босоо бичлэг · /reels · YouTube линк / Shorts"
+              search={search}
+              onSearch={setSearch}
+              items={store.data.shorts.map((n) => ({
+                id: n.id,
+                label: n.title,
+                meta: n.youtubeId,
+              }))}
+              onCreate={() =>
+                openEditor(
+                  'Шинэ reel',
+                  shortFields,
+                  { title: '', youtubeId: '', start: 0, rapperId: '' },
+                  (v) => {
+                    const item: ShortClip = {
+                      id: crypto.randomUUID(),
+                      title: String(v.title).trim(),
+                      youtubeId: ytFrom(v.youtubeId),
+                      start: Number(v.start) || 0,
+                      rapperId: String(v.rapperId || '').trim() || undefined,
+                    }
+                    store.upsertShort(item)
+                    notify('Reel нэмэгдлээ')
+                  },
+                )
+              }
+              onEdit={(id) => {
+                const n = store.data.shorts.find((x) => x.id === id)
+                if (!n) return
+                openEditor(
+                  'Reel засах',
+                  shortFields,
+                  {
+                    title: n.title,
+                    youtubeId: n.youtubeId,
+                    start: n.start || 0,
+                    rapperId: n.rapperId || '',
+                  },
+                  (v) => {
+                    store.upsertShort({
+                      ...n,
+                      title: String(v.title).trim(),
+                      youtubeId: ytFrom(v.youtubeId),
+                      start: Number(v.start) || 0,
+                      rapperId: String(v.rapperId || '').trim() || undefined,
+                    })
+                    notify('Reel хадгалагдлаа')
+                  },
+                  n.title,
+                )
+              }}
+              onDelete={(id) => {
+                const n = store.data.shorts.find((x) => x.id === id)
+                askDelete(n?.title || 'reel', () => {
+                  store.deleteShort(id)
+                  notify('Устгагдлаа')
+                })
+              }}
+            />
+          )}
+
+          {tab === 'polls' && (
+            <EntityList
+              title="Санал асуулга"
+              description="Нүүрний Poll widget"
+              search={search}
+              onSearch={setSearch}
+              items={store.data.polls.map((n) => ({
+                id: n.id,
+                label: n.question,
+                meta: `${n.active ? 'ACTIVE' : 'OFF'} · ${n.options.length} сонголт`,
+              }))}
+              onCreate={() =>
+                openEditor(
+                  'Шинэ poll',
+                  pollFields,
+                  {
+                    question: '',
+                    optionA: '',
+                    optionB: '',
+                    optionC: '',
+                    optionD: '',
+                    endsAt: new Date(Date.now() + 7 * 86400000).toISOString(),
+                    active: true,
+                  },
+                  (v) => {
+                    const labels = [v.optionA, v.optionB, v.optionC, v.optionD]
+                      .map((x) => String(x || '').trim())
+                      .filter(Boolean)
+                    if (labels.length < 2) {
+                      notify('Хамгийн багадаа 2 сонголт', true)
+                      return
+                    }
+                    const poll: Poll = {
+                      id: crypto.randomUUID(),
+                      question: String(v.question).trim(),
+                      options: labels.map((label) => ({
+                        id: crypto.randomUUID(),
+                        label,
+                        votes: 0,
+                      })),
+                      active: Boolean(v.active),
+                      endsAt: String(v.endsAt || new Date().toISOString()),
+                    }
+                    if (poll.active) {
+                      store.data.polls
+                        .filter((p) => p.active)
+                        .forEach((p) => store.upsertPoll({ ...p, active: false }))
+                    }
+                    store.upsertPoll(poll)
+                    notify('Poll нэмэгдлээ')
+                  },
+                )
+              }
+              onEdit={(id) => {
+                const n = store.data.polls.find((x) => x.id === id)
+                if (!n) return
+                openEditor(
+                  'Poll засах',
+                  pollFields,
+                  {
+                    question: n.question,
+                    optionA: n.options[0]?.label || '',
+                    optionB: n.options[1]?.label || '',
+                    optionC: n.options[2]?.label || '',
+                    optionD: n.options[3]?.label || '',
+                    endsAt: n.endsAt,
+                    active: n.active,
+                  },
+                  (v) => {
+                    const labels = [v.optionA, v.optionB, v.optionC, v.optionD]
+                      .map((x) => String(x || '').trim())
+                      .filter(Boolean)
+                    if (labels.length < 2) {
+                      notify('Хамгийн багадаа 2 сонголт', true)
+                      return
+                    }
+                    const options = labels.map((label, i) => ({
+                      id: n.options[i]?.id || crypto.randomUUID(),
+                      label,
+                      votes: n.options[i]?.votes || 0,
+                    }))
+                    if (v.active) {
+                      store.data.polls
+                        .filter((p) => p.active && p.id !== n.id)
+                        .forEach((p) => store.upsertPoll({ ...p, active: false }))
+                    }
+                    store.upsertPoll({
+                      ...n,
+                      question: String(v.question).trim(),
+                      options,
+                      active: Boolean(v.active),
+                      endsAt: String(v.endsAt),
+                    })
+                    notify('Poll хадгалагдлаа')
+                  },
+                  n.question,
+                )
+              }}
+              onDelete={(id) => {
+                const n = store.data.polls.find((x) => x.id === id)
+                askDelete(n?.question || 'poll', () => {
+                  store.deletePoll(id)
+                  notify('Устгагдлаа')
+                })
+              }}
+            />
+          )}
+
           {tab === 'audience' && (
             <div>
               <div className="admin-panel-head">
@@ -1426,6 +1957,98 @@ export function AdminPage() {
                   </li>
                 )}
               </ul>
+            </div>
+          )}
+
+          {tab === 'about' && (
+            <div className="staff-box">
+              <h3>Тухай хуудас</h3>
+              <p>
+                Менюний «Тухай» дээр харагдах зураг + богино танилцуулга. Зураг URL
+                оруулна (өөрийн зураг upload хийсний дараа link).
+              </p>
+              <form
+                className="admin-form"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  store.setAbout(aboutDraft)
+                  notify('Тухай хадгалагдлаа')
+                }}
+              >
+                <div className="admin-field">
+                  <label htmlFor="about-name">Нэр</label>
+                  <input
+                    id="about-name"
+                    value={aboutDraft.name}
+                    onChange={(e) =>
+                      setAboutDraft((d) => ({ ...d, name: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="admin-field-row">
+                  <div className="admin-field">
+                    <label htmlFor="about-role">Албан тушаал / role</label>
+                    <input
+                      id="about-role"
+                      value={aboutDraft.role}
+                      onChange={(e) =>
+                        setAboutDraft((d) => ({ ...d, role: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="admin-field">
+                    <label htmlFor="about-loc">Байршил</label>
+                    <input
+                      id="about-loc"
+                      value={aboutDraft.location || ''}
+                      onChange={(e) =>
+                        setAboutDraft((d) => ({ ...d, location: e.target.value }))
+                      }
+                      placeholder="Улаанбаатар"
+                    />
+                  </div>
+                </div>
+                <div className="admin-field">
+                  <label htmlFor="about-photo">Зураг URL</label>
+                  <input
+                    id="about-photo"
+                    type="url"
+                    value={aboutDraft.photo}
+                    onChange={(e) =>
+                      setAboutDraft((d) => ({ ...d, photo: e.target.value }))
+                    }
+                    required
+                    placeholder="https://..."
+                  />
+                </div>
+                {aboutDraft.photo && (
+                  <div className="admin-about-preview">
+                    <img src={aboutDraft.photo} alt="" />
+                  </div>
+                )}
+                <div className="admin-field">
+                  <label htmlFor="about-bio">Танилцуулга (товч)</label>
+                  <textarea
+                    id="about-bio"
+                    value={aboutDraft.bio}
+                    onChange={(e) =>
+                      setAboutDraft((d) => ({ ...d, bio: e.target.value }))
+                    }
+                    required
+                    rows={4}
+                  />
+                </div>
+                <div className="admin-modal-actions" style={{ border: 'none', paddingTop: 0 }}>
+                  <Link to="/about" className="btn btn-ghost">
+                    Хуудас үзэх
+                  </Link>
+                  <button type="submit" className="btn btn-primary">
+                    Хадгалах
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 

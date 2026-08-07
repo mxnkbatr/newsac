@@ -8,11 +8,14 @@ import {
   type ReactNode,
 } from 'react'
 import { createSeed, isAdminCredential, isAdminEmail } from './seed'
+import { normalizeYouTubeId, parseYouTubeId, youtubeThumb } from '../lib/youtube'
 import type {
+  AboutPage,
   AnalyticsEvent,
   AppData,
   Battle,
   DailyDrop,
+  HomeStory,
   Livestream,
   NewsItem,
   Order,
@@ -23,6 +26,7 @@ import type {
   ChartSong,
   ShortClip,
   Show,
+  SiteFlags,
   PodcastEpisode,
   Sponsor,
   Subscriber,
@@ -30,6 +34,12 @@ import type {
   VideoItem,
   WallPost,
   WallComment,
+  NewsComment,
+  NbaFreeAgent,
+  NbaHot,
+  NbaQuizQ,
+  NbaSacfunBit,
+  NbaStory,
 } from './types'
 import { YOUTUBE_CHANNEL_URL } from '../data/brand'
 import {
@@ -65,6 +75,13 @@ type StoreValue = {
   syncMusicChart: () => Promise<number>
   upsertNews: (item: NewsItem) => void
   deleteNews: (id: string) => void
+  setHomeHotNewsIds: (ids: string[]) => void
+  addNewsComment: (
+    newsId: string,
+    comment: { authorName: string; authorId?: string; text: string },
+  ) => string | null
+  setAbout: (about: AboutPage) => void
+  setSiteFlags: (flags: Partial<SiteFlags>) => void
   upsertVideo: (item: VideoItem) => void
   deleteVideo: (id: string) => void
   upsertRapper: (item: Rapper) => void
@@ -74,6 +91,7 @@ type StoreValue = {
   upsertSponsor: (item: Sponsor) => void
   deleteSponsor: (id: string) => void
   upsertPoll: (item: Poll) => void
+  deletePoll: (id: string) => void
   upsertShort: (item: ShortClip) => void
   deleteShort: (id: string) => void
   upsertShow: (item: Show) => void
@@ -82,6 +100,8 @@ type StoreValue = {
   deletePodcast: (id: string) => void
   upsertDailyDrop: (item: DailyDrop) => void
   deleteDailyDrop: (id: string) => void
+  upsertHomeStory: (item: HomeStory) => void
+  deleteHomeStory: (id: string) => void
   upsertLivestream: (item: Livestream) => void
   deleteLivestream: (id: string) => void
   upsertWallPost: (item: WallPost) => void
@@ -101,6 +121,16 @@ type StoreValue = {
   upsertBattle: (item: Battle) => void
   deleteBattle: (id: string) => void
   voteBattle: (battleId: string, sideId: string) => string | null
+  upsertNbaUpdate: (item: NbaStory) => void
+  deleteNbaUpdate: (id: string) => void
+  upsertNbaHot: (item: NbaHot) => void
+  deleteNbaHot: (id: string) => void
+  upsertNbaFreeAgent: (item: NbaFreeAgent) => void
+  deleteNbaFreeAgent: (id: string) => void
+  upsertNbaQuiz: (item: NbaQuizQ) => void
+  deleteNbaQuiz: (id: string) => void
+  upsertNbaSacfun: (item: NbaSacfunBit) => void
+  deleteNbaSacfun: (id: string) => void
   linkRapperOwner: (
     rapperId: string,
     ownerEmail: string,
@@ -144,7 +174,12 @@ function loadData(): AppData {
       ...parsed,
       news: parsed.news?.length ? parsed.news : seed.news,
       videos: parsed.videos?.length ? parsed.videos : seed.videos,
-      rappers: parsed.rappers?.length ? parsed.rappers : seed.rappers,
+      rappers: (() => {
+        const base = parsed.rappers?.length ? parsed.rappers : seed.rappers
+        const ids = new Set(base.map((r) => r.id))
+        const missing = seed.rappers.filter((r) => !ids.has(r.id))
+        return [...base, ...missing]
+      })(),
       products: parsed.products?.length ? parsed.products : seed.products,
       sponsors: parsed.sponsors?.length ? parsed.sponsors : seed.sponsors,
       polls: parsed.polls?.length ? parsed.polls : seed.polls,
@@ -153,11 +188,50 @@ function loadData(): AppData {
       podcasts: parsed.podcasts?.length ? parsed.podcasts : seed.podcasts,
       rankings: parsed.rankings?.length ? parsed.rankings : seed.rankings,
       chartSongs: parsed.chartSongs?.length ? parsed.chartSongs : seed.chartSongs,
-      dailyDrops: parsed.dailyDrops?.length ? parsed.dailyDrops : seed.dailyDrops,
+      homeStories: (() => {
+        const base = parsed.homeStories?.length ? parsed.homeStories : seed.homeStories
+        const mapped = base.map((s) => {
+          const yt = s.youtubeId || seed.homeStories.find((x) => x.id === s.id)?.youtubeId
+          return {
+            ...s,
+            youtubeId: yt,
+            image: s.image?.trim() || (yt ? youtubeThumb(yt) : s.image),
+          }
+        })
+        return mapped.some((s) => s.youtubeId) ? mapped : seed.homeStories
+      })(),
+      dailyDrops: (parsed.dailyDrops?.length ? parsed.dailyDrops : seed.dailyDrops).map((d) => {
+        const yt = d.youtubeId || seed.dailyDrops.find((x) => x.id === d.id)?.youtubeId
+        return {
+          ...d,
+          youtubeId: yt,
+          image: d.image?.trim() || (yt ? youtubeThumb(yt) : d.image),
+        }
+      }),
       livestreams: parsed.livestreams?.length ? parsed.livestreams : seed.livestreams,
       wallPosts: parsed.wallPosts?.length ? parsed.wallPosts : seed.wallPosts,
-      battles: parsed.battles?.length ? parsed.battles : seed.battles,
-      adminEmails: parsed.adminEmails?.length ? parsed.adminEmails : seed.adminEmails,
+      battles: Array.isArray(parsed.battles)
+        ? parsed.battles.filter((b) => b.id !== 'battle-1' && b.id !== 'battle-2')
+        : seed.battles,
+      nbaUpdates: parsed.nbaUpdates?.length ? parsed.nbaUpdates : seed.nbaUpdates,
+      nbaHotNews: parsed.nbaHotNews?.length ? parsed.nbaHotNews : seed.nbaHotNews,
+      nbaFreeAgents: parsed.nbaFreeAgents?.length
+        ? parsed.nbaFreeAgents
+        : seed.nbaFreeAgents,
+      nbaQuiz: parsed.nbaQuiz?.length ? parsed.nbaQuiz : seed.nbaQuiz,
+      nbaSacfun: parsed.nbaSacfun?.length ? parsed.nbaSacfun : seed.nbaSacfun,
+      homeHotNewsIds:
+        Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
+          ? parsed.homeHotNewsIds.slice(0, 3)
+          : seed.homeHotNewsIds,
+      about: parsed.about?.name ? { ...seed.about, ...parsed.about } : seed.about,
+      siteFlags: { ...seed.siteFlags, ...(parsed.siteFlags || {}) },
+      adminEmails: Array.from(
+        new Set([
+          ...(parsed.adminEmails || []).map((e) => e.toLowerCase()),
+          ...seed.adminEmails.map((e) => e.toLowerCase()),
+        ]),
+      ),
       orders: parsed.orders || [],
       ticketOrders: parsed.ticketOrders || [],
       subscribers: parsed.subscribers || [],
@@ -459,24 +533,94 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const i = prev.news.findIndex((n) => n.id === item.id)
           if (i >= 0) {
             const news = [...prev.news]
-            news[i] = item
+            news[i] = {
+              ...item,
+              comments: item.comments ?? news[i].comments ?? [],
+            }
             return { ...prev, news }
           }
-          return { ...prev, news: [item, ...prev.news] }
+          return {
+            ...prev,
+            news: [{ ...item, comments: item.comments ?? [] }, ...prev.news],
+          }
         })
       },
       deleteNews(id) {
-        patch((prev) => ({ ...prev, news: prev.news.filter((n) => n.id !== id) }))
+        patch((prev) => {
+          const news = prev.news.filter((n) => n.id !== id)
+          const remaining = (prev.homeHotNewsIds || []).filter((x) => x !== id)
+          const fill = news.map((n) => n.id).filter((x) => !remaining.includes(x))
+          const homeHotNewsIds = [...remaining, ...fill].slice(0, 3)
+          return { ...prev, news, homeHotNewsIds }
+        })
+      },
+      setHomeHotNewsIds(ids) {
+        patch((prev) => {
+          const valid = ids
+            .map((id) => id.trim())
+            .filter((id) => prev.news.some((n) => n.id === id))
+          const unique = [...new Set(valid)].slice(0, 3)
+          const fill = prev.news
+            .map((n) => n.id)
+            .filter((id) => !unique.includes(id))
+          return {
+            ...prev,
+            homeHotNewsIds: [...unique, ...fill].slice(0, 3),
+          }
+        })
+      },
+      addNewsComment(newsId, comment) {
+        const text = comment.text.trim()
+        if (!text) return 'Сэтгэгдэл хоосон байна.'
+        if (text.length > 800) return 'Сэтгэгдэл хэт урт байна.'
+        const entry: NewsComment = {
+          id: uid(),
+          newsId,
+          authorName: comment.authorName.trim() || 'Newsac фэн',
+          authorId: comment.authorId,
+          text,
+          createdAt: new Date().toISOString(),
+        }
+        let found = false
+        patch((prev) => ({
+          ...prev,
+          news: prev.news.map((n) => {
+            if (n.id !== newsId) return n
+            found = true
+            return { ...n, comments: [...(n.comments || []), entry] }
+          }),
+        }))
+        return found ? null : 'Мэдээ олдсонгүй.'
+      },
+      setAbout(about) {
+        patch((prev) => ({
+          ...prev,
+          about: {
+            name: about.name.trim(),
+            role: about.role.trim(),
+            photo: about.photo.trim(),
+            bio: about.bio.trim(),
+            location: about.location?.trim() || undefined,
+          },
+        }))
+      },
+      setSiteFlags(flags) {
+        patch((prev) => ({
+          ...prev,
+          siteFlags: { ...prev.siteFlags, ...flags },
+        }))
       },
       upsertVideo(item) {
+        const youtubeId = normalizeYouTubeId(item.youtubeId)
+        const next = { ...item, youtubeId }
         patch((prev) => {
-          const i = prev.videos.findIndex((n) => n.id === item.id)
+          const i = prev.videos.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const videos = [...prev.videos]
-            videos[i] = item
+            videos[i] = next
             return { ...prev, videos }
           }
-          return { ...prev, videos: [item, ...prev.videos] }
+          return { ...prev, videos: [next, ...prev.videos] }
         })
       },
       deleteVideo(id) {
@@ -535,15 +679,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return { ...prev, polls: [item, ...prev.polls] }
         })
       },
+      deletePoll(id) {
+        patch((prev) => ({ ...prev, polls: prev.polls.filter((n) => n.id !== id) }))
+      },
       upsertShort(item) {
+        const youtubeId = normalizeYouTubeId(item.youtubeId)
+        const next = { ...item, youtubeId }
         patch((prev) => {
-          const i = prev.shorts.findIndex((n) => n.id === item.id)
+          const i = prev.shorts.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const shorts = [...prev.shorts]
-            shorts[i] = item
+            shorts[i] = next
             return { ...prev, shorts }
           }
-          return { ...prev, shorts: [item, ...prev.shorts] }
+          return { ...prev, shorts: [next, ...prev.shorts] }
         })
       },
       deleteShort(id) {
@@ -578,28 +727,64 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         patch((prev) => ({ ...prev, podcasts: prev.podcasts.filter((n) => n.id !== id) }))
       },
       upsertDailyDrop(item) {
+        const youtubeId = item.youtubeId ? normalizeYouTubeId(item.youtubeId) : undefined
+        const image =
+          item.image?.trim() ||
+          (youtubeId ? youtubeThumb(youtubeId) : item.image)
+        const next = { ...item, youtubeId: youtubeId || undefined, image }
         patch((prev) => {
-          const i = prev.dailyDrops.findIndex((n) => n.id === item.id)
+          const i = prev.dailyDrops.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const dailyDrops = [...prev.dailyDrops]
-            dailyDrops[i] = item
+            dailyDrops[i] = next
             return { ...prev, dailyDrops }
           }
-          return { ...prev, dailyDrops: [item, ...prev.dailyDrops] }
+          return { ...prev, dailyDrops: [next, ...prev.dailyDrops] }
         })
       },
       deleteDailyDrop(id) {
         patch((prev) => ({ ...prev, dailyDrops: prev.dailyDrops.filter((n) => n.id !== id) }))
       },
-      upsertLivestream(item) {
+      upsertHomeStory(item) {
+        const youtubeId = item.youtubeId ? normalizeYouTubeId(item.youtubeId) : undefined
+        const image =
+          item.image?.trim() ||
+          (youtubeId ? youtubeThumb(youtubeId) : item.image)
+        const next = {
+          ...item,
+          youtubeId: youtubeId || undefined,
+          image,
+          href: item.href?.trim() || (youtubeId ? '/reels' : '/'),
+        }
         patch((prev) => {
-          const i = prev.livestreams.findIndex((n) => n.id === item.id)
+          const i = prev.homeStories.findIndex((n) => n.id === next.id)
+          if (i >= 0) {
+            const homeStories = [...prev.homeStories]
+            homeStories[i] = next
+            return { ...prev, homeStories }
+          }
+          return { ...prev, homeStories: [next, ...prev.homeStories] }
+        })
+      },
+      deleteHomeStory(id) {
+        patch((prev) => ({
+          ...prev,
+          homeStories: prev.homeStories.filter((n) => n.id !== id),
+        }))
+      },
+      upsertLivestream(item) {
+        const youtubeId = item.youtubeId
+          ? normalizeYouTubeId(item.youtubeId) || undefined
+          : undefined
+        const next = { ...item, youtubeId }
+        patch((prev) => {
+          const i = prev.livestreams.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const livestreams = [...prev.livestreams]
-            livestreams[i] = item
+            livestreams[i] = next
             return { ...prev, livestreams }
           }
-          return { ...prev, livestreams: [item, ...prev.livestreams] }
+          return { ...prev, livestreams: [next, ...prev.livestreams] }
         })
       },
       deleteLivestream(id) {
@@ -707,14 +892,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         patch((prev) => ({ ...prev, rankings: items }))
       },
       upsertChartSong(item) {
+        const youtubeId = item.youtubeId
+          ? normalizeYouTubeId(item.youtubeId) || undefined
+          : undefined
+        const cover =
+          item.cover?.trim() ||
+          (youtubeId ? youtubeThumb(youtubeId) : item.cover)
+        const next = { ...item, youtubeId, cover }
         patch((prev) => {
-          const i = prev.chartSongs.findIndex((n) => n.id === item.id)
+          const i = prev.chartSongs.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const chartSongs = [...prev.chartSongs]
-            chartSongs[i] = item
+            chartSongs[i] = next
             return { ...prev, chartSongs }
           }
-          return { ...prev, chartSongs: [item, ...prev.chartSongs] }
+          return { ...prev, chartSongs: [next, ...prev.chartSongs] }
         })
       },
       deleteChartSong(id) {
@@ -764,6 +956,91 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }))
         return null
       },
+      upsertNbaUpdate(item) {
+        patch((prev) => {
+          const i = prev.nbaUpdates.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const nbaUpdates = [...prev.nbaUpdates]
+            nbaUpdates[i] = item
+            return { ...prev, nbaUpdates }
+          }
+          return { ...prev, nbaUpdates: [item, ...prev.nbaUpdates] }
+        })
+      },
+      deleteNbaUpdate(id) {
+        patch((prev) => ({
+          ...prev,
+          nbaUpdates: prev.nbaUpdates.filter((n) => n.id !== id),
+        }))
+      },
+      upsertNbaHot(item) {
+        patch((prev) => {
+          const i = prev.nbaHotNews.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const nbaHotNews = [...prev.nbaHotNews]
+            nbaHotNews[i] = item
+            return { ...prev, nbaHotNews }
+          }
+          return { ...prev, nbaHotNews: [item, ...prev.nbaHotNews] }
+        })
+      },
+      deleteNbaHot(id) {
+        patch((prev) => ({
+          ...prev,
+          nbaHotNews: prev.nbaHotNews.filter((n) => n.id !== id),
+        }))
+      },
+      upsertNbaFreeAgent(item) {
+        patch((prev) => {
+          const i = prev.nbaFreeAgents.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const nbaFreeAgents = [...prev.nbaFreeAgents]
+            nbaFreeAgents[i] = item
+            return { ...prev, nbaFreeAgents }
+          }
+          return { ...prev, nbaFreeAgents: [item, ...prev.nbaFreeAgents] }
+        })
+      },
+      deleteNbaFreeAgent(id) {
+        patch((prev) => ({
+          ...prev,
+          nbaFreeAgents: prev.nbaFreeAgents.filter((n) => n.id !== id),
+        }))
+      },
+      upsertNbaQuiz(item) {
+        patch((prev) => {
+          const i = prev.nbaQuiz.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const nbaQuiz = [...prev.nbaQuiz]
+            nbaQuiz[i] = item
+            return { ...prev, nbaQuiz }
+          }
+          return { ...prev, nbaQuiz: [item, ...prev.nbaQuiz] }
+        })
+      },
+      deleteNbaQuiz(id) {
+        patch((prev) => ({
+          ...prev,
+          nbaQuiz: prev.nbaQuiz.filter((n) => n.id !== id),
+        }))
+      },
+      upsertNbaSacfun(item) {
+        patch((prev) => {
+          const i = prev.nbaSacfun.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const nbaSacfun = [...prev.nbaSacfun]
+            nbaSacfun[i] = item
+            return { ...prev, nbaSacfun }
+          }
+          return { ...prev, nbaSacfun: [item, ...prev.nbaSacfun] }
+        })
+      },
+      deleteNbaSacfun(id) {
+        patch((prev) => ({
+          ...prev,
+          nbaSacfun: prev.nbaSacfun.filter((n) => n.id !== id),
+        }))
+      },
       linkRapperOwner(rapperId, ownerEmail, ownerUserId) {
         const email = ownerEmail.trim().toLowerCase()
         if (!email) return 'Gmail оруулна уу'
@@ -808,10 +1085,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return 'Энэ профайл таных биш'
         }
 
-        const fromUrl = ytRaw.match(
-          /(?:youtu\.be\/|v=|\/live\/|\/embed\/)([a-zA-Z0-9_-]{6,})/,
-        )
-        const youtubeId = fromUrl ? fromUrl[1] : ytRaw
+        const youtubeId = parseYouTubeId(ytRaw) || ytRaw
 
         const live: Livestream = {
           id: uid(),
@@ -860,7 +1134,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...remote,
           news: remote.news?.length ? remote.news : seed.news,
           videos: remote.videos?.length ? remote.videos : seed.videos,
-          rappers: remote.rappers?.length ? remote.rappers : seed.rappers,
+          rappers: (() => {
+            const base = remote.rappers?.length ? remote.rappers : seed.rappers
+            const ids = new Set(base.map((r) => r.id))
+            const missing = seed.rappers.filter((r) => !ids.has(r.id))
+            return [...base, ...missing]
+          })(),
           products: remote.products?.length ? remote.products : seed.products,
           sponsors: remote.sponsors?.length ? remote.sponsors : seed.sponsors,
           polls: remote.polls?.length ? remote.polls : seed.polls,
@@ -870,9 +1149,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           rankings: remote.rankings?.length ? remote.rankings : seed.rankings,
           chartSongs: remote.chartSongs?.length ? remote.chartSongs : seed.chartSongs,
           dailyDrops: remote.dailyDrops?.length ? remote.dailyDrops : seed.dailyDrops,
+          homeStories: remote.homeStories?.length ? remote.homeStories : seed.homeStories,
           livestreams: remote.livestreams?.length ? remote.livestreams : seed.livestreams,
           wallPosts: remote.wallPosts?.length ? remote.wallPosts : seed.wallPosts,
-          battles: remote.battles?.length ? remote.battles : seed.battles,
+          battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
+          nbaUpdates: remote.nbaUpdates?.length ? remote.nbaUpdates : seed.nbaUpdates,
+          nbaHotNews: remote.nbaHotNews?.length ? remote.nbaHotNews : seed.nbaHotNews,
+          nbaFreeAgents: remote.nbaFreeAgents?.length
+            ? remote.nbaFreeAgents
+            : seed.nbaFreeAgents,
+          nbaQuiz: remote.nbaQuiz?.length ? remote.nbaQuiz : seed.nbaQuiz,
+          nbaSacfun: remote.nbaSacfun?.length ? remote.nbaSacfun : seed.nbaSacfun,
+          about: remote.about?.name ? { ...seed.about, ...remote.about } : seed.about,
+          siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || {}) },
           adminEmails: remote.adminEmails?.length ? remote.adminEmails : seed.adminEmails,
           orders: remote.orders || [],
           ticketOrders: remote.ticketOrders || [],

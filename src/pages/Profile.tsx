@@ -8,11 +8,22 @@ import {
   removeOfflineEpisode,
   type OfflineMeta,
 } from '../lib/offlineAudio'
-import './Pages.css'
+import './Profile.css'
+
+function genderLabel(g: string | null | undefined) {
+  if (g === 'male') return 'Эрэгтэй'
+  if (g === 'female') return 'Эмэгтэй'
+  return null
+}
+
+function initialOf(name: string) {
+  const t = name.trim()
+  return (t[0] || '?').toUpperCase()
+}
 
 export function ProfilePage() {
-  const { user, logout, isMember, setPushEnabled } = useAuth()
-  const { data } = useStore()
+  const { user, logout, isMember, membershipTier, setPushEnabled, profileComplete } = useAuth()
+  const { data, isEmailAdmin } = useStore()
   const { playEpisode } = usePlayer()
   const [offline, setOffline] = useState<OfflineMeta[]>(() => listOfflineMeta())
 
@@ -21,9 +32,27 @@ export function ProfilePage() {
   }, [])
 
   if (!user) return <Navigate to="/auth" replace />
+  if (!profileComplete) return <Navigate to="/auth" replace />
 
+  const canOpenAdmin = isEmailAdmin(user.email)
   const favs = data.rappers.filter((r) => user.favorites.includes(r.id))
   const reacted = data.videos.filter((v) => user.reactions[v.id])
+  const gender = genderLabel(user.gender)
+  const memberLabel = isMember
+    ? membershipTier === 'artist'
+      ? 'Artist Pass'
+      : 'Fan Pass'
+    : 'Free'
+  const memberUntil = isMember && user.membershipUntil
+    ? new Date(user.membershipUntil).toLocaleDateString('mn-MN')
+    : null
+  const joined = user.joinedAt
+    ? new Date(user.joinedAt).toLocaleDateString('mn-MN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null
 
   async function enablePush() {
     if (!('Notification' in window)) {
@@ -46,149 +75,253 @@ export function ProfilePage() {
   }
 
   return (
-    <div>
-      <header className="page-hero">
-        <div className="container profile-head">
-          <div>
-            <div className="section-kicker">Профайл</div>
-            <h1>{user.name}</h1>
-            <p>
-              {user.email} ·{' '}
-              {isMember
-                ? `Member · ${new Date(user.membershipUntil!).toLocaleDateString('mn-MN')}`
-                : 'Free'}
-            </p>
+    <div className="prof">
+      <header className="prof-hero">
+        <div className="prof-hero-glow" aria-hidden="true" />
+        <div className="prof-avatar" aria-hidden="true">
+          <span>{initialOf(user.name)}</span>
+        </div>
+        <div className="prof-hero-text">
+          <p className="prof-kicker">Профайл</p>
+          <h1>{user.name}</h1>
+          <p className="prof-email">{user.email}</p>
+          <div className="prof-chips">
+            {user.age ? <span className="prof-chip">{user.age} нас</span> : null}
+            {gender ? <span className="prof-chip">{gender}</span> : null}
+            <span className={`prof-chip prof-chip-tier ${isMember ? 'on' : ''}`}>
+              {memberLabel}
+            </span>
           </div>
-          <button type="button" className="btn btn-ghost" onClick={() => void logout()}>
-            Гарах
-          </button>
+          {(memberUntil || joined) && (
+            <p className="prof-meta">
+              {memberUntil ? `Pass хүртэл ${memberUntil}` : null}
+              {memberUntil && joined ? ' · ' : null}
+              {joined ? `Элссэн ${joined}` : null}
+            </p>
+          )}
         </div>
       </header>
 
-      <section className="section">
-        <div className="container profile-grid">
-          <div>
-            <h2 className="section-title" style={{ maxWidth: 'none', marginBottom: '1.25rem' }}>
-              Follow рэппер
-            </h2>
-            {favs.length === 0 ? (
-              <p className="empty-note">
-                Одоогоор хоосон. <Link to="/rappers">Рэпперүүд</Link> хэсгээс ★ дар.
-              </p>
-            ) : (
-              <ul className="profile-list">
-                {favs.map((r) => (
-                  <li key={r.id}>
-                    <Link to={`/rappers/${r.id}`}>
-                      <img src={r.image} alt="" />
-                      <span>{r.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link to="/feed" className="section-link" style={{ display: 'inline-block', marginTop: '1rem' }}>
-              Миний feed →
-            </Link>
-
-            <h2
-              className="section-title"
-              style={{ maxWidth: 'none', margin: '1.75rem 0 1.25rem' }}
-            >
-              Офлайн podcast
-            </h2>
-            {offline.length === 0 ? (
-              <p className="empty-note">
-                Хоосон. <Link to="/podcasts">Podcast</Link> дээрээс «Татаж авах».
-              </p>
-            ) : (
-              <ul className="profile-list">
-                {offline.map((m) => {
-                  const ep = data.podcasts.find((p) => p.id === m.id)
-                  return (
-                    <li key={m.id}>
-                      <div className="profile-offline-row">
-                        <img src={m.cover} alt="" />
-                        <div>
-                          <span>{m.title}</span>
-                          <em>
-                            {m.duration}
-                            {!m.blobOk ? ' · метадата' : ''}
-                          </em>
-                        </div>
-                        <div className="profile-offline-actions">
-                          {ep && (
-                            <button type="button" className="btn btn-ghost" onClick={() => void playEpisode(ep)}>
-                              Тоглуулах
-                            </button>
-                          )}
-                          <button type="button" className="btn btn-ghost" onClick={() => void removeSaved(m.id)}>
-                            Устгах
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-
-          <div>
-            <h2 className="section-title" style={{ maxWidth: 'none', marginBottom: '1.25rem' }}>
-              Тохиргоо
-            </h2>
-            <div className="profile-actions">
-              <button type="button" className="btn btn-primary btn-block" onClick={enablePush}>
-                {user.pushEnabled ? 'Push идэвхтэй' : 'Push мэдэгдэл асаах'}
-              </button>
-              <Link to="/membership" className="btn btn-ghost btn-block">
-                {isMember ? 'Fan Pass идэвхтэй' : 'Fan Pass авах'}
-              </Link>
-              <Link to="/artist" className="btn btn-ghost btn-block">
-                Artist Hub
-              </Link>
-              <Link to="/battle" className="btn btn-ghost btn-block">
-                Battle / Cypher
-              </Link>
-              <Link to="/admin" className="btn btn-ghost btn-block">
-                Admin panel
-              </Link>
-              <Link to="/wall" className="btn btn-ghost btn-block">
-                Community Wall
-              </Link>
-              <Link to="/shop" className="btn btn-ghost btn-block">
-                Shop
-              </Link>
-            </div>
-
-            <h2
-              className="section-title"
-              style={{ maxWidth: 'none', margin: '1.75rem 0 1.25rem' }}
-            >
-              Миний реакц
-            </h2>
-            {reacted.length === 0 ? (
-              <p className="empty-note">
-                Бичлэгт Fire/Cold өгөөгүй байна. <Link to="/videos">Бичлэг</Link> рүү ор.
-              </p>
-            ) : (
-              <ul className="profile-list">
-                {reacted.map((v) => (
-                  <li key={v.id}>
-                    <Link to="/videos">
-                      <span className="react-badge">
-                        {user.reactions[v.id] === 'fire' ? 'FIRE' : 'COLD'}
-                      </span>
-                      <span>{v.title}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+      <div className="prof-stats" role="group" aria-label="Тойм">
+        <div className="prof-stat">
+          <strong>{favs.length}</strong>
+          <span>Follow</span>
         </div>
+        <div className="prof-stat">
+          <strong>{reacted.length}</strong>
+          <span>Реакц</span>
+        </div>
+        <div className="prof-stat">
+          <strong>{offline.length}</strong>
+          <span>Офлайн</span>
+        </div>
+      </div>
+
+      <section className="prof-block">
+        <div className="prof-block-head">
+          <h2>Follow рэппер</h2>
+          <Link to="/rappers" className="prof-block-link">
+            Бүгд
+          </Link>
+        </div>
+        {favs.length === 0 ? (
+          <p className="prof-empty">
+            Хоосон. <Link to="/rappers">Рэпперүүд</Link> дээрээс ★ дар.
+          </p>
+        ) : (
+          <ul className="prof-follow-rail">
+            {favs.map((r) => (
+              <li key={r.id}>
+                <Link to={`/rappers/${r.id}`} className="prof-follow-item">
+                  <img src={r.image} alt="" loading="lazy" />
+                  <span>{r.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
+
+      <section className="prof-block">
+        <div className="prof-block-head">
+          <h2>Офлайн podcast</h2>
+          <Link to="/podcasts" className="prof-block-link">
+            Нэмэх
+          </Link>
+        </div>
+        {offline.length === 0 ? (
+          <p className="prof-empty">
+            Хоосон. <Link to="/podcasts">Podcast</Link> дээрээс татаж ав.
+          </p>
+        ) : (
+          <ul className="prof-rows">
+            {offline.map((m) => {
+              const ep = data.podcasts.find((p) => p.id === m.id)
+              return (
+                <li key={m.id} className="prof-row media">
+                  <img src={m.cover} alt="" loading="lazy" />
+                  <div className="prof-row-body">
+                    <strong>{m.title}</strong>
+                    <em>
+                      {m.duration}
+                      {!m.blobOk ? ' · метадата' : ''}
+                    </em>
+                  </div>
+                  <div className="prof-row-actions">
+                    {ep && (
+                      <button
+                        type="button"
+                        className="prof-icon-btn"
+                        aria-label="Тоглуулах"
+                        onClick={() => void playEpisode(ep)}
+                      >
+                        ▶
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="prof-icon-btn danger"
+                      aria-label="Устгах"
+                      onClick={() => void removeSaved(m.id)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+
+      <section className="prof-block">
+        <div className="prof-block-head">
+          <h2>Миний реакц</h2>
+          <Link to="/videos" className="prof-block-link">
+            Бичлэг
+          </Link>
+        </div>
+        {reacted.length === 0 ? (
+          <p className="prof-empty">
+            Fire / Cold өгөөгүй. <Link to="/videos">Бичлэг</Link> рүү ор.
+          </p>
+        ) : (
+          <ul className="prof-rows">
+            {reacted.map((v) => (
+              <li key={v.id}>
+                <Link to="/videos" className="prof-row media">
+                  <span
+                    className={`prof-react ${user.reactions[v.id] === 'fire' ? 'fire' : 'cold'}`}
+                  >
+                    {user.reactions[v.id] === 'fire' ? 'FIRE' : 'COLD'}
+                  </span>
+                  <div className="prof-row-body">
+                    <strong>{v.title}</strong>
+                    <em>{v.artist || 'Newsac'}</em>
+                  </div>
+                  <span className="prof-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="prof-block">
+        <div className="prof-block-head">
+          <h2>Тохиргоо</h2>
+        </div>
+        <ul className="prof-menu">
+          <li>
+            <button type="button" className="prof-menu-item" onClick={() => void enablePush()}>
+              <span className="prof-menu-icon push" aria-hidden="true" />
+              <span className="prof-menu-text">
+                <strong>Push мэдэгдэл</strong>
+                <em>{user.pushEnabled ? 'Идэвхтэй' : 'Асаах'}</em>
+              </span>
+              <span className={`prof-toggle ${user.pushEnabled ? 'on' : ''}`} aria-hidden="true" />
+            </button>
+          </li>
+          <li>
+            <Link to="/membership" className="prof-menu-item">
+              <span className="prof-menu-icon pass" aria-hidden="true" />
+              <span className="prof-menu-text">
+                <strong>Fan Pass</strong>
+                <em>{isMember ? 'Идэвхтэй' : 'Авах'}</em>
+              </span>
+              <span className="prof-chevron" aria-hidden="true">
+                ›
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/artist" className="prof-menu-item">
+              <span className="prof-menu-icon artist" aria-hidden="true" />
+              <span className="prof-menu-text">
+                <strong>Artist Profile</strong>
+                <em>Удахгүй</em>
+              </span>
+              <span className="prof-chevron" aria-hidden="true">
+                ›
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/battle" className="prof-menu-item">
+              <span className="prof-menu-icon battle" aria-hidden="true" />
+              <span className="prof-menu-text">
+                <strong>Battle / Cypher</strong>
+              </span>
+              <span className="prof-chevron" aria-hidden="true">
+                ›
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/wall" className="prof-menu-item">
+              <span className="prof-menu-icon wall" aria-hidden="true" />
+              <span className="prof-menu-text">
+                <strong>Community Wall</strong>
+              </span>
+              <span className="prof-chevron" aria-hidden="true">
+                ›
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/shop" className="prof-menu-item">
+              <span className="prof-menu-icon shop" aria-hidden="true" />
+              <span className="prof-menu-text">
+                <strong>Shop</strong>
+              </span>
+              <span className="prof-chevron" aria-hidden="true">
+                ›
+              </span>
+            </Link>
+          </li>
+          {canOpenAdmin && (
+            <li>
+              <Link to="/admin" className="prof-menu-item">
+                <span className="prof-menu-icon admin" aria-hidden="true" />
+                <span className="prof-menu-text">
+                  <strong>Admin panel</strong>
+                </span>
+                <span className="prof-chevron" aria-hidden="true">
+                  ›
+                </span>
+              </Link>
+            </li>
+          )}
+        </ul>
+      </section>
+
+      <div className="prof-footer">
+        <button type="button" className="prof-logout" onClick={() => void logout()}>
+          Гарах
+        </button>
+      </div>
     </div>
   )
 }

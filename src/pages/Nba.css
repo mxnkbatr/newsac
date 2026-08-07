@@ -1,0 +1,1070 @@
+.nba-page {
+  --nba-court: #c4a574;
+  background:
+    radial-gradient(ellipse 70% 45% at 10% -5%, rgba(227, 27, 35, 0.22), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(196, 165, 116, 0.12), transparent 50%),
+    var(--bg);
+}
+
+.nba-hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  padding: 2.5rem 0 2.75rem;
+}
+
+.nba-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(105deg, rgba(7, 7, 7, 0.94) 32%, rgba(7, 7, 7, 0.55) 72%, rgba(7, 7, 7, 0.88)),
+    url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80')
+      center / cover;
+  pointer-events: none;
+}
+
+.nba-hero .container,
+.nba-hero-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.nba-hero-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.nba-hero .section-kicker {
+  color: var(--nba-court);
+}
+
+.nba-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 7vw, 4.2rem);
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  margin: 0.35rem 0 0.75rem;
+  max-width: 8ch;
+}
+
+.nba-hero > .nba-hero-grid > div > p {
+  color: var(--ink-dim);
+  max-width: 44ch;
+  line-height: 1.55;
+  margin: 0 0 1.1rem;
+  font-size: 1rem;
+}
+
+.nba-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.15rem;
+}
+
+.nba-filter {
+  margin: 0.35rem 0 0.85rem;
+}
+
+.nba-hero .nba-filter {
+  margin: 0.15rem 0 1.1rem;
+}
+
+.nba-subhero .nba-filter {
+  margin: 0.65rem 0 1rem;
+}
+
+.nba-filter.sticky {
+  position: sticky;
+  top: calc(var(--top-bar, var(--nav-h)) - 1px);
+  z-index: 20;
+  margin-left: -0.15rem;
+  margin-right: -0.15rem;
+  padding: 0.45rem 0.15rem 0.55rem;
+  background: linear-gradient(180deg, rgba(7, 7, 7, 0.96) 40%, rgba(7, 7, 7, 0.88) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.nba-filter-rail {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding: 0.1rem 0.05rem 0.35rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+
+.nba-filter-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.nba-filter-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  scroll-snap-align: start;
+  transition:
+    background 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    color 0.18s var(--ease),
+    transform 0.16s var(--ease);
+}
+
+.nba-filter-chip:hover {
+  border-color: rgba(196, 165, 116, 0.55);
+  color: var(--ink);
+}
+
+.nba-filter-chip.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(227, 27, 35, 0.28);
+}
+
+.nba-filter-chip:active {
+  transform: scale(0.96);
+}
+
+.nba-filter-hint {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0.35rem 0 1.25rem;
+}
+
+.nba-filter-hint p {
+  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.nba-filter-hint a {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.nba-filter-hint span {
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+}
+
+.nba-filter-hint a:hover {
+  color: var(--red-hot);
+}
+
+.nba-hero-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.nba-hero-nav a {
+  border: 1px solid var(--line-strong);
+  background: rgba(14, 14, 14, 0.65);
+  color: var(--ink-dim);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.68rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.nba-hero-nav a:hover {
+  color: #fff;
+  border-color: var(--red);
+  background: rgba(227, 27, 35, 0.2);
+}
+
+.nba-feature {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-2);
+  text-align: left;
+  min-height: 220px;
+}
+
+.nba-feature img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: transform 0.5s var(--ease);
+}
+
+.nba-feature:hover img {
+  transform: scale(1.04);
+}
+
+.nba-feature-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 20%, rgba(0, 0, 0, 0.88));
+}
+
+.nba-feature-copy {
+  position: relative;
+  z-index: 1;
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+  align-content: end;
+  min-height: 220px;
+}
+
+.nba-feature-copy span {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nba-court);
+}
+
+.nba-feature-copy strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.nba-feature-copy em {
+  font-style: normal;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+
+.nba-section {
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.nba-section:last-of-type {
+  border-bottom: none;
+}
+
+.nba-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.nba-section-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  margin: 0.2rem 0 0;
+  letter-spacing: -0.02em;
+}
+
+.nba-section-head p {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  max-width: 40ch;
+}
+
+.nba-reels-section {
+  padding-top: 0.5rem;
+}
+
+.nba-reels-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.nba-reels-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.nba-reel-chip {
+  flex: 0 0 auto;
+  width: 112px;
+  text-decoration: none;
+  color: inherit;
+  scroll-snap-align: start;
+}
+
+.nba-reel-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 9 / 14;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(227, 27, 35, 0.55);
+  background: #111;
+}
+
+.nba-reel-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nba-reel-thumb i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(227, 27, 35, 0.92);
+  color: #fff;
+  font-style: normal;
+  font-size: 0.7rem;
+}
+
+.nba-reel-chip strong {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  color: var(--ink-dim);
+  max-height: 2.5em;
+  overflow: hidden;
+}
+
+.nba-hub-card-reels {
+  border-color: rgba(227, 27, 35, 0.45);
+  background:
+    radial-gradient(ellipse 80% 120% at 100% 0%, rgba(227, 27, 35, 0.18), transparent 55%),
+    var(--bg-2);
+}
+
+.nba-story-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nba-story {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  transition: border-color 0.15s;
+}
+
+.nba-story.open,
+.nba-story:hover {
+  border-color: rgba(227, 27, 35, 0.4);
+}
+
+.nba-story-toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 0.85rem;
+  align-items: stretch;
+  padding: 0.75rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nba-story-thumb {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--bg-3);
+}
+
+.nba-story-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nba-story-meta h3 {
+  margin: 0.25rem 0 0.35rem;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.nba-story-meta p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nba-update-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.nba-chevron {
+  align-self: center;
+  font-size: 1.25rem;
+  color: var(--ink-faint);
+  width: 1.5rem;
+  text-align: center;
+}
+
+.nba-story-body {
+  padding: 0 1rem 1.15rem 1rem;
+  border-top: 1px solid var(--line);
+  animation: nba-open 0.22s ease;
+}
+
+.nba-story-body p,
+.nba-hot-body p,
+.nba-fa-body p,
+.nba-mamba-story p {
+  color: var(--ink-dim);
+  line-height: 1.65;
+  font-size: 0.95rem;
+  margin: 0.85rem 0 0;
+  max-width: 68ch;
+}
+
+.nba-inline-yt {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--red);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nba-inline-yt:hover {
+  text-decoration: underline;
+}
+
+.nba-hot-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.nba-hot {
+  border: 1px solid var(--line);
+  background: linear-gradient(120deg, var(--bg-2), rgba(227, 27, 35, 0.06));
+}
+
+.nba-hot.open {
+  border-color: rgba(227, 27, 35, 0.45);
+}
+
+.nba-hot-btn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nba-hot-rank {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--red);
+}
+
+.nba-hot h3 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+}
+
+.nba-hot-btn span:not(.nba-hot-rank):not(.nba-hot-heat) {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.nba-hot-heat {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--red);
+}
+
+.nba-hot-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.nba-hot-lead {
+  color: var(--ink) !important;
+  font-weight: 600;
+}
+
+.nba-mamba {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.nba-mamba-lead {
+  border-left: 3px solid var(--nba-court);
+  padding-left: 1rem;
+  color: var(--ink-dim);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 58ch;
+  margin: 0;
+}
+
+.nba-mamba-story {
+  max-width: 68ch;
+}
+
+.nba-mamba-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nba-mamba-card {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 1rem 1.1rem;
+}
+
+.nba-mamba-card h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nba-court);
+}
+
+.nba-mamba-card p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.nba-quote {
+  margin: 0;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid rgba(196, 165, 116, 0.35);
+  background: rgba(196, 165, 116, 0.08);
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.nba-mamba-take {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 60ch;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.nba-fa-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.nba-fa {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.nba-fa.open {
+  border-color: rgba(227, 27, 35, 0.4);
+}
+
+.nba-fa-btn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.2rem 1fr auto;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.95rem 1rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nba-fa-rank {
+  font-family: var(--font-display);
+  color: var(--red);
+  font-size: 1.1rem;
+}
+
+.nba-fa h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.nba-fa-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.nba-fa-btn > div > p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+}
+
+.nba-fa-body {
+  padding: 0 1rem 1rem 3.4rem;
+  border-top: 1px solid var(--line);
+}
+
+.nba-fa-body strong {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--nba-court);
+}
+
+.nba-sacfun {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nba-sacfun-card {
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(145deg, rgba(227, 27, 35, 0.12), transparent 55%),
+    var(--bg-2);
+  padding: 1.15rem 1.2rem;
+}
+
+.nba-sacfun-card h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.nba-sacfun-card p {
+  margin: 0;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.nba-yt-section {
+  background:
+    radial-gradient(ellipse 60% 80% at 100% 50%, rgba(227, 27, 35, 0.14), transparent 55%);
+}
+
+.nba-yt-banner {
+  display: grid;
+  gap: 1.25rem;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  padding: 1.35rem 1.25rem;
+}
+
+.nba-yt-banner h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.nba-yt-banner > div > p {
+  margin: 0 0 1rem;
+  color: var(--ink-dim);
+  line-height: 1.55;
+  max-width: 52ch;
+}
+
+.nba-yt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.nba-yt-list a {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  background: var(--bg);
+  transition: border-color 0.15s;
+}
+
+.nba-yt-list a:hover {
+  border-color: var(--red);
+}
+
+.nba-yt-list strong {
+  font-size: 0.92rem;
+}
+
+.nba-yt-list span {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.nba-quiz {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 1.25rem;
+}
+
+.nba-quiz-progress {
+  height: 3px;
+  background: var(--bg-3);
+  margin-bottom: 1.15rem;
+}
+
+.nba-quiz-progress i {
+  display: block;
+  height: 100%;
+  background: var(--red);
+  transition: width 0.25s var(--ease);
+}
+
+.nba-quiz h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.nba-quiz-choices {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.nba-quiz-choices button {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 0.75rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.nba-quiz-choices button:hover:not(:disabled) {
+  border-color: var(--red);
+}
+
+.nba-quiz-choices button.correct {
+  border-color: #3ddc84;
+  background: rgba(61, 220, 132, 0.12);
+}
+
+.nba-quiz-choices button.wrong {
+  border-color: var(--red);
+  background: rgba(227, 27, 35, 0.12);
+}
+
+.nba-quiz-choices button:disabled {
+  cursor: default;
+}
+
+.nba-quiz-explain {
+  margin: 0.85rem 0 0;
+  color: var(--nba-court);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.nba-quiz-result {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+}
+
+.nba-quiz-result strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.nba-quiz-result p {
+  color: var(--ink-dim);
+  margin: 0 0 1.15rem;
+}
+
+.nba-quiz-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+@keyframes nba-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 720px) {
+  .nba-story-toggle {
+    grid-template-columns: 140px 1fr auto;
+    padding: 0.9rem;
+  }
+
+  .nba-story-meta h3 {
+    font-size: 1.15rem;
+  }
+
+  .nba-hot-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nba-mamba-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nba-sacfun {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nba-yt-banner {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+    padding: 1.6rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .nba-hero {
+    padding: 3.25rem 0 3.5rem;
+  }
+
+  .nba-hero-grid {
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: stretch;
+    gap: 2rem;
+  }
+
+  .nba-feature,
+  .nba-feature-copy {
+    min-height: 100%;
+  }
+
+  .nba-sacfun {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .nba-story-toggle {
+    grid-template-columns: 72px 1fr auto;
+  }
+
+  .nba-fa-body {
+    padding-left: 1rem;
+  }
+}
+
+.nba-hub-grid {
+  display: none;
+}
+
+.nba-hub-card {
+  display: none;
+}
+
+.nba-subhero {
+  padding: 1.75rem 0 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.nba-subhero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 0.25rem 0 0.45rem;
+  letter-spacing: -0.02em;
+}
+
+.nba-subhero p {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+
+.nba-back,
+.nba-crumb {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.nba-back:hover,
+.nba-crumb:hover {
+  color: var(--red);
+}
+
+.nba-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nba-list-card {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+
+.nba-list-card:hover {
+  border-color: rgba(227, 27, 35, 0.45);
+}
+
+.nba-list-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.nba-list-card h2 {
+  margin: 0.25rem 0 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.nba-list-card p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.nba-list-card-plain {
+  grid-template-columns: 2.5rem 1fr;
+  align-items: start;
+}
+
+.nba-article {
+  padding: 1.5rem 0 3rem;
+}
+
+.nba-article-inner {
+  max-width: 720px;
+}
+
+.nba-article-cover {
+  margin: 0.5rem 0 1.15rem;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.nba-article-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nba-article h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  line-height: 1.2;
+  margin: 0.55rem 0 0.75rem;
+}
+
+.nba-article-lead {
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+}
+
+.nba-article-body p {
+  color: var(--ink-dim);
+  line-height: 1.7;
+  font-size: 0.98rem;
+  margin: 0 0 1rem;
+}
+
+@media (min-width: 720px) {
+  .nba-filter-hint {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nba-list-card {
+    grid-template-columns: 160px 1fr;
+    padding: 0.9rem;
+  }
+
+  .nba-list-card h2 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .nba-filter-hint {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

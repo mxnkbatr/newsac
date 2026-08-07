@@ -46,11 +46,6 @@
     }
   }
 
-  /* Hide website footer — stay in app */
-  .footer {
-    display: none !important;
-  }
-
   /* iOS-style top bar */
   .nav {
     height: calc(52px + env(safe-area-inset-top, 0px));
@@ -167,6 +162,15 @@
   .home-show-card,
   .video-side-item {
     border-radius: 16px;
+  }
+
+  .section.videos-section {
+    padding-top: 1.35rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .videos-section > .container:first-child {
+    margin-bottom: 1.65rem;
   }
 
   .news-row-img,

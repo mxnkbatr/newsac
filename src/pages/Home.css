@@ -312,6 +312,15 @@
   justify-items: center;
   gap: 0.45rem;
   scroll-snap-align: start;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+  text-decoration: none;
 }
 
 .story-ring {
@@ -328,7 +337,7 @@
 }
 
 .story-chip:active .story-ring {
-  transform: scale(0.93);
+  transform: none;
 }
 
 .story-ring img,
@@ -384,6 +393,21 @@
 .story-chip.tone-soon .story-ring > i,
 .story-chip.tone-ticket .story-ring > i {
   background: #292a2e;
+}
+
+.story-chip-ig .story-ring {
+  background: conic-gradient(
+    from 210deg,
+    #f58529,
+    #dd2a7b,
+    #8134af,
+    #515bd4,
+    #f58529
+  );
+}
+
+.story-chip-ig.is-live .story-ring > i {
+  background: #dd2a7b;
 }
 
 .story-chip > strong {
@@ -624,6 +648,28 @@
   gap: 0.75rem;
 }
 
+.home-originals {
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 80% 120% at 0% 50%, rgba(227, 27, 35, 0.14), transparent 55%),
+    var(--bg-2);
+  padding: 2rem 1.35rem;
+  text-align: center;
+}
+
+.home-originals .section-title {
+  margin: 0.25rem 0 0.75rem;
+}
+
+.home-originals-soon {
+  margin: 0;
+  color: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .home-pod-card {
   display: grid;
   grid-template-columns: 72px 1fr;
@@ -666,6 +712,7 @@
 }
 
 .home-show-card {
+  position: relative;
   border: 1px solid var(--line);
   background: var(--bg-2);
   overflow: hidden;
@@ -681,12 +728,47 @@
 
 .home-show-card .fx-media {
   aspect-ratio: 16 / 10;
+  position: relative;
 }
 
 .home-show-card .fx-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.home-show-card.is-locked .fx-media img {
+  filter: brightness(0.55) saturate(0.85);
+}
+
+.home-show-lock {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 2;
+  width: 2.35rem;
+  height: 2.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(244, 242, 238, 0.2);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.home-show-card.is-locked::after {
+  content: 'LOCKED';
+  position: absolute;
+  left: 0.65rem;
+  top: 0.7rem;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: rgba(227, 27, 35, 0.92);
+  padding: 0.28rem 0.45rem;
 }
 
 .home-show-card > div:last-child {
@@ -1488,6 +1570,14 @@
   font-style: normal;
   color: var(--ink-faint);
   font-size: 0.78rem;
+}
+
+.home-chart-new {
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--red);
+  letter-spacing: 0.04em;
+  font-weight: 700;
 }
 
 .home-chart .btn {

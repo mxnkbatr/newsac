@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useStore } from '../store/StoreContext'
+import { SponsorSlot } from '../components/Widgets'
 import './Pages.css'
 import './Battle.css'
 
@@ -47,10 +48,29 @@ export function BattlePage() {
 
       <section className="section">
         <div className="container battle-stack">
-          {battles.length === 0 && (
-            <p className="empty-note">Одоогоор battle байхгүй.</p>
-          )}
-          {battles.map((battle) => {
+          {battles.length === 0 ? (
+            <div className="battle-empty" role="status">
+              <div className="battle-empty-mark" aria-hidden="true">
+                <span />
+                <span />
+              </div>
+              <p className="battle-empty-kicker">Cypher / Battle</p>
+              <h2>Одоогоор battle байхгүй</h2>
+              <p>
+                Одоохондоо нээлттэй cypher алга. Шинэ battle нээгдэхэд энд фэн санал гарч ирнэ —
+                дараагийн round-д бэлэн байгаарай.
+              </p>
+              <div className="battle-empty-actions">
+                <Link to="/" className="btn btn-primary">
+                  Нүүр рүү
+                </Link>
+                <Link to="/live" className="btn btn-ghost">
+                  Live үзэх
+                </Link>
+              </div>
+            </div>
+          ) : (
+            battles.map((battle) => {
             const total = battle.sides[0].votes + battle.sides[1].votes || 1
             const voted = user ? hasVotedBattle(battle.id) : false
             const closed =
@@ -121,7 +141,9 @@ export function BattlePage() {
                 </div>
               </article>
             )
-          })}
+          })
+          )}
+          <SponsorSlot slot="battle" alwaysShow />
         </div>
       </section>
     </div>

@@ -1,5 +1,12 @@
 import type { AppData } from './types'
 import { news, videos, rappers, rankings } from '../data/content'
+import {
+  freeAgents,
+  nbaHotNews,
+  nbaQuiz,
+  nbaUpdates,
+  sacfunBits,
+} from '../data/nba'
 
 export const ADMIN_PASSWORD = 'newsac2026'
 
@@ -405,9 +412,55 @@ export function createSeed(): AppData {
         title: 'Видео Drop · HOT TRACKS',
         kind: 'video',
         targetId: 'v1',
+        youtubeId: 'UryRJd1vWoY',
         teaser: 'Өчигдрийн халуун бичлэг — дахин үзэхэд бэлэн.',
-        image:
-          'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://i.ytimg.com/vi/UryRJd1vWoY/hqdefault.jpg',
+      },
+    ],
+    homeStories: [
+      {
+        id: 'story-new',
+        label: 'Шинэ',
+        status: 'ШИНЭ',
+        href: '/videos',
+        youtubeId: 'UryRJd1vWoY',
+        image: 'https://i.ytimg.com/vi/UryRJd1vWoY/hqdefault.jpg',
+        tone: 'drop',
+        order: 1,
+        active: true,
+      },
+      {
+        id: 'story-live',
+        label: 'Шууд',
+        status: 'LIVE',
+        href: '/live',
+        youtubeId: 'jfKfPfyJRdk',
+        image: 'https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg',
+        tone: 'live',
+        order: 2,
+        active: true,
+      },
+      {
+        id: 'story-reel',
+        label: 'Reels',
+        status: 'REEL',
+        href: '/reels',
+        youtubeId: '0THTfeMzZx8',
+        image: 'https://i.ytimg.com/vi/0THTfeMzZx8/hqdefault.jpg',
+        tone: 'drop',
+        order: 3,
+        active: true,
+      },
+      {
+        id: 'story-hot',
+        label: 'Hot',
+        status: 'HOT',
+        href: '/videos',
+        youtubeId: 'EpTCrO5BjiQ',
+        image: 'https://i.ytimg.com/vi/EpTCrO5BjiQ/hqdefault.jpg',
+        tone: 'default',
+        order: 4,
+        active: true,
       },
     ],
     livestreams: [
@@ -504,64 +557,28 @@ export function createSeed(): AppData {
         comments: [],
       },
     ],
-    battles: [
-      {
-        id: 'battle-1',
-        title: 'UB Cypher · Thunder vs NEON.88',
-        subtitle: 'Энэ 7 хоногийн фэн санал · ялагч дараагийн Live-д нээлттэй слот авна',
-        status: 'open',
-        endsAt: new Date(Date.now() + 5 * 86400000).toISOString(),
-        cover:
-          'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?auto=format&fit=crop&w=1400&q=80',
-        city: 'Улаанбаатар',
-        sides: [
-          {
-            id: 'side-thunder',
-            name: 'Thunder',
-            rapperId: 'thunder',
-            image:
-              'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=80',
-            votes: 842,
-          },
-          {
-            id: 'side-neon',
-            name: 'NEON.88',
-            rapperId: 'neon',
-            image:
-              'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
-            votes: 791,
-          },
-        ],
-      },
-      {
-        id: 'battle-2',
-        title: 'Region Drop · Khaan vs Luna Vee',
-        subtitle: 'Дархан story vs UB melodic — аль нь чиний чихэнд?',
-        status: 'open',
-        endsAt: new Date(Date.now() + 9 * 86400000).toISOString(),
-        cover:
-          'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&q=80',
-        city: 'Дархан / УБ',
-        sides: [
-          {
-            id: 'side-khaan',
-            name: 'Khaan',
-            rapperId: 'khaan',
-            image:
-              'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&q=80',
-            votes: 512,
-          },
-          {
-            id: 'side-luna',
-            name: 'Luna Vee',
-            rapperId: 'luna',
-            image:
-              'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=600&q=80',
-            votes: 640,
-          },
-        ],
-      },
-    ],
+    battles: [],
+    nbaUpdates: [...nbaUpdates],
+    nbaHotNews: [...nbaHotNews],
+    nbaFreeAgents: [...freeAgents],
+    nbaQuiz: [...nbaQuiz],
+    nbaSacfun: [...sacfunBits],
+    homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
+    about: {
+      name: 'Цэндийн Батбаатар',
+      role: 'Үүсгэн байгуулагч · Newsac',
+      photo:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80',
+      bio: 'Newsac — хөгжим, спорт, соёл, энтертайнментийн ертөнцийг нэг дороос мэдрэх дижитал экосистем.',
+      location: 'Улаанбаатар',
+    },
+    siteFlags: {
+      ticketsClassified: true,
+      shopSoon: true,
+      cypherSoon: true,
+      artistSoon: true,
+      passSoon: true,
+    },
     adminEmails: envAdminEmails(),
     orders: [],
     ticketOrders: [],
