@@ -96,7 +96,8 @@
   }
 
   .app-shell.has-mini-player .app-more,
-  .app-shell.has-mini-player .mobile-sheet-fab {
+  .app-shell.has-mini-player .mobile-sheet-fab,
+  .app-shell.has-mini-player .page-quick {
     bottom: calc(var(--player-clear) - 0.35rem);
   }
 }

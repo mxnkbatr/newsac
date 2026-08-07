@@ -5,6 +5,7 @@ import { Footer } from './Footer'
 import { MiniPlayer } from './MiniPlayer'
 import { ChartMiniPlayer } from './ChartMiniPlayer'
 import { FullMusicPlayer } from './FullMusicPlayer'
+import { PageQuickActions } from './PageQuickActions'
 import { usePlayer } from '../context/PlayerContext'
 import { useChartPlayer } from '../context/ChartPlayerContext'
 import './Layout.css'
@@ -88,14 +89,16 @@ export function Layout() {
       <ChartMiniPlayer />
       <FullMusicPlayer />
       <MiniPlayer />
+      <PageQuickActions />
 
       <nav className="mobile-dock" aria-label="Мобайл цэс">
-        {dock.map((item) => (
+        {dock.map((item, i) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className={({ isActive }) => (isActive ? 'dock-item active' : 'dock-item')}
+            style={{ ['--i' as string]: i }}
             onClick={buzz}
           >
             <span className="dock-icon">{item.icon}</span>

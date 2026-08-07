@@ -34,7 +34,7 @@
 }
 
 .nav-word {
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
   font-weight: 800;
   font-size: 1rem;
   letter-spacing: 0.04em;
@@ -218,11 +218,12 @@
     z-index: 104;
     display: block;
     border: 0;
-    background: rgba(0, 0, 0, 0.58);
+    background: rgba(0, 0, 0, 0.62);
     opacity: 0;
     pointer-events: none;
-    backdrop-filter: blur(3px);
-    transition: opacity 0.25s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .nav-menu-scrim.open {
@@ -237,24 +238,86 @@
     left: 0.55rem;
     z-index: 105;
     display: block;
+    max-height: min(72svh, 560px);
+    overflow: auto;
     padding: 0.55rem 0.8rem 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
-    background: rgba(17, 18, 20, 0.96);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+    background: rgba(17, 18, 20, 0.97);
+    box-shadow:
+      0 24px 70px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(227, 27, 35, 0);
     backdrop-filter: blur(24px) saturate(1.35);
-    transform: translateY(calc(100% + 7rem));
+    -webkit-backdrop-filter: blur(24px) saturate(1.35);
+    transform: translate3d(0, calc(100% + 5rem), 0) scale(0.94);
     opacity: 0;
     pointer-events: none;
     transition:
-      transform 0.34s var(--ease),
-      opacity 0.2s ease;
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.45s ease;
+    will-change: transform, opacity;
   }
 
   .nav-more-panel.open {
-    transform: none;
+    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
     pointer-events: auto;
+  }
+
+  .nav-more-panel.intro {
+    animation: nav-more-intro 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow:
+      0 28px 80px rgba(0, 0, 0, 0.72),
+      0 0 0 1px rgba(227, 27, 35, 0.35),
+      0 0 48px rgba(227, 27, 35, 0.22);
+  }
+
+  .nav-more-glow {
+    display: none;
+  }
+
+  .nav-more-panel.intro .nav-more-glow {
+    display: block;
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: -18%;
+    height: 42%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(227, 27, 35, 0.35), transparent 70%);
+    filter: blur(18px);
+    pointer-events: none;
+    animation: nav-more-glow 1.8s ease-out both;
+  }
+
+  @keyframes nav-more-intro {
+    0% {
+      transform: translate3d(0, 110%, 0) scale(0.9);
+      opacity: 0;
+    }
+    58% {
+      transform: translate3d(0, -2.5%, 0) scale(1.015);
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes nav-more-glow {
+    from {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+    40% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.35;
+      transform: scale(1.15);
+    }
   }
 
   .nav-more-handle {
@@ -263,6 +326,12 @@
     margin: 0 auto 0.75rem;
     border-radius: 99px;
     background: rgba(255, 255, 255, 0.16);
+    transition: background 0.3s, width 0.35s var(--ease);
+  }
+
+  .nav-more-panel.intro .nav-more-handle {
+    width: 52px;
+    background: rgba(227, 27, 35, 0.7);
   }
 
   .nav-more-head {
@@ -285,6 +354,14 @@
     text-transform: uppercase;
   }
 
+  .nav-more-panel.open .nav-more-head span {
+    animation: nav-more-fade-up 0.45s 0.08s both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .nav-more-panel.open .nav-more-head strong {
+    animation: nav-more-fade-up 0.5s 0.14s both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   .nav-more-head strong {
     font-family: var(--font-display);
     font-size: 1rem;
@@ -298,6 +375,12 @@
     background: rgba(255, 255, 255, 0.06);
     color: var(--ink);
     font-size: 1.2rem;
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .nav-more-head button:active {
+    transform: scale(0.9);
+    background: rgba(227, 27, 35, 0.2);
   }
 
   .nav-more-grid {
@@ -316,11 +399,45 @@
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.035);
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.96);
+    transition:
+      transform 0.18s ease,
+      background 0.18s ease,
+      border-color 0.18s ease;
+  }
+
+  .nav-more-panel.open .nav-more-grid a {
+    animation: nav-more-chip 0.48s calc(0.12s + var(--i, 0) * 0.038s) both
+      cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes nav-more-fade-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 8px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes nav-more-chip {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .nav-more-grid a:active {
     transform: scale(0.97);
-    background: rgba(227, 27, 35, 0.1);
+    background: rgba(227, 27, 35, 0.12);
+    border-color: rgba(227, 27, 35, 0.35);
   }
 
   .nav-more-grid a > span {
@@ -333,6 +450,76 @@
     color: var(--red-hot);
     font-family: var(--font-display);
     font-size: 0.68rem;
+    transition: transform 0.25s var(--ease), background 0.2s;
+  }
+
+  .nav-more-panel.intro .nav-more-grid a > span {
+    animation: nav-more-icon-pop 0.55s calc(0.22s + var(--i, 0) * 0.04s) both
+      cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  @keyframes nav-more-icon-pop {
+    0% {
+      transform: scale(0.5);
+    }
+    70% {
+      transform: scale(1.12);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .nav-more-grid a:active > span {
+    transform: scale(0.92);
+    background: rgba(227, 27, 35, 0.22);
+  }
+
+  .nav-more-toggle.intro-pulse {
+    animation: nav-toggle-pulse 1.4s ease-out 2;
+    border-color: rgba(227, 27, 35, 0.55);
+    background: rgba(227, 27, 35, 0.18);
+    color: var(--red-hot);
+  }
+
+  @keyframes nav-toggle-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(227, 27, 35, 0);
+    }
+    40% {
+      box-shadow: 0 0 0 8px rgba(227, 27, 35, 0.22);
+    }
+  }
+
+  .nav-more-panel.open > p {
+    animation: nav-more-fade-up 0.45s 0.55s both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-menu-scrim,
+    .nav-more-panel,
+    .nav-more-grid a,
+    .nav-more-head span,
+    .nav-more-head strong,
+    .nav-more-toggle.intro-pulse,
+    .nav-more-panel.intro .nav-more-grid a > span {
+      animation: none !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    .nav-more-panel {
+      transform: none;
+    }
+
+    .nav-more-panel:not(.open) {
+      opacity: 0;
+    }
+
+    .nav-more-panel.open .nav-more-grid a {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .nav-more-grid strong {

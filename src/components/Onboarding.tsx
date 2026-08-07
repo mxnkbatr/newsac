@@ -78,7 +78,10 @@ export function Onboarding() {
   function finish() {
     markDone()
     setLeaving(true)
-    window.setTimeout(() => setOpen(false), 380)
+    window.setTimeout(() => {
+      setOpen(false)
+      window.dispatchEvent(new Event('newsac-onboarding-done'))
+    }, 380)
   }
 
   function next() {

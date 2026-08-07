@@ -116,12 +116,14 @@
   }
 
   .app-shell.has-chart-player .app-more,
-  .app-shell.has-chart-player .mobile-sheet-fab {
+  .app-shell.has-chart-player .mobile-sheet-fab,
+  .app-shell.has-chart-player .page-quick {
     bottom: calc(var(--player-clear) - 0.35rem);
   }
 
   .app-shell.has-chart-player.has-mini-player .app-more,
-  .app-shell.has-chart-player.has-mini-player .mobile-sheet-fab {
+  .app-shell.has-chart-player.has-mini-player .mobile-sheet-fab,
+  .app-shell.has-chart-player.has-mini-player .page-quick {
     bottom: calc(var(--player-clear) + var(--player-h) - 0.35rem);
   }
 }

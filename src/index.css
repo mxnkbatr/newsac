@@ -11,8 +11,9 @@
   --line: rgba(244, 242, 238, 0.08);
   --line-strong: rgba(244, 242, 238, 0.16);
   --glow-red: rgba(227, 27, 35, 0.35);
-  --font-display: "Unbounded", system-ui, sans-serif;
-  --font-body: "Manrope", system-ui, sans-serif;
+  --font-brand: "Unbounded", "Onest", system-ui, sans-serif;
+  --font-display: "Onest", system-ui, sans-serif;
+  --font-body: "Onest", system-ui, sans-serif;
   --nav-h: 72px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --max: 1240px;

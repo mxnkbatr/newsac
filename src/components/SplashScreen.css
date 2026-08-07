@@ -89,7 +89,7 @@
 }
 
 .splash-word {
-  font-family: var(--font-display), "Unbounded", system-ui, sans-serif;
+  font-family: var(--font-brand);
   font-size: clamp(1.8rem, 7vw, 2.6rem);
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -97,7 +97,7 @@
 }
 
 .splash-domain {
-  font-family: var(--font-display), "Unbounded", system-ui, sans-serif;
+  font-family: var(--font-brand);
   font-size: clamp(1.55rem, 6.5vw, 2.35rem);
   font-weight: 800;
   letter-spacing: 0.06em;

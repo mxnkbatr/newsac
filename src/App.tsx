@@ -7,7 +7,8 @@ import { Layout } from './components/Layout'
 import { RevealObserver } from './components/RevealObserver'
 import { EffectsLayer } from './components/EffectsLayer'
 import { SplashScreen } from './components/SplashScreen'
-import { Onboarding } from './components/Onboarding'
+// Temporary: onboarding hidden — restore <Onboarding /> when ready
+// import { Onboarding } from './components/Onboarding'
 import { AdminSessionSync } from './components/AdminSessionSync'
 import { Home } from './pages/Home'
 import { NewsPage, NewsDetailPage } from './pages/News'
@@ -59,7 +60,6 @@ export default function App() {
           <ChartPlayerProvider>
           <BrowserRouter>
             <SplashScreen />
-            <Onboarding />
             <AdminSessionSync />
             <EffectsLayer />
             <RevealObserver />

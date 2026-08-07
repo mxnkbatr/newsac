@@ -31,7 +31,7 @@
 
 .footer-logo-row strong {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
   letter-spacing: -0.02em;
   font-size: 1.2rem;
   line-height: 1.1;

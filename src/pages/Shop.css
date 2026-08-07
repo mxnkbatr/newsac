@@ -259,7 +259,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--red);
-  font-family: Manrope, sans-serif;
+  font-family: var(--font-body);
 }
 
 .member-card ul {
