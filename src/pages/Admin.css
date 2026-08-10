@@ -674,6 +674,18 @@
   display: none;
 }
 
+.admin-image-pick.is-busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.admin-field-error {
+  margin: 0.35rem 0 0;
+  color: #ff8b8b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .admin-field textarea {
   min-height: 88px;
   resize: vertical;

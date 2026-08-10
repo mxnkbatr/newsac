@@ -4,6 +4,8 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react'
+import { uploadPublicImage } from '../lib/mediaUpload'
+import { supabaseConfigured } from '../lib/supabase'
 
 export type FieldType =
   | 'text'
@@ -26,8 +28,8 @@ export type FieldDef = {
 
 export type ToastState = { text: string; error?: boolean } | null
 
-/** Phone gallery/camera → compressed data URL for story images */
-function fileToCompressedDataUrl(file: File, maxSide = 1280, quality = 0.82): Promise<string> {
+/** Phone gallery/camera → Supabase Storage URL, or compressed data URL fallback */
+function fileToCompressedDataUrl(file: File, maxSide = 960, quality = 0.72): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('read failed'))
@@ -53,6 +55,17 @@ function fileToCompressedDataUrl(file: File, maxSide = 1280, quality = 0.82): Pr
     }
     reader.readAsDataURL(file)
   })
+}
+
+async function resolveImageFile(file: File): Promise<string> {
+  if (supabaseConfigured) {
+    try {
+      return await uploadPublicImage(file)
+    } catch {
+      /* fall back to data URL if storage bucket missing */
+    }
+  }
+  return fileToCompressedDataUrl(file)
 }
 
 export function Toast({ toast }: { toast: ToastState }) {
@@ -107,6 +120,61 @@ export function Modal({
   )
 }
 
+function ImageField({
+  def,
+  value,
+  onChange,
+}: {
+  def: FieldDef
+  value: string | number | boolean
+  onChange: (v: string | number | boolean) => void
+}) {
+  const src = String(value || '')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  return (
+    <div className="admin-field admin-field-image">
+      <label htmlFor={`f-${def.key}`}>{def.label}</label>
+      {src ? (
+        <div className="admin-image-preview">
+          <img src={src} alt="" />
+        </div>
+      ) : null}
+      <label className={`admin-image-pick${busy ? ' is-busy' : ''}`}>
+        <input
+          id={`f-${def.key}-file`}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          disabled={busy}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            setBusy(true)
+            setErr(null)
+            void resolveImageFile(file)
+              .then((url) => onChange(url))
+              .catch((ex: unknown) => {
+                setErr(ex instanceof Error ? ex.message : 'Зураг оруулж чадсангүй')
+              })
+              .finally(() => setBusy(false))
+          }}
+        />
+        {busy ? 'Зураг илгээж байна…' : '📷 Зураг сонгох / аваах'}
+      </label>
+      {err ? <p className="admin-field-error">{err}</p> : null}
+      <input
+        id={`f-${def.key}`}
+        type="url"
+        value={src.startsWith('data:') ? '' : src}
+        placeholder={def.placeholder || 'эсвэл зураг URL'}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  )
+}
+
 function Field({
   def,
   value,
@@ -131,42 +199,7 @@ function Field({
   }
 
   if (type === 'image') {
-    const src = String(value || '')
-    return (
-      <div className="admin-field admin-field-image">
-        <label htmlFor={`f-${def.key}`}>{def.label}</label>
-        {src ? (
-          <div className="admin-image-preview">
-            <img src={src} alt="" />
-          </div>
-        ) : null}
-        <label className="admin-image-pick">
-          <input
-            id={`f-${def.key}-file`}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              void fileToCompressedDataUrl(file)
-                .then((url) => onChange(url))
-                .catch(() => {
-                  /* ignore */
-                })
-            }}
-          />
-          📷 Зураг сонгох / аваах
-        </label>
-        <input
-          id={`f-${def.key}`}
-          type="url"
-          value={src.startsWith('data:') ? '' : src}
-          placeholder={def.placeholder || 'эсвэл зураг URL'}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </div>
-    )
+    return <ImageField def={def} value={value} onChange={onChange} />
   }
 
   return (
@@ -272,13 +305,18 @@ export function EditorModal({
   onSave: (values: Record<string, string | number | boolean>) => void
 }) {
   const [values, setValues] = useState(initial)
+  const [formError, setFormError] = useState<string | null>(null)
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
     for (const f of fields.filter((x) => x.required)) {
       const v = values[f.key]
-      if (v === undefined || v === null || String(v).trim() === '') return
+      if (v === undefined || v === null || String(v).trim() === '') {
+        setFormError(`«${f.label}» заавал бөглөнө үү`)
+        return
+      }
     }
+    setFormError(null)
     onSave(values)
   }
 
@@ -286,6 +324,7 @@ export function EditorModal({
     <Modal title={title} subtitle={subtitle} onClose={onClose}>
       <form className="admin-form" onSubmit={submit}>
         <FormFields fields={fields} values={values} setValues={setValues} />
+        {formError ? <p className="admin-field-error">{formError}</p> : null}
         <div className="admin-modal-actions">
           <button type="button" className="btn btn-ghost" onClick={onClose}>
             Болих

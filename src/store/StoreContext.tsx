@@ -75,7 +75,7 @@ type StoreValue = {
   votePoll: (pollId: string, optionId: string) => void
   syncYoutube: () => Promise<number>
   syncMusicChart: () => Promise<number>
-  upsertNews: (item: NewsItem) => void
+  upsertNews: (item: NewsItem) => AppData
   deleteNews: (id: string) => void
   setHomeHotNewsIds: (ids: string[]) => void
   addNewsComment: (
@@ -84,7 +84,7 @@ type StoreValue = {
   ) => string | null
   setAbout: (about: AboutPage) => void
   setSiteFlags: (flags: Partial<SiteFlags>) => void
-  upsertVideo: (item: VideoItem) => void
+  upsertVideo: (item: VideoItem) => AppData
   deleteVideo: (id: string) => void
   upsertRapper: (item: Rapper) => void
   deleteRapper: (id: string) => void
@@ -148,7 +148,7 @@ type StoreValue = {
     cover?: string
   }) => Livestream | string
   endArtistLive: (livestreamId: string) => void
-  pushCloud: () => Promise<void>
+  pushCloud: (override?: AppData) => Promise<void>
   pullCloud: () => Promise<'empty' | 'ok'>
   analyticsSummary: () => {
     newsClicks: { id: string; title: string; clicks: number }[]
@@ -387,11 +387,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const patch = useCallback((fn: (prev: AppData) => AppData) => {
+    let next!: AppData
     setData((prev) => {
-      const next = fn(prev)
+      next = fn(prev)
       dataRef.current = next
       return next
     })
+    return next
   }, [])
 
   const track = useCallback(
@@ -650,7 +652,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return songs.length
       },
       upsertNews(item) {
-        patch((prev) => {
+        return patch((prev) => {
           const i = prev.news.findIndex((n) => n.id === item.id)
           if (i >= 0) {
             const news = [...prev.news]
@@ -660,10 +662,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             }
             return { ...prev, news }
           }
-          return {
-            ...prev,
-            news: [{ ...item, comments: item.comments ?? [] }, ...prev.news],
-          }
+          const news = [{ ...item, comments: item.comments ?? [] }, ...prev.news]
+          const homeHotNewsIds = [
+            item.id,
+            ...(prev.homeHotNewsIds || []).filter((id) => id !== item.id),
+          ].slice(0, 3)
+          return { ...prev, news, homeHotNewsIds }
         })
       },
       deleteNews(id) {
@@ -734,7 +738,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       upsertVideo(item) {
         const youtubeId = normalizeYouTubeId(item.youtubeId)
         const next = { ...item, youtubeId }
-        patch((prev) => {
+        return patch((prev) => {
           const i = prev.videos.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const videos = [...prev.videos]
@@ -1242,9 +1246,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ),
         }))
       },
-      async pushCloud() {
-        await pushAppSnapshot(dataRef.current)
-        patch((prev) => ({ ...prev, lastCloudSync: new Date().toISOString() }))
+      async pushCloud(override?: AppData) {
+        const payload = override ?? dataRef.current
+        const size = JSON.stringify(payload).length
+        if (size > 900_000) {
+          throw new Error(
+            'Өгөгдөл хэт том (зураг data URL). Зургийг URL эсвэл Storage-аар оруулна уу.',
+          )
+        }
+        await pushAppSnapshot(payload)
+        const synced = { ...payload, lastCloudSync: new Date().toISOString() }
+        dataRef.current = synced
+        setData(synced)
       },
       async pullCloud() {
         const remote = await pullAppSnapshot()

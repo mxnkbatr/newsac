@@ -13,6 +13,7 @@ import type {
   Rapper,
   ShortClip,
   Sponsor,
+  AppData,
 } from '../store/types'
 import {
   IMG,
@@ -168,17 +169,13 @@ export function AdminPage() {
 
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
-  const saveAndSync = async (okText: string) => {
+  const saveAndSync = async (okText: string, snapshot?: AppData) => {
     try {
-      // Ensure React state/ref flush after upsert before reading payload
-      await new Promise<void>((resolve) => {
-        window.setTimeout(resolve, 0)
-      })
-      await store.pushCloud()
+      await store.pushCloud(snapshot)
       notify(`${okText} · Supabase-д хадгаллаа`)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Cloud Push амжилтгүй'
-      notify(`${okText} · ${msg}`, true)
+      notify(`${okText} (локал) · ${msg}`, true)
     }
   }
 
@@ -671,8 +668,8 @@ export function AdminPage() {
                       image,
                       membersOnly: Boolean(v.membersOnly),
                     }
-                    store.upsertNews(item)
-                    void saveAndSync('Мэдээ нэмэгдлээ')
+                    const snapshot = store.upsertNews(item)
+                    void saveAndSync('Мэдээ нэмэгдлээ', snapshot)
                   },
                 )
               }
@@ -699,7 +696,7 @@ export function AdminPage() {
                       notify('Зураг сонгох эсвэл URL оруулна уу', true)
                       return false
                     }
-                    store.upsertNews({
+                    const snapshot = store.upsertNews({
                       ...n,
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
@@ -711,7 +708,7 @@ export function AdminPage() {
                       image,
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    void saveAndSync('Мэдээ хадгалагдлаа')
+                    void saveAndSync('Мэдээ хадгалагдлаа', snapshot)
                   },
                   n.title,
                 )
@@ -757,7 +754,7 @@ export function AdminPage() {
                       notify('Зөв YouTube линк эсвэл ID оруулна уу', true)
                       return false
                     }
-                    store.upsertVideo({
+                    const snapshot = store.upsertVideo({
                       id: crypto.randomUUID(),
                       title: String(v.title).trim(),
                       youtubeId,
@@ -767,7 +764,7 @@ export function AdminPage() {
                       published: String(v.published || 'саяхан'),
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    void saveAndSync('Бичлэг нэмэгдлээ')
+                    void saveAndSync('Бичлэг нэмэгдлээ', snapshot)
                   },
                 )
               }
@@ -786,7 +783,7 @@ export function AdminPage() {
                       notify('Зөв YouTube линк эсвэл ID оруулна уу', true)
                       return false
                     }
-                    store.upsertVideo({
+                    const snapshot = store.upsertVideo({
                       ...n,
                       title: String(v.title).trim(),
                       youtubeId,
@@ -796,7 +793,7 @@ export function AdminPage() {
                       published: String(v.published),
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    void saveAndSync('Бичлэг хадгалагдлаа')
+                    void saveAndSync('Бичлэг хадгалагдлаа', snapshot)
                   },
                   n.title,
                 )
