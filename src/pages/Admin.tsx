@@ -2282,10 +2282,8 @@ export function AdminPage() {
 
           {tab === 'cloud' && (
             <div className="sync-box">
-              <h3>Supabase Cloud sync</h3>
+              <h3>Cloud sync</h3>
               <p>
-                Бүх CMS өгөгдлийг <code>app_snapshots</code> хүснэгт рүү push / pull хийнэ.
-                Эхлээд <code>supabase/schema.sql</code>-ийг SQL Editor дээр ажиллуулна уу.
                 Сүүлийн sync:{' '}
                 {store.data.lastCloudSync
                   ? new Date(store.data.lastCloudSync).toLocaleString('mn-MN')
