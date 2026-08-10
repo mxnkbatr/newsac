@@ -255,31 +255,14 @@ function mergeList<T extends { id: string }>(
   return extras.length ? [...extras, ...base] : base
 }
 
-/** Prefer published cloud CMS; keep only local rows that are not seed demos. */
-function mergeCmsList<T extends { id: string }>(
-  remote: T[] | undefined,
-  local: T[],
-  seed: T[],
-  preferRemote: boolean,
-): T[] {
-  if (preferRemote && remote?.length) {
-    const seedIds = new Set(seed.map((item) => item.id))
-    const remoteIds = new Set(remote.map((item) => item.id))
-    const unpushed = local.filter((item) => !remoteIds.has(item.id) && !seedIds.has(item.id))
-    return unpushed.length ? [...unpushed, ...remote] : remote
-  }
-  return mergeList(remote, local, seed)
-}
-
-/** Apply cloud snapshot; keep local-only rows that are not yet on cloud. */
+/** Apply cloud snapshot; keep any local-only rows not yet pushed. */
 function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
   const seed = createSeed()
-  const preferRemote = Boolean(remote.lastCloudSync)
   return {
     ...seed,
     ...remote,
-    news: mergeCmsList(remote.news, local.news, seed.news, preferRemote),
-    videos: mergeCmsList(remote.videos, local.videos, seed.videos, preferRemote),
+    news: mergeList(remote.news, local.news, seed.news),
+    videos: mergeList(remote.videos, local.videos, seed.videos),
     rappers: (() => {
       const base = remote.rappers?.length ? remote.rappers : seed.rappers
       const ids = new Set(base.map((r) => r.id))
@@ -303,13 +286,8 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     podcasts: mergeList(remote.podcasts, local.podcasts, seed.podcasts),
     rankings: remote.rankings?.length ? remote.rankings : seed.rankings,
     chartSongs: remote.chartSongs?.length ? remote.chartSongs : seed.chartSongs,
-    dailyDrops: mergeCmsList(remote.dailyDrops, local.dailyDrops, seed.dailyDrops, preferRemote),
-    homeStories: mergeCmsList(
-      remote.homeStories,
-      local.homeStories,
-      seed.homeStories,
-      preferRemote,
-    ),
+    dailyDrops: mergeList(remote.dailyDrops, local.dailyDrops, seed.dailyDrops),
+    homeStories: mergeList(remote.homeStories, local.homeStories, seed.homeStories),
     livestreams: mergeList(remote.livestreams, local.livestreams, seed.livestreams),
     wallPosts: mergeList(remote.wallPosts, local.wallPosts, seed.wallPosts),
     battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
@@ -321,11 +299,9 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     homeHotNewsIds:
       Array.isArray(remote.homeHotNewsIds) && remote.homeHotNewsIds.length
         ? remote.homeHotNewsIds.slice(0, 3)
-        : preferRemote && remote.news?.length
-          ? remote.news.slice(0, 3).map((n) => n.id)
-          : local.homeHotNewsIds?.length
-            ? local.homeHotNewsIds.slice(0, 3)
-            : seed.homeHotNewsIds,
+        : local.homeHotNewsIds?.length
+          ? local.homeHotNewsIds.slice(0, 3)
+          : seed.homeHotNewsIds,
     about: remote.about?.name ? { ...seed.about, ...remote.about } : local.about || seed.about,
     siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || local.siteFlags || {}) },
     adminEmails: Array.from(
@@ -385,18 +361,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Public site: load shared CMS from Supabase so admin-added news/videos appear for everyone
   useEffect(() => {
-    if (!supabaseConfigured) {
-      console.warn('[Newsac] Supabase env байхгүй — бусад төхөөрөмжтэй sync хийхгүй')
-      return
-    }
+    if (!supabaseConfigured) return
     let cancelled = false
     ;(async () => {
       try {
         const remote = await pullAppSnapshot()
-        if (cancelled || !remote || !Object.keys(remote).length) {
-          console.info('[Newsac] Cloud snapshot хоосон эсвэл алга')
-          return
-        }
+        if (cancelled || !remote || !Object.keys(remote).length) return
         const remoteHasCms =
           Boolean(remote.lastCloudSync) ||
           (remote.news?.length || 0) > 0 ||
@@ -407,8 +377,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           dataRef.current = next
           return next
         })
-      } catch (err) {
-        console.warn('[Newsac] Cloud pull амжилтгүй', err)
+      } catch {
+        /* offline / RLS / missing table */
       }
     })()
     return () => {
@@ -1284,7 +1254,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             'Өгөгдөл хэт том (зураг data URL). Зургийг URL эсвэл Storage-аар оруулна уу.',
           )
         }
-        const synced = await pushAppSnapshot(payload)
+        await pushAppSnapshot(payload)
+        const synced = { ...payload, lastCloudSync: new Date().toISOString() }
         dataRef.current = synced
         setData(synced)
       },

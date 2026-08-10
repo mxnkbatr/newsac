@@ -46,7 +46,7 @@ import {
 } from './adminUi'
 import { buildHubStages, type AdminTab } from './adminHub'
 import { AdminNbaPanel, type NbaSub } from './AdminNbaPanel'
-import { getCloudHealth } from '../lib/cloudHealth'
+import './Admin.css'
 
 type Tab = AdminTab
 
@@ -170,22 +170,12 @@ export function AdminPage() {
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
   const saveAndSync = async (okText: string, snapshot?: AppData) => {
-    const health = await getCloudHealth()
-    if (!health.ok) {
-      notify(
-        `${okText} · ЗӨВХӨН энэ төхөөрөмжид. ${'reason' in health ? health.reason : ''}`,
-        true,
-      )
-      setTab('cloud')
-      return
-    }
     try {
       await store.pushCloud(snapshot)
-      notify(`${okText} · Бүх төхөөрөмжид Supabase-ээр гарлаа`)
+      notify(`${okText} · Supabase-д хадгаллаа`)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Cloud Push амжилтгүй'
-      notify(`${okText} · ЗӨВХӨН энэ төхөөрөмжид. ${msg}`, true)
-      setTab('cloud')
+      notify(`${okText} (локал) · ${msg}`, true)
     }
   }
 
@@ -543,62 +533,6 @@ export function AdminPage() {
 
           {tab === 'news' && (
             <>
-              <div
-                className={`admin-sync-bar${
-                  store.data.lastCloudSync ? ' is-ok' : ' is-warn'
-                }`}
-              >
-                <div className="admin-sync-bar-text">
-                  <strong>
-                    {store.data.lastCloudSync ? 'Cloud sync OK' : 'Cloud sync хэрэгтэй'}
-                  </strong>
-                  <span>
-                    {store.data.lastCloudSync
-                      ? new Date(store.data.lastCloudSync).toLocaleString('mn-MN')
-                      : user
-                        ? 'Бусад төхөөрөмжид гаргахын тулд Push хийнэ'
-                        : 'Gmail-ээр нэвтэрээд Push хийнэ'}
-                  </span>
-                </div>
-                <div className="admin-sync-bar-actions">
-                  {!user ? (
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      disabled={googleBusy || authLoading}
-                      onClick={() => {
-                        setGoogleBusy(true)
-                        void signInWithGoogle().then((e) => {
-                          setGoogleBusy(false)
-                          if (e) notify(e, true)
-                          else notify('Gmail-ээр нэвтэрлээ')
-                        })
-                      }}
-                    >
-                      Gmail
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      disabled={cloudBusy}
-                      onClick={async () => {
-                        setCloudBusy(true)
-                        try {
-                          await store.pushCloud()
-                          notify('Cloud-д илгээлээ')
-                        } catch (e) {
-                          notify(e instanceof Error ? e.message : 'Push амжилтгүй', true)
-                        } finally {
-                          setCloudBusy(false)
-                        }
-                      }}
-                    >
-                      {cloudBusy ? '…' : 'Push'}
-                    </button>
-                  )}
-                </div>
-              </div>
               <div className="admin-seg" role="tablist" aria-label="Мэдээний төрөл">
                 {(
                   [
@@ -628,10 +562,12 @@ export function AdminPage() {
                   </button>
                 ))}
               </div>
-              <div className="admin-hot-panel">
-                <div className="admin-hot-panel-head">
-                  <strong>Нүүр · халуун 3</strong>
-                </div>
+              <div className="staff-box" style={{ marginBottom: '1.25rem' }}>
+                <h3>Нүүр · халуун 3 мэдээ</h3>
+                <p>
+                  Home дээрх «Монгол entertainment · халуун 3» хэсгийн 3 мэдээг эндээс солино.
+                  1-р байр = том lead кард.
+                </p>
                 <div className="admin-hot-slots">
                   {[0, 1, 2].map((slot) => {
                     const current =
@@ -640,7 +576,10 @@ export function AdminPage() {
                       ''
                     return (
                       <label key={slot} className="admin-field">
-                        <span>{slot === 0 ? 'Lead' : `${slot + 1}`}</span>
+                        <span>
+                          {slot + 1}-р мэдээ
+                          {slot === 0 ? ' (lead)' : ''}
+                        </span>
                         <select
                           value={current}
                           onChange={(e) => {
@@ -673,7 +612,7 @@ export function AdminPage() {
               </div>
               <EntityList
               title="Мэдээ"
-              description="Дотоод / гадаад · зураг + бүрэн текст"
+              description="Зураг upload + бүрэн текст заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
               search={search}
               onSearch={setSearch}
               items={store.data.news
@@ -788,7 +727,7 @@ export function AdminPage() {
           {tab === 'videos' && (
             <EntityList
               title="Бичлэг"
-              description="YouTube линк / ID"
+              description="Зөв YouTube линк заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
               search={search}
               onSearch={setSearch}
               items={store.data.videos.map((n) => ({
@@ -2282,8 +2221,10 @@ export function AdminPage() {
 
           {tab === 'cloud' && (
             <div className="sync-box">
-              <h3>Cloud sync</h3>
+              <h3>Supabase Cloud sync</h3>
               <p>
+                Бүх CMS өгөгдлийг <code>app_snapshots</code> хүснэгт рүү push / pull хийнэ.
+                Эхлээд <code>supabase/schema.sql</code>-ийг SQL Editor дээр ажиллуулна уу.
                 Сүүлийн sync:{' '}
                 {store.data.lastCloudSync
                   ? new Date(store.data.lastCloudSync).toLocaleString('mn-MN')

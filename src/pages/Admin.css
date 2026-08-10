@@ -501,82 +501,6 @@
   padding: 1.25rem;
 }
 
-.admin-sync-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.admin-sync-bar.is-warn {
-  border-color: rgba(227, 27, 35, 0.35);
-  background: rgba(227, 27, 35, 0.08);
-}
-
-.admin-sync-bar.is-ok {
-  border-color: rgba(61, 220, 132, 0.28);
-  background: rgba(61, 220, 132, 0.06);
-}
-
-.admin-sync-bar-text {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.admin-sync-bar-text strong {
-  font-size: 0.82rem;
-}
-
-.admin-sync-bar-text span {
-  color: var(--ink-faint);
-  font-size: 0.72rem;
-  line-height: 1.35;
-}
-
-.admin-sync-bar-actions {
-  flex-shrink: 0;
-}
-
-.admin-sync-bar-actions .btn {
-  min-height: 36px;
-  padding: 0.45rem 0.9rem;
-  font-size: 0.72rem;
-}
-
-.admin-hot-panel {
-  margin: 0.85rem 0 1.1rem;
-  padding: 0.85rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.admin-hot-panel-head {
-  margin-bottom: 0.65rem;
-}
-
-.admin-hot-panel-head strong {
-  font-size: 0.8rem;
-  letter-spacing: 0.02em;
-}
-
-.admin-hot-slots {
-  display: grid;
-  gap: 0.55rem;
-  margin-top: 0;
-}
-
-.staff-box.is-warn {
-  border-color: rgba(227, 27, 35, 0.45);
-  background: rgba(227, 27, 35, 0.08);
-}
-
 .sync-box p,
 .staff-box p {
   color: var(--ink-dim);
@@ -589,6 +513,12 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.5rem;
+}
+
+.admin-hot-slots {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
 }
 
 .admin-about-preview {
