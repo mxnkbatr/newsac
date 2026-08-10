@@ -76,7 +76,7 @@ type StoreValue = {
   syncYoutube: () => Promise<number>
   syncMusicChart: () => Promise<number>
   upsertNews: (item: NewsItem) => AppData
-  deleteNews: (id: string) => void
+  deleteNews: (id: string) => AppData
   setHomeHotNewsIds: (ids: string[]) => void
   addNewsComment: (
     newsId: string,
@@ -85,7 +85,7 @@ type StoreValue = {
   setAbout: (about: AboutPage) => void
   setSiteFlags: (flags: Partial<SiteFlags>) => void
   upsertVideo: (item: VideoItem) => AppData
-  deleteVideo: (id: string) => void
+  deleteVideo: (id: string) => AppData
   upsertRapper: (item: Rapper) => void
   deleteRapper: (id: string) => void
   upsertProduct: (item: Product) => void
@@ -174,8 +174,8 @@ function loadData(): AppData {
     return {
       ...seed,
       ...parsed,
-      news: parsed.news?.length ? parsed.news : seed.news,
-      videos: parsed.videos?.length ? parsed.videos : seed.videos,
+      news: Array.isArray(parsed.news) ? parsed.news : seed.news,
+      videos: Array.isArray(parsed.videos) ? parsed.videos : seed.videos,
       rappers: (() => {
         const base = parsed.rappers?.length ? parsed.rappers : seed.rappers
         const ids = new Set(base.map((r) => r.id))
@@ -255,14 +255,37 @@ function mergeList<T extends { id: string }>(
   return extras.length ? [...extras, ...base] : base
 }
 
-/** Apply cloud snapshot; keep any local-only rows not yet pushed. */
+/**
+ * When cloud has been published, trust the remote array (including empty =
+ * intentional deletes). Only keep local rows that are not seed demos and not
+ * already on remote (unpushed creates).
+ */
+function mergePublishedList<T extends { id: string }>(
+  remote: T[] | undefined,
+  local: T[],
+  seed: T[],
+  published: boolean,
+): T[] {
+  if (published && Array.isArray(remote)) {
+    const seedIds = new Set(seed.map((item) => item.id))
+    const remoteIds = new Set(remote.map((item) => item.id))
+    const unpushed = local.filter(
+      (item) => !remoteIds.has(item.id) && !seedIds.has(item.id),
+    )
+    return unpushed.length ? [...unpushed, ...remote] : remote
+  }
+  return mergeList(remote, local, seed)
+}
+
+/** Apply cloud snapshot; respect deletes once cloud has lastCloudSync. */
 function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
   const seed = createSeed()
+  const published = Boolean(remote.lastCloudSync)
   return {
     ...seed,
     ...remote,
-    news: mergeList(remote.news, local.news, seed.news),
-    videos: mergeList(remote.videos, local.videos, seed.videos),
+    news: mergePublishedList(remote.news, local.news, seed.news, published),
+    videos: mergePublishedList(remote.videos, local.videos, seed.videos, published),
     rappers: (() => {
       const base = remote.rappers?.length ? remote.rappers : seed.rappers
       const ids = new Set(base.map((r) => r.id))
@@ -286,8 +309,18 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     podcasts: mergeList(remote.podcasts, local.podcasts, seed.podcasts),
     rankings: remote.rankings?.length ? remote.rankings : seed.rankings,
     chartSongs: remote.chartSongs?.length ? remote.chartSongs : seed.chartSongs,
-    dailyDrops: mergeList(remote.dailyDrops, local.dailyDrops, seed.dailyDrops),
-    homeStories: mergeList(remote.homeStories, local.homeStories, seed.homeStories),
+    dailyDrops: mergePublishedList(
+      remote.dailyDrops,
+      local.dailyDrops,
+      seed.dailyDrops,
+      published,
+    ),
+    homeStories: mergePublishedList(
+      remote.homeStories,
+      local.homeStories,
+      seed.homeStories,
+      published,
+    ),
     livestreams: mergeList(remote.livestreams, local.livestreams, seed.livestreams),
     wallPosts: mergeList(remote.wallPosts, local.wallPosts, seed.wallPosts),
     battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
@@ -296,12 +329,11 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     nbaFreeAgents: mergeList(remote.nbaFreeAgents, local.nbaFreeAgents, seed.nbaFreeAgents),
     nbaQuiz: remote.nbaQuiz?.length ? remote.nbaQuiz : seed.nbaQuiz,
     nbaSacfun: mergeList(remote.nbaSacfun, local.nbaSacfun, seed.nbaSacfun),
-    homeHotNewsIds:
-      Array.isArray(remote.homeHotNewsIds) && remote.homeHotNewsIds.length
-        ? remote.homeHotNewsIds.slice(0, 3)
-        : local.homeHotNewsIds?.length
-          ? local.homeHotNewsIds.slice(0, 3)
-          : seed.homeHotNewsIds,
+    homeHotNewsIds: Array.isArray(remote.homeHotNewsIds)
+      ? remote.homeHotNewsIds.slice(0, 3)
+      : local.homeHotNewsIds?.length
+        ? local.homeHotNewsIds.slice(0, 3)
+        : seed.homeHotNewsIds,
     about: remote.about?.name ? { ...seed.about, ...remote.about } : local.about || seed.about,
     siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || local.siteFlags || {}) },
     adminEmails: Array.from(
@@ -671,12 +703,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
       },
       deleteNews(id) {
-        patch((prev) => {
+        return patch((prev) => {
           const news = prev.news.filter((n) => n.id !== id)
           const remaining = (prev.homeHotNewsIds || []).filter((x) => x !== id)
           const fill = news.map((n) => n.id).filter((x) => !remaining.includes(x))
-          const homeHotNewsIds = [...remaining, ...fill].slice(0, 3)
-          return { ...prev, news, homeHotNewsIds }
+          return {
+            ...prev,
+            news,
+            homeHotNewsIds: [...remaining, ...fill].slice(0, 3),
+          }
         })
       },
       setHomeHotNewsIds(ids) {
@@ -749,7 +784,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
       },
       deleteVideo(id) {
-        patch((prev) => ({ ...prev, videos: prev.videos.filter((n) => n.id !== id) }))
+        return patch((prev) => ({ ...prev, videos: prev.videos.filter((n) => n.id !== id) }))
       },
       upsertRapper(item) {
         patch((prev) => {

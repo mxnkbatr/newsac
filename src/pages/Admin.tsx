@@ -716,8 +716,8 @@ export function AdminPage() {
               onDelete={(id) => {
                 const n = store.data.news.find((x) => x.id === id)
                 askDelete(n?.title || 'мэдээ', () => {
-                  store.deleteNews(id)
-                  notify('Устгагдлаа')
+                  const snapshot = store.deleteNews(id)
+                  void saveAndSync('Мэдээ устгагдлаа', snapshot)
                 })
               }}
             />
@@ -801,8 +801,8 @@ export function AdminPage() {
               onDelete={(id) => {
                 const n = store.data.videos.find((x) => x.id === id)
                 askDelete(n?.title || 'бичлэг', () => {
-                  store.deleteVideo(id)
-                  notify('Устгагдлаа')
+                  const snapshot = store.deleteVideo(id)
+                  void saveAndSync('Бичлэг устгагдлаа', snapshot)
                 })
               }}
             />
