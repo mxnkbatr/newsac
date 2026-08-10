@@ -385,4 +385,6 @@ export type AppData = {
   events: AnalyticsEvent[]
   lastYoutubeSync?: string
   lastCloudSync?: string
+  /** Soft-deleted CMS row ids — prevents cloud/seed from resurrecting deletes */
+  cmsTombstones?: string[]
 }

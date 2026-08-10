@@ -165,17 +165,52 @@ type StoreValue = {
 
 const StoreContext = createContext<StoreValue | null>(null)
 
+function mergeList<T extends { id: string }>(
+  remote: T[] | undefined,
+  local: T[],
+  seed: T[],
+): T[] {
+  const base = remote?.length ? remote : seed
+  const ids = new Set(base.map((item) => item.id))
+  const extras = local.filter((item) => !ids.has(item.id))
+  return extras.length ? [...extras, ...base] : base
+}
+
+function tombstoneSet(...lists: Array<string[] | undefined>) {
+  const set = new Set<string>()
+  for (const list of lists) {
+    for (const id of list || []) set.add(id)
+  }
+  return set
+}
+
+function rejectTombs<T extends { id: string }>(items: T[], tombs: Set<string>) {
+  if (!tombs.size) return items
+  return items.filter((item) => !tombs.has(item.id))
+}
+
+function addTombstones(prev: string[] | undefined, ids: string[]) {
+  return [...new Set([...(prev || []), ...ids])].slice(-400)
+}
+
 function loadData(): AppData {
   try {
     const raw = localStorage.getItem(DATA_KEY)
     if (!raw) return createSeed()
     const parsed = JSON.parse(raw) as AppData
     const seed = createSeed()
+    const tombs = tombstoneSet(parsed.cmsTombstones)
+    const news = rejectTombs(Array.isArray(parsed.news) ? parsed.news : seed.news, tombs)
+    const videos = rejectTombs(
+      Array.isArray(parsed.videos) ? parsed.videos : seed.videos,
+      tombs,
+    )
     return {
       ...seed,
       ...parsed,
-      news: Array.isArray(parsed.news) ? parsed.news : seed.news,
-      videos: Array.isArray(parsed.videos) ? parsed.videos : seed.videos,
+      cmsTombstones: [...tombs],
+      news,
+      videos,
       rappers: (() => {
         const base = parsed.rappers?.length ? parsed.rappers : seed.rappers
         const ids = new Set(base.map((r) => r.id))
@@ -222,10 +257,16 @@ function loadData(): AppData {
         : seed.nbaFreeAgents,
       nbaQuiz: parsed.nbaQuiz?.length ? parsed.nbaQuiz : seed.nbaQuiz,
       nbaSacfun: parsed.nbaSacfun?.length ? parsed.nbaSacfun : seed.nbaSacfun,
-      homeHotNewsIds:
-        Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
-          ? parsed.homeHotNewsIds.slice(0, 3)
-          : seed.homeHotNewsIds,
+      homeHotNewsIds: rejectTombs(
+        (
+          Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
+            ? parsed.homeHotNewsIds
+            : seed.homeHotNewsIds
+        ).map((id) => ({ id })),
+        tombs,
+      )
+        .map((x) => x.id)
+        .slice(0, 3),
       about: parsed.about?.name ? { ...seed.about, ...parsed.about } : seed.about,
       siteFlags: { ...seed.siteFlags, ...(parsed.siteFlags || {}) },
       adminEmails: Array.from(
@@ -244,48 +285,41 @@ function loadData(): AppData {
   }
 }
 
-function mergeList<T extends { id: string }>(
-  remote: T[] | undefined,
-  local: T[],
-  seed: T[],
-): T[] {
-  const base = remote?.length ? remote : seed
-  const ids = new Set(base.map((item) => item.id))
-  const extras = local.filter((item) => !ids.has(item.id))
-  return extras.length ? [...extras, ...base] : base
-}
-
 /**
  * When cloud has been published, trust the remote array (including empty =
- * intentional deletes). Only keep local rows that are not seed demos and not
- * already on remote (unpushed creates).
+ * intentional deletes). Keep local unpushed creates. Always drop tombstoned ids.
  */
 function mergePublishedList<T extends { id: string }>(
   remote: T[] | undefined,
   local: T[],
   seed: T[],
   published: boolean,
+  tombs: Set<string>,
 ): T[] {
   if (published && Array.isArray(remote)) {
     const seedIds = new Set(seed.map((item) => item.id))
     const remoteIds = new Set(remote.map((item) => item.id))
     const unpushed = local.filter(
-      (item) => !remoteIds.has(item.id) && !seedIds.has(item.id),
+      (item) => !remoteIds.has(item.id) && !seedIds.has(item.id) && !tombs.has(item.id),
     )
-    return unpushed.length ? [...unpushed, ...remote] : remote
+    const base = rejectTombs(remote, tombs)
+    return unpushed.length ? [...unpushed, ...base] : base
   }
-  return mergeList(remote, local, seed)
+  return rejectTombs(mergeList(remote, local, seed), tombs)
 }
 
 /** Apply cloud snapshot; respect deletes once cloud has lastCloudSync. */
 function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
   const seed = createSeed()
   const published = Boolean(remote.lastCloudSync)
+  const tombs = tombstoneSet(local.cmsTombstones, remote.cmsTombstones)
+  const cmsTombstones = [...tombs].slice(-400)
   return {
     ...seed,
     ...remote,
-    news: mergePublishedList(remote.news, local.news, seed.news, published),
-    videos: mergePublishedList(remote.videos, local.videos, seed.videos, published),
+    cmsTombstones,
+    news: mergePublishedList(remote.news, local.news, seed.news, published, tombs),
+    videos: mergePublishedList(remote.videos, local.videos, seed.videos, published, tombs),
     rappers: (() => {
       const base = remote.rappers?.length ? remote.rappers : seed.rappers
       const ids = new Set(base.map((r) => r.id))
@@ -314,12 +348,14 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
       local.dailyDrops,
       seed.dailyDrops,
       published,
+      tombs,
     ),
     homeStories: mergePublishedList(
       remote.homeStories,
       local.homeStories,
       seed.homeStories,
       published,
+      tombs,
     ),
     livestreams: mergeList(remote.livestreams, local.livestreams, seed.livestreams),
     wallPosts: mergeList(remote.wallPosts, local.wallPosts, seed.wallPosts),
@@ -329,11 +365,18 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     nbaFreeAgents: mergeList(remote.nbaFreeAgents, local.nbaFreeAgents, seed.nbaFreeAgents),
     nbaQuiz: remote.nbaQuiz?.length ? remote.nbaQuiz : seed.nbaQuiz,
     nbaSacfun: mergeList(remote.nbaSacfun, local.nbaSacfun, seed.nbaSacfun),
-    homeHotNewsIds: Array.isArray(remote.homeHotNewsIds)
-      ? remote.homeHotNewsIds.slice(0, 3)
-      : local.homeHotNewsIds?.length
-        ? local.homeHotNewsIds.slice(0, 3)
-        : seed.homeHotNewsIds,
+    homeHotNewsIds: rejectTombs(
+      (
+        Array.isArray(remote.homeHotNewsIds)
+          ? remote.homeHotNewsIds
+          : local.homeHotNewsIds?.length
+            ? local.homeHotNewsIds
+            : seed.homeHotNewsIds
+      ).map((id) => ({ id })),
+      tombs,
+    )
+      .map((x) => x.id)
+      .slice(0, 3),
     about: remote.about?.name ? { ...seed.about, ...remote.about } : local.about || seed.about,
     siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || local.siteFlags || {}) },
     adminEmails: Array.from(
@@ -368,6 +411,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem(ADMIN_KEY) === '1')
   const dataRef = useRef(data)
   dataRef.current = data
+  const dataEpoch = useRef(0)
 
   useEffect(() => {
     const sync = () => setIsAdmin(localStorage.getItem(ADMIN_KEY) === '1')
@@ -395,16 +439,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabaseConfigured) return
     let cancelled = false
+    const epochAtStart = dataEpoch.current
     ;(async () => {
       try {
         const remote = await pullAppSnapshot()
         if (cancelled || !remote || !Object.keys(remote).length) return
         const remoteHasCms =
           Boolean(remote.lastCloudSync) ||
-          (remote.news?.length || 0) > 0 ||
-          (remote.videos?.length || 0) > 0
+          Array.isArray(remote.news) ||
+          Array.isArray(remote.videos)
         if (!remoteHasCms) return
         setData((local) => {
+          // Local edits (delete/create) during pull — still merge, tombstones win
+          if (dataEpoch.current !== epochAtStart && (local.cmsTombstones?.length || 0) > 0) {
+            const next = applyRemoteSnapshot(remote, local)
+            dataRef.current = next
+            return next
+          }
           const next = applyRemoteSnapshot(remote, local)
           dataRef.current = next
           return next
@@ -420,6 +471,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const patch = useCallback((fn: (prev: AppData) => AppData) => {
     let next!: AppData
+    dataEpoch.current += 1
     setData((prev) => {
       next = fn(prev)
       dataRef.current = next
@@ -711,6 +763,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ...prev,
             news,
             homeHotNewsIds: [...remaining, ...fill].slice(0, 3),
+            cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
           }
         })
       },
@@ -784,7 +837,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
       },
       deleteVideo(id) {
-        return patch((prev) => ({ ...prev, videos: prev.videos.filter((n) => n.id !== id) }))
+        return patch((prev) => ({
+          ...prev,
+          videos: prev.videos.filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
       },
       upsertRapper(item) {
         patch((prev) => {

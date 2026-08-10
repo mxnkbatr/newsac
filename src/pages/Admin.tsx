@@ -142,8 +142,9 @@ export function AdminPage() {
   const [editor, setEditor] = useState<EditorState | null>(null)
   const [confirmDel, setConfirmDel] = useState<{
     label: string
-    onConfirm: () => void
+    onConfirm: () => void | Promise<void>
   } | null>(null)
+  const [deleteBusy, setDeleteBusy] = useState(false)
 
   const summary = useMemo(() => store.analyticsSummary(), [store.data])
   const hubStages = useMemo(() => buildHubStages(store.data), [store.data])
@@ -187,7 +188,7 @@ export function AdminPage() {
     subtitle?: string,
   ) => setEditor({ title, subtitle, fields, values, onSave })
 
-  const askDelete = (label: string, onConfirm: () => void) =>
+  const askDelete = (label: string, onConfirm: () => void | Promise<void>) =>
     setConfirmDel({ label, onConfirm })
 
   if (!store.isAdmin) {
@@ -715,9 +716,9 @@ export function AdminPage() {
               }}
               onDelete={(id) => {
                 const n = store.data.news.find((x) => x.id === id)
-                askDelete(n?.title || 'мэдээ', () => {
+                askDelete(n?.title || 'мэдээ', async () => {
                   const snapshot = store.deleteNews(id)
-                  void saveAndSync('Мэдээ устгагдлаа', snapshot)
+                  await saveAndSync('Мэдээ устгагдлаа', snapshot)
                 })
               }}
             />
@@ -800,9 +801,9 @@ export function AdminPage() {
               }}
               onDelete={(id) => {
                 const n = store.data.videos.find((x) => x.id === id)
-                askDelete(n?.title || 'бичлэг', () => {
+                askDelete(n?.title || 'бичлэг', async () => {
                   const snapshot = store.deleteVideo(id)
-                  void saveAndSync('Бичлэг устгагдлаа', snapshot)
+                  await saveAndSync('Бичлэг устгагдлаа', snapshot)
                 })
               }}
             />
@@ -2314,21 +2315,36 @@ export function AdminPage() {
         <Modal
           title="Устгах уу?"
           subtitle={`«${confirmDel.label}» — буцаах боломжгүй`}
-          onClose={() => setConfirmDel(null)}
+          onClose={() => {
+            if (!deleteBusy) setConfirmDel(null)
+          }}
         >
           <div className="admin-modal-actions">
-            <button type="button" className="btn btn-ghost" onClick={() => setConfirmDel(null)}>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={deleteBusy}
+              onClick={() => setConfirmDel(null)}
+            >
               Болих
             </button>
             <button
               type="button"
               className="btn btn-primary"
+              disabled={deleteBusy}
               onClick={() => {
-                confirmDel.onConfirm()
-                setConfirmDel(null)
+                setDeleteBusy(true)
+                void Promise.resolve(confirmDel.onConfirm())
+                  .catch(() => {
+                    /* saveAndSync already toasts */
+                  })
+                  .finally(() => {
+                    setDeleteBusy(false)
+                    setConfirmDel(null)
+                  })
               }}
             >
-              Устгах
+              {deleteBusy ? 'Устгаж байна…' : 'Устгах'}
             </button>
           </div>
         </Modal>

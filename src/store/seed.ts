@@ -596,5 +596,6 @@ export function createSeed(): AppData {
     events: [],
     lastYoutubeSync: undefined,
     lastCloudSync: undefined,
+    cmsTombstones: [],
   }
 }
