@@ -11,7 +11,13 @@ export function todayIso() {
 export const newsFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
   { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
-  { key: 'body', label: 'Бүрэн текст', type: 'textarea' },
+  {
+    key: 'body',
+    label: 'Бүрэн текст',
+    type: 'textarea',
+    required: true,
+    placeholder: 'Мэдээний бүтэн агуулга. Хоосон үлдээвэл дэлгэрэнгүй хуудас хоосон харагдана.',
+  },
   {
     key: 'region',
     label: 'Төрөл',
@@ -25,7 +31,13 @@ export const newsFields: FieldDef[] = [
   { key: 'category', label: 'Ангилал', half: true },
   { key: 'date', label: 'Огноо', half: true, placeholder: '2026.08.06' },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
-  { key: 'image', label: 'Зураг URL', type: 'url', half: true },
+  {
+    key: 'image',
+    label: 'Зураг',
+    type: 'image',
+    required: true,
+    placeholder: 'эсвэл зураг URL',
+  },
   { key: 'membersOnly', label: 'Members only', type: 'checkbox' },
 ]
 

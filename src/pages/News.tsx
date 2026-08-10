@@ -172,9 +172,16 @@ export function NewsDetailPage() {
           onLoad={() => track('news_click', item.id)}
         />
         <div className="detail-body">
-          {item.body.split('\n\n').map((para) => (
-            <p key={para.slice(0, 24)}>{para}</p>
-          ))}
+          {(item.body?.trim() || item.excerpt || '')
+            .split(/\n\n+/)
+            .map((para) => para.trim())
+            .filter(Boolean)
+            .map((para, i) => (
+              <p key={`${i}-${para.slice(0, 24)}`}>{para}</p>
+            ))}
+          {!item.body?.trim() && !item.excerpt?.trim() ? (
+            <p className="detail-empty">Энэ мэдээнд текст оруулаагүй байна.</p>
+          ) : null}
           <Link
             to="/news"
             className="section-link"

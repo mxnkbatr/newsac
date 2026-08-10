@@ -27,7 +27,7 @@ export type FieldDef = {
 export type ToastState = { text: string; error?: boolean } | null
 
 /** Phone gallery/camera → compressed data URL for story images */
-function fileToCompressedDataUrl(file: File, maxSide = 640, quality = 0.72): Promise<string> {
+function fileToCompressedDataUrl(file: File, maxSide = 1280, quality = 0.82): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('read failed'))

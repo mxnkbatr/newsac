@@ -121,6 +121,11 @@
   margin-bottom: 1.15rem;
 }
 
+.detail-empty {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
 .news-comments {
   margin-top: 2.5rem;
   padding-top: 1.75rem;

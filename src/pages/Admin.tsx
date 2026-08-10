@@ -116,7 +116,7 @@ type EditorState = {
   subtitle?: string
   fields: FieldDef[]
   values: Record<string, string | number | boolean>
-  onSave: (values: Record<string, string | number | boolean>) => void
+  onSave: (values: Record<string, string | number | boolean>) => boolean | void
 }
 
 export function AdminPage() {
@@ -168,11 +168,20 @@ export function AdminPage() {
 
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
+  const saveAndSync = async (okText: string) => {
+    try {
+      await store.pushCloud()
+      notify(`${okText} · Cloud руу илгээлээ`)
+    } catch {
+      notify(`${okText} · Cloud Push хийхээ мартуузай`, true)
+    }
+  }
+
   const openEditor = (
     title: string,
     fields: FieldDef[],
     values: Record<string, string | number | boolean>,
-    onSave: (values: Record<string, string | number | boolean>) => void,
+    onSave: (values: Record<string, string | number | boolean>) => boolean | void,
     subtitle?: string,
   ) => setEditor({ title, subtitle, fields, values, onSave })
 
@@ -601,7 +610,7 @@ export function AdminPage() {
               </div>
               <EntityList
               title="Мэдээ"
-              description="Дотоод / гадаад мэдээ · нэмэх, засах, устгах"
+              description="Зураг upload + бүрэн текст заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
               search={search}
               onSearch={setSearch}
               items={store.data.news
@@ -631,24 +640,34 @@ export function AdminPage() {
                     category: 'Мэдээ',
                     date: todayDot(),
                     readMin: 3,
-                    image: IMG.news,
+                    image: '',
                     membersOnly: false,
                   },
                   (v) => {
+                    const body = String(v.body || v.excerpt).trim()
+                    const image = String(v.image || '').trim()
+                    if (!body) {
+                      notify('Бүрэн текст оруулна уу', true)
+                      return false
+                    }
+                    if (!image) {
+                      notify('Зураг сонгох эсвэл URL оруулна уу', true)
+                      return false
+                    }
                     const item: NewsItem = {
                       id: crypto.randomUUID(),
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
-                      body: String(v.body || v.excerpt),
+                      body,
                       region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       category: String(v.category || 'Мэдээ'),
                       date: String(v.date || todayDot()),
                       readMin: Number(v.readMin) || 3,
-                      image: String(v.image),
+                      image,
                       membersOnly: Boolean(v.membersOnly),
                     }
                     store.upsertNews(item)
-                    notify('Мэдээ нэмэгдлээ')
+                    void saveAndSync('Мэдээ нэмэгдлээ')
                   },
                 )
               }
@@ -665,19 +684,29 @@ export function AdminPage() {
                     membersOnly: Boolean(n.membersOnly),
                   },
                   (v) => {
+                    const body = String(v.body || v.excerpt || n.body || n.excerpt).trim()
+                    const image = String(v.image || n.image || '').trim()
+                    if (!body) {
+                      notify('Бүрэн текст оруулна уу', true)
+                      return false
+                    }
+                    if (!image) {
+                      notify('Зураг сонгох эсвэл URL оруулна уу', true)
+                      return false
+                    }
                     store.upsertNews({
                       ...n,
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
-                      body: String(v.body),
+                      body,
                       region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       category: String(v.category),
                       date: String(v.date),
                       readMin: Number(v.readMin) || 3,
-                      image: String(v.image),
+                      image,
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    notify('Мэдээ хадгалагдлаа')
+                    void saveAndSync('Мэдээ хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -696,7 +725,7 @@ export function AdminPage() {
           {tab === 'videos' && (
             <EntityList
               title="Бичлэг"
-              description="YouTube видео удирдлага"
+              description="Зөв YouTube линк заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
               search={search}
               onSearch={setSearch}
               items={store.data.videos.map((n) => ({
@@ -718,7 +747,11 @@ export function AdminPage() {
                     membersOnly: false,
                   },
                   (v) => {
-                    const youtubeId = ytFrom(v.youtubeId)
+                    const youtubeId = parseYouTubeId(String(v.youtubeId || ''))
+                    if (!youtubeId) {
+                      notify('Зөв YouTube линк эсвэл ID оруулна уу', true)
+                      return false
+                    }
                     store.upsertVideo({
                       id: crypto.randomUUID(),
                       title: String(v.title).trim(),
@@ -729,7 +762,7 @@ export function AdminPage() {
                       published: String(v.published || 'саяхан'),
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    notify('Бичлэг нэмэгдлээ')
+                    void saveAndSync('Бичлэг нэмэгдлээ')
                   },
                 )
               }
@@ -741,17 +774,24 @@ export function AdminPage() {
                   videoFields,
                   { ...n, membersOnly: Boolean(n.membersOnly) },
                   (v) => {
+                    const youtubeId =
+                      parseYouTubeId(String(v.youtubeId || '')) ||
+                      parseYouTubeId(n.youtubeId)
+                    if (!youtubeId) {
+                      notify('Зөв YouTube линк эсвэл ID оруулна уу', true)
+                      return false
+                    }
                     store.upsertVideo({
                       ...n,
                       title: String(v.title).trim(),
-                      youtubeId: ytFrom(v.youtubeId),
+                      youtubeId,
                       description: String(v.description),
                       views: String(v.views),
                       duration: String(v.duration),
                       published: String(v.published),
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    notify('Бичлэг хадгалагдлаа')
+                    void saveAndSync('Бичлэг хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -2262,7 +2302,7 @@ export function AdminPage() {
           initial={editor.values}
           onClose={() => setEditor(null)}
           onSave={(values) => {
-            editor.onSave(values)
+            if (editor.onSave(values) === false) return
             setEditor(null)
           }}
         />
