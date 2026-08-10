@@ -47,7 +47,6 @@ import {
 import { buildHubStages, type AdminTab } from './adminHub'
 import { AdminNbaPanel, type NbaSub } from './AdminNbaPanel'
 import { getCloudHealth } from '../lib/cloudHealth'
-import { supabaseConfigured } from '../lib/supabase'
 
 type Tab = AdminTab
 
@@ -545,22 +544,23 @@ export function AdminPage() {
           {tab === 'news' && (
             <>
               <div
-                className={`staff-box${supabaseConfigured ? '' : ' is-warn'}`}
-                style={{ marginBottom: '1rem' }}
+                className={`admin-sync-bar${
+                  store.data.lastCloudSync ? ' is-ok' : ' is-warn'
+                }`}
               >
-                <h3>Бусад төхөөрөмжид харагдах уу?</h3>
-                <p>
-                  Мэдээ зөвхөн энэ утас/компьютерт биш, бүгдэд гаргахын тулд{' '}
-                  <strong>Gmail-ээр нэвтэрч</strong> хадгална. Нууц үг/кодоор нэвтэрсэн бол cloud
-                  руу илгээгдэхгүй.
-                </p>
-                <p>
-                  Сүүлийн cloud sync:{' '}
-                  {store.data.lastCloudSync
-                    ? new Date(store.data.lastCloudSync).toLocaleString('mn-MN')
-                    : 'байхгүй — Push хийгээгүй'}
-                </p>
-                <div className="admin-quick" style={{ marginTop: '0.75rem' }}>
+                <div className="admin-sync-bar-text">
+                  <strong>
+                    {store.data.lastCloudSync ? 'Cloud sync OK' : 'Cloud sync хэрэгтэй'}
+                  </strong>
+                  <span>
+                    {store.data.lastCloudSync
+                      ? new Date(store.data.lastCloudSync).toLocaleString('mn-MN')
+                      : user
+                        ? 'Бусад төхөөрөмжид гаргахын тулд Push хийнэ'
+                        : 'Gmail-ээр нэвтэрээд Push хийнэ'}
+                  </span>
+                </div>
+                <div className="admin-sync-bar-actions">
                   {!user ? (
                     <button
                       type="button"
@@ -571,11 +571,11 @@ export function AdminPage() {
                         void signInWithGoogle().then((e) => {
                           setGoogleBusy(false)
                           if (e) notify(e, true)
-                          else notify('Gmail-ээр нэвтэрлээ · мэдээг дахин хадгална уу')
+                          else notify('Gmail-ээр нэвтэрлээ')
                         })
                       }}
                     >
-                      Gmail-ээр нэвтрэх
+                      Gmail
                     </button>
                   ) : (
                     <button
@@ -586,7 +586,7 @@ export function AdminPage() {
                         setCloudBusy(true)
                         try {
                           await store.pushCloud()
-                          notify('Cloud push амжилттай — бусад төхөөрөмж refresh хийнэ')
+                          notify('Cloud-д илгээлээ')
                         } catch (e) {
                           notify(e instanceof Error ? e.message : 'Push амжилтгүй', true)
                         } finally {
@@ -594,12 +594,9 @@ export function AdminPage() {
                         }
                       }}
                     >
-                      Одоо Push → Cloud
+                      {cloudBusy ? '…' : 'Push'}
                     </button>
                   )}
-                  <button type="button" className="btn btn-ghost" onClick={() => setTab('cloud')}>
-                    Cloud tab
-                  </button>
                 </div>
               </div>
               <div className="admin-seg" role="tablist" aria-label="Мэдээний төрөл">
@@ -631,12 +628,10 @@ export function AdminPage() {
                   </button>
                 ))}
               </div>
-              <div className="staff-box" style={{ marginBottom: '1.25rem' }}>
-                <h3>Нүүр · халуун 3 мэдээ</h3>
-                <p>
-                  Home дээрх «Монгол entertainment · халуун 3» хэсгийн 3 мэдээг эндээс солино.
-                  1-р байр = том lead кард.
-                </p>
+              <div className="admin-hot-panel">
+                <div className="admin-hot-panel-head">
+                  <strong>Нүүр · халуун 3</strong>
+                </div>
                 <div className="admin-hot-slots">
                   {[0, 1, 2].map((slot) => {
                     const current =
@@ -645,10 +640,7 @@ export function AdminPage() {
                       ''
                     return (
                       <label key={slot} className="admin-field">
-                        <span>
-                          {slot + 1}-р мэдээ
-                          {slot === 0 ? ' (lead)' : ''}
-                        </span>
+                        <span>{slot === 0 ? 'Lead' : `${slot + 1}`}</span>
                         <select
                           value={current}
                           onChange={(e) => {
@@ -681,7 +673,7 @@ export function AdminPage() {
               </div>
               <EntityList
               title="Мэдээ"
-              description="Зураг upload + бүрэн текст заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
+              description="Дотоод / гадаад · зураг + бүрэн текст"
               search={search}
               onSearch={setSearch}
               items={store.data.news
@@ -796,7 +788,7 @@ export function AdminPage() {
           {tab === 'videos' && (
             <EntityList
               title="Бичлэг"
-              description="Зөв YouTube линк заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
+              description="YouTube линк / ID"
               search={search}
               onSearch={setSearch}
               items={store.data.videos.map((n) => ({
