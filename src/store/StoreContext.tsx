@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -47,6 +48,7 @@ import {
   fetchMongolianYouTubeChart,
 } from '../lib/youtubeChart'
 import { pullAppSnapshot, pushAppSnapshot } from '../lib/cloudSync'
+import { supabaseConfigured } from '../lib/supabase'
 
 const DATA_KEY = 'newsac_app_data_v6'
 const ADMIN_KEY = 'newsac_admin_session'
@@ -242,6 +244,82 @@ function loadData(): AppData {
   }
 }
 
+function mergeList<T extends { id: string }>(
+  remote: T[] | undefined,
+  local: T[],
+  seed: T[],
+): T[] {
+  const base = remote?.length ? remote : seed
+  const ids = new Set(base.map((item) => item.id))
+  const extras = local.filter((item) => !ids.has(item.id))
+  return extras.length ? [...extras, ...base] : base
+}
+
+/** Apply cloud snapshot; keep any local-only rows not yet pushed. */
+function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
+  const seed = createSeed()
+  return {
+    ...seed,
+    ...remote,
+    news: mergeList(remote.news, local.news, seed.news),
+    videos: mergeList(remote.videos, local.videos, seed.videos),
+    rappers: (() => {
+      const base = remote.rappers?.length ? remote.rappers : seed.rappers
+      const ids = new Set(base.map((r) => r.id))
+      const missing = [
+        ...seed.rappers.filter((r) => !ids.has(r.id)),
+        ...local.rappers.filter((r) => !ids.has(r.id)),
+      ]
+      const seen = new Set(ids)
+      const extras = missing.filter((r) => {
+        if (seen.has(r.id)) return false
+        seen.add(r.id)
+        return true
+      })
+      return [...base, ...extras]
+    })(),
+    products: mergeList(remote.products, local.products, seed.products),
+    sponsors: mergeList(remote.sponsors, local.sponsors, seed.sponsors),
+    polls: mergeList(remote.polls, local.polls, seed.polls),
+    shorts: mergeList(remote.shorts, local.shorts, seed.shorts),
+    shows: mergeList(remote.shows, local.shows, seed.shows),
+    podcasts: mergeList(remote.podcasts, local.podcasts, seed.podcasts),
+    rankings: remote.rankings?.length ? remote.rankings : seed.rankings,
+    chartSongs: remote.chartSongs?.length ? remote.chartSongs : seed.chartSongs,
+    dailyDrops: mergeList(remote.dailyDrops, local.dailyDrops, seed.dailyDrops),
+    homeStories: mergeList(remote.homeStories, local.homeStories, seed.homeStories),
+    livestreams: mergeList(remote.livestreams, local.livestreams, seed.livestreams),
+    wallPosts: mergeList(remote.wallPosts, local.wallPosts, seed.wallPosts),
+    battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
+    nbaUpdates: mergeList(remote.nbaUpdates, local.nbaUpdates, seed.nbaUpdates),
+    nbaHotNews: mergeList(remote.nbaHotNews, local.nbaHotNews, seed.nbaHotNews),
+    nbaFreeAgents: mergeList(remote.nbaFreeAgents, local.nbaFreeAgents, seed.nbaFreeAgents),
+    nbaQuiz: remote.nbaQuiz?.length ? remote.nbaQuiz : seed.nbaQuiz,
+    nbaSacfun: mergeList(remote.nbaSacfun, local.nbaSacfun, seed.nbaSacfun),
+    homeHotNewsIds:
+      Array.isArray(remote.homeHotNewsIds) && remote.homeHotNewsIds.length
+        ? remote.homeHotNewsIds.slice(0, 3)
+        : local.homeHotNewsIds?.length
+          ? local.homeHotNewsIds.slice(0, 3)
+          : seed.homeHotNewsIds,
+    about: remote.about?.name ? { ...seed.about, ...remote.about } : local.about || seed.about,
+    siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || local.siteFlags || {}) },
+    adminEmails: Array.from(
+      new Set([
+        ...(remote.adminEmails || []).map((e) => e.toLowerCase()),
+        ...(local.adminEmails || []).map((e) => e.toLowerCase()),
+        ...seed.adminEmails.map((e) => e.toLowerCase()),
+        ...envAdminEmails(),
+      ]),
+    ),
+    orders: remote.orders || local.orders || [],
+    ticketOrders: remote.ticketOrders || local.ticketOrders || [],
+    subscribers: remote.subscribers || local.subscribers || [],
+    events: remote.events || local.events || [],
+    lastCloudSync: remote.lastCloudSync || local.lastCloudSync,
+  }
+}
+
 function uid() {
   return crypto.randomUUID()
 }
@@ -256,6 +334,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   })
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem(ADMIN_KEY) === '1')
+  const dataRef = useRef(data)
+  dataRef.current = data
 
   useEffect(() => {
     const sync = () => setIsAdmin(localStorage.getItem(ADMIN_KEY) === '1')
@@ -268,15 +348,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(DATA_KEY, JSON.stringify(data))
+    try {
+      localStorage.setItem(DATA_KEY, JSON.stringify(data))
+    } catch {
+      console.warn('[Newsac] localStorage full — зураг хэт том байж магад. Cloud Push хийнэ үү.')
+    }
   }, [data])
 
   useEffect(() => {
     localStorage.setItem('newsac_cart', JSON.stringify(cart))
   }, [cart])
 
+  // Public site: load shared CMS from Supabase so admin-added news/videos appear for everyone
+  useEffect(() => {
+    if (!supabaseConfigured) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const remote = await pullAppSnapshot()
+        if (cancelled || !remote || !Object.keys(remote).length) return
+        const remoteHasCms =
+          Boolean(remote.lastCloudSync) ||
+          (remote.news?.length || 0) > 0 ||
+          (remote.videos?.length || 0) > 0
+        if (!remoteHasCms) return
+        setData((local) => {
+          const next = applyRemoteSnapshot(remote, local)
+          dataRef.current = next
+          return next
+        })
+      } catch {
+        /* offline / RLS / missing table */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const patch = useCallback((fn: (prev: AppData) => AppData) => {
-    setData((prev) => fn(prev))
+    setData((prev) => {
+      const next = fn(prev)
+      dataRef.current = next
+      return next
+    })
   }, [])
 
   const track = useCallback(
@@ -1128,58 +1243,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }))
       },
       async pushCloud() {
-        await pushAppSnapshot(data)
+        await pushAppSnapshot(dataRef.current)
         patch((prev) => ({ ...prev, lastCloudSync: new Date().toISOString() }))
       },
       async pullCloud() {
         const remote = await pullAppSnapshot()
         if (!remote || !Object.keys(remote).length) return 'empty'
-        const seed = createSeed()
-        setData({
-          ...seed,
-          ...remote,
-          news: remote.news?.length ? remote.news : seed.news,
-          videos: remote.videos?.length ? remote.videos : seed.videos,
-          rappers: (() => {
-            const base = remote.rappers?.length ? remote.rappers : seed.rappers
-            const ids = new Set(base.map((r) => r.id))
-            const missing = seed.rappers.filter((r) => !ids.has(r.id))
-            return [...base, ...missing]
-          })(),
-          products: remote.products?.length ? remote.products : seed.products,
-          sponsors: remote.sponsors?.length ? remote.sponsors : seed.sponsors,
-          polls: remote.polls?.length ? remote.polls : seed.polls,
-          shorts: remote.shorts?.length ? remote.shorts : seed.shorts,
-          shows: remote.shows?.length ? remote.shows : seed.shows,
-          podcasts: remote.podcasts?.length ? remote.podcasts : seed.podcasts,
-          rankings: remote.rankings?.length ? remote.rankings : seed.rankings,
-          chartSongs: remote.chartSongs?.length ? remote.chartSongs : seed.chartSongs,
-          dailyDrops: remote.dailyDrops?.length ? remote.dailyDrops : seed.dailyDrops,
-          homeStories: remote.homeStories?.length ? remote.homeStories : seed.homeStories,
-          livestreams: remote.livestreams?.length ? remote.livestreams : seed.livestreams,
-          wallPosts: remote.wallPosts?.length ? remote.wallPosts : seed.wallPosts,
-          battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
-          nbaUpdates: remote.nbaUpdates?.length ? remote.nbaUpdates : seed.nbaUpdates,
-          nbaHotNews: remote.nbaHotNews?.length ? remote.nbaHotNews : seed.nbaHotNews,
-          nbaFreeAgents: remote.nbaFreeAgents?.length
-            ? remote.nbaFreeAgents
-            : seed.nbaFreeAgents,
-          nbaQuiz: remote.nbaQuiz?.length ? remote.nbaQuiz : seed.nbaQuiz,
-          nbaSacfun: remote.nbaSacfun?.length ? remote.nbaSacfun : seed.nbaSacfun,
-          about: remote.about?.name ? { ...seed.about, ...remote.about } : seed.about,
-          siteFlags: { ...seed.siteFlags, ...(remote.siteFlags || {}) },
-          adminEmails: Array.from(
-            new Set([
-              ...(remote.adminEmails || []).map((e) => e.toLowerCase()),
-              ...seed.adminEmails.map((e) => e.toLowerCase()),
-              ...envAdminEmails(),
-            ]),
-          ),
-          orders: remote.orders || [],
-          ticketOrders: remote.ticketOrders || [],
-          subscribers: remote.subscribers || [],
-          events: remote.events || [],
-          lastCloudSync: new Date().toISOString(),
+        setData((local) => {
+          const next = {
+            ...applyRemoteSnapshot(remote, local),
+            lastCloudSync: new Date().toISOString(),
+          }
+          dataRef.current = next
+          return next
         })
         return 'ok'
       },

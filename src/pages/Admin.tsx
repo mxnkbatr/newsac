@@ -170,10 +170,15 @@ export function AdminPage() {
 
   const saveAndSync = async (okText: string) => {
     try {
+      // Ensure React state/ref flush after upsert before reading payload
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 0)
+      })
       await store.pushCloud()
-      notify(`${okText} · Cloud руу илгээлээ`)
-    } catch {
-      notify(`${okText} · Cloud Push хийхээ мартуузай`, true)
+      notify(`${okText} · Supabase-д хадгаллаа`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Cloud Push амжилтгүй'
+      notify(`${okText} · ${msg}`, true)
     }
   }
 
