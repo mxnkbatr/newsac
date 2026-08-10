@@ -17,19 +17,26 @@ export async function pullAppSnapshot(): Promise<AppData | null> {
   return data.data as AppData
 }
 
-export async function pushAppSnapshot(payload: AppData): Promise<void> {
+export async function pushAppSnapshot(payload: AppData): Promise<AppData> {
   if (!supabaseConfigured) throw new Error('Supabase тохируулаагүй байна.')
 
   const { data: sessionData } = await supabase.auth.getSession()
   if (!sessionData.session) {
-    throw new Error('Cloud push хийхийн тулд Gmail-ээр нэвтэрнэ үү.')
+    throw new Error(
+      'Бусад төхөөрөмжид гаргахын тулд Gmail-ээр нэвтэрнэ үү (нууц үг/код хангалтгүй).',
+    )
+  }
+
+  const published: AppData = {
+    ...payload,
+    lastCloudSync: new Date().toISOString(),
   }
 
   const { error } = await supabase.from('app_snapshots').upsert(
     {
       id: SNAPSHOT_ID,
-      data: payload,
-      updated_at: new Date().toISOString(),
+      data: published,
+      updated_at: published.lastCloudSync,
     },
     { onConflict: 'id' },
   )
@@ -42,4 +49,18 @@ export async function pushAppSnapshot(payload: AppData): Promise<void> {
     }
     throw new Error(error.message)
   }
+
+  const { data: check, error: checkErr } = await supabase
+    .from('app_snapshots')
+    .select('data')
+    .eq('id', SNAPSHOT_ID)
+    .maybeSingle()
+
+  if (checkErr) throw new Error(`Push OK боловч шалгалт амжилтгүй: ${checkErr.message}`)
+  const remote = check?.data as AppData | undefined
+  if (!remote?.lastCloudSync) {
+    throw new Error('Cloud-д хадгалсан боловч уншиж чадсангүй. RLS / schema шалгана уу.')
+  }
+
+  return published
 }

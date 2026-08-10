@@ -501,6 +501,11 @@
   padding: 1.25rem;
 }
 
+.staff-box.is-warn {
+  border-color: rgba(227, 27, 35, 0.45);
+  background: rgba(227, 27, 35, 0.08);
+}
+
 .sync-box p,
 .staff-box p {
   color: var(--ink-dim);

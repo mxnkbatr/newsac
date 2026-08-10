@@ -46,7 +46,8 @@ import {
 } from './adminUi'
 import { buildHubStages, type AdminTab } from './adminHub'
 import { AdminNbaPanel, type NbaSub } from './AdminNbaPanel'
-import './Admin.css'
+import { getCloudHealth } from '../lib/cloudHealth'
+import { supabaseConfigured } from '../lib/supabase'
 
 type Tab = AdminTab
 
@@ -170,12 +171,22 @@ export function AdminPage() {
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
   const saveAndSync = async (okText: string, snapshot?: AppData) => {
+    const health = await getCloudHealth()
+    if (!health.ok) {
+      notify(
+        `${okText} · ЗӨВХӨН энэ төхөөрөмжид. ${'reason' in health ? health.reason : ''}`,
+        true,
+      )
+      setTab('cloud')
+      return
+    }
     try {
       await store.pushCloud(snapshot)
-      notify(`${okText} · Supabase-д хадгаллаа`)
+      notify(`${okText} · Бүх төхөөрөмжид Supabase-ээр гарлаа`)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Cloud Push амжилтгүй'
-      notify(`${okText} (локал) · ${msg}`, true)
+      notify(`${okText} · ЗӨВХӨН энэ төхөөрөмжид. ${msg}`, true)
+      setTab('cloud')
     }
   }
 
@@ -533,6 +544,64 @@ export function AdminPage() {
 
           {tab === 'news' && (
             <>
+              <div
+                className={`staff-box${supabaseConfigured ? '' : ' is-warn'}`}
+                style={{ marginBottom: '1rem' }}
+              >
+                <h3>Бусад төхөөрөмжид харагдах уу?</h3>
+                <p>
+                  Мэдээ зөвхөн энэ утас/компьютерт биш, бүгдэд гаргахын тулд{' '}
+                  <strong>Gmail-ээр нэвтэрч</strong> хадгална. Нууц үг/кодоор нэвтэрсэн бол cloud
+                  руу илгээгдэхгүй.
+                </p>
+                <p>
+                  Сүүлийн cloud sync:{' '}
+                  {store.data.lastCloudSync
+                    ? new Date(store.data.lastCloudSync).toLocaleString('mn-MN')
+                    : 'байхгүй — Push хийгээгүй'}
+                </p>
+                <div className="admin-quick" style={{ marginTop: '0.75rem' }}>
+                  {!user ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={googleBusy || authLoading}
+                      onClick={() => {
+                        setGoogleBusy(true)
+                        void signInWithGoogle().then((e) => {
+                          setGoogleBusy(false)
+                          if (e) notify(e, true)
+                          else notify('Gmail-ээр нэвтэрлээ · мэдээг дахин хадгална уу')
+                        })
+                      }}
+                    >
+                      Gmail-ээр нэвтрэх
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={cloudBusy}
+                      onClick={async () => {
+                        setCloudBusy(true)
+                        try {
+                          await store.pushCloud()
+                          notify('Cloud push амжилттай — бусад төхөөрөмж refresh хийнэ')
+                        } catch (e) {
+                          notify(e instanceof Error ? e.message : 'Push амжилтгүй', true)
+                        } finally {
+                          setCloudBusy(false)
+                        }
+                      }}
+                    >
+                      Одоо Push → Cloud
+                    </button>
+                  )}
+                  <button type="button" className="btn btn-ghost" onClick={() => setTab('cloud')}>
+                    Cloud tab
+                  </button>
+                </div>
+              </div>
               <div className="admin-seg" role="tablist" aria-label="Мэдээний төрөл">
                 {(
                   [
