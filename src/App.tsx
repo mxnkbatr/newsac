@@ -10,6 +10,7 @@ import { SplashScreen } from './components/SplashScreen'
 // Temporary: onboarding hidden — restore <Onboarding /> when ready
 // import { Onboarding } from './components/Onboarding'
 import { AdminSessionSync } from './components/AdminSessionSync'
+import { Analytics } from './components/Analytics'
 import { Home } from './pages/Home'
 import { NewsPage, NewsDetailPage } from './pages/News'
 import { VideosPage } from './pages/Videos'
@@ -59,6 +60,7 @@ export default function App() {
         <PlayerProvider>
           <ChartPlayerProvider>
           <BrowserRouter>
+            <Analytics />
             <SplashScreen />
             <AdminSessionSync />
             <EffectsLayer />

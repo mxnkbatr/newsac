@@ -13,12 +13,11 @@ import '../mobile-app.css'
 
 const dock = [
   {
-    to: '/',
-    label: 'Нүүр',
-    end: true,
+    to: '/news',
+    label: 'Мэдээ',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" />
+        <path d="M4 5h16v14H4V5Zm3 3h10v2H7V8Zm0 4h7v2H7v-2Z" />
       </svg>
     ),
   },
@@ -32,29 +31,29 @@ const dock = [
     ),
   },
   {
-    to: '/tickets',
-    label: 'Тасалбар',
+    to: '/nba',
+    label: 'NBA',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 8h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4V8Zm4 2v6h2v-6H7Zm4 0v6h2v-6h-2Z" />
-      </svg>
-    ),
-  },
-  {
-    to: '/shop',
-    label: 'Дэлгүүр',
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 3H8l1-3Z" />
+        <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 2.2c1.7 1.4 2.8 3.9 2.9 6.8H9.1c.1-2.9 1.2-5.4 2.9-6.8Zm-4.7.9C5.7 7.6 4.5 9.7 4.3 12h3c.1-2.2.8-4.2 1.9-5.9Zm9.4 0c1.1 1.7 1.8 3.7 1.9 5.9h3c-.2-2.3-1.4-4.4-3-5.9ZM7.3 14h-3c.3 2.3 1.5 4.3 3.1 5.7C6.3 18 5.6 16.1 5.4 14h1.9Zm1.8 0h5.8c-.1 2.6-1.1 4.9-2.7 6.3-1.6-1.4-2.6-3.7-2.7-6.3h-.4Zm7.6 0h1.9c-.2 2.1-.9 4-1.9 5.7 1.6-1.4 2.8-3.4 3.1-5.7h-3.1Z" />
       </svg>
     ),
   },
   {
     to: '/live',
-    label: 'Шууд',
+    label: 'Live',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 5a7 7 0 0 1 7 7v1h2v4h-2.1A7 7 0 0 1 5.1 17H3v-4h2v-1a7 7 0 0 1 7-7Zm0 2a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5Zm-1 9.5a1.5 1.5 0 1 0 3 0H11Z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/shop',
+    label: 'Shop',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 3H8l1-3Z" />
       </svg>
     ),
   },
@@ -96,7 +95,6 @@ export function Layout() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.end}
             className={({ isActive }) => (isActive ? 'dock-item active' : 'dock-item')}
             style={{ ['--i' as string]: i }}
             onClick={buzz}
