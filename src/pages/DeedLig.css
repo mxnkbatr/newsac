@@ -122,3 +122,124 @@
     padding: 3.25rem 0 3.4rem;
   }
 }
+
+.deed-count {
+  color: var(--ink-dim);
+  font-size: 0.82rem;
+}
+
+.deed-empty {
+  margin: 0;
+  padding: 1.2rem 1.25rem;
+  border: 1px dashed var(--line);
+  color: var(--ink-dim);
+}
+
+.deed-news {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.deed-news-card {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.deed-news-card:hover {
+  border-color: rgba(230, 122, 34, 0.55);
+}
+
+.deed-news-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.deed-news-card span {
+  color: var(--deed-orange);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.deed-news-card h3 {
+  margin: 0.3rem 0 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.deed-news-card p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.deed-back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+}
+
+.deed-article {
+  padding: 1.5rem 0 3rem;
+}
+
+.deed-article-inner {
+  max-width: 720px;
+}
+
+.deed-article-cover {
+  margin-bottom: 1rem;
+}
+
+.deed-article-cover img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.deed-article-inner > span {
+  color: var(--deed-orange);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.deed-article h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 1.1;
+  margin: 0.45rem 0 0.7rem;
+}
+
+.deed-article-lead {
+  color: var(--ink-dim);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.deed-article-body p {
+  color: var(--ink);
+  line-height: 1.65;
+  margin: 0 0 1rem;
+}
+
+@media (min-width: 720px) {
+  .deed-news-card {
+    grid-template-columns: 148px 1fr;
+  }
+
+  .deed-news-card h3 {
+    font-size: 1.18rem;
+  }
+}

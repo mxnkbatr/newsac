@@ -575,6 +575,7 @@ export function createSeed(): AppData {
     nbaSacfun: [...sacfunBits],
     nbaSacfunVideos: [],
     nbaMamba: { ...mambaMentality, story: [...mambaMentality.story], points: mambaMentality.points.map((p) => ({ ...p })) },
+    deedLigNews: [],
     homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
     about: {
       name: 'Цэндийн Батбаатар',

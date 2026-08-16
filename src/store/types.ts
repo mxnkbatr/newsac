@@ -395,6 +395,8 @@ export type AppData = {
   nbaSacfun: NbaSacfunBit[]
   nbaSacfunVideos: NbaSacfunVideo[]
   nbaMamba: NbaMamba
+  /** Монголын сагсан бөмбөгийн Дээд лиг — ерөнхий мэдээнээс тусдаа */
+  deedLigNews: NbaStory[]
   lastSacfunYoutubeSync?: string
   /** Нүүр дээрх халуун 3 мэдээний ID (дараалал чухал) */
   homeHotNewsIds: string[]

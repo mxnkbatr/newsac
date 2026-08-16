@@ -172,6 +172,8 @@ export function Home() {
   const videos = data.videos
   const rappers = data.rappers
   const rankings = data.rankings
+  const deedLigNews = data.deedLigNews || []
+  const deedLead = deedLigNews[0]
 
   const hotNews = (() => {
     const byId = new Map(news.map((n) => [n.id, n]))
@@ -312,14 +314,25 @@ export function Home() {
               <h2 className="section-title">Дээд Лиг</h2>
             </div>
             <Link to="/deed-lig" className="section-link">
-              Нээх →
+              Бүгдийг үзэх →
             </Link>
           </div>
-          <Link to="/deed-lig" className="home-deed reveal reveal-delay-1">
+          <Link
+            to={deedLead ? `/deed-lig/${deedLead.id}` : '/deed-lig'}
+            className="home-deed reveal reveal-delay-1"
+          >
             <div>
-              <span>Монголын сагсан бөмбөг</span>
-              <strong>Хасын Хүлэгүүд · SG Эйпс · BCH Найтс · Сэлэнгэ Бодонс</strong>
-              <p>Улирлын мэдээ, клуб, тоглолт — тун удахгүй энд.</p>
+              <span>Монголын сагсан бөмбөг · тусдаа мэдээ</span>
+              <strong>
+                {deedLead
+                  ? deedLead.title
+                  : 'Хасын Хүлэгүүд · SG Эйпс · BCH Найтс · Сэлэнгэ Бодонс'}
+              </strong>
+              <p>
+                {deedLead
+                  ? deedLead.blurb
+                  : 'Дээд Лигийн мэдээлэл ерөнхий мэдээнээс тусдаа энд гарна.'}
+              </p>
             </div>
             <b>Дээд Лиг</b>
           </Link>

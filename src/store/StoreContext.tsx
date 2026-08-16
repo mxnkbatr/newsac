@@ -127,6 +127,8 @@ type StoreValue = {
   voteBattle: (battleId: string, sideId: string) => string | null
   upsertNbaUpdate: (item: NbaStory) => AppData
   deleteNbaUpdate: (id: string) => AppData
+  upsertDeedLigNews: (item: NbaStory) => AppData
+  deleteDeedLigNews: (id: string) => AppData
   upsertNbaHot: (item: NbaHot) => void
   deleteNbaHot: (id: string) => void
   upsertNbaFreeAgent: (item: NbaFreeAgent) => AppData
@@ -332,6 +334,10 @@ function loadData(): AppData {
       nbaSacfunVideos: Array.isArray(parsed.nbaSacfunVideos) ? parsed.nbaSacfunVideos : [],
       nbaMamba: mergeNbaMamba(undefined, parsed.nbaMamba, seed.nbaMamba),
       lastSacfunYoutubeSync: parsed.lastSacfunYoutubeSync,
+      deedLigNews: rejectTombs(
+        Array.isArray(parsed.deedLigNews) ? parsed.deedLigNews : seed.deedLigNews,
+        tombs,
+      ),
       homeHotNewsIds: rejectTombs(
         (
           Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
@@ -436,6 +442,13 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     wallPosts: mergeList(remote.wallPosts, local.wallPosts, seed.wallPosts),
     battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
     nbaUpdates: mergeNbaContent(remote.nbaUpdates, local.nbaUpdates, seed.nbaUpdates, tombs),
+    deedLigNews: mergePublishedList(
+      remote.deedLigNews,
+      local.deedLigNews || [],
+      seed.deedLigNews,
+      published,
+      tombs,
+    ),
     nbaHotNews: [],
     nbaFreeAgents: mergeNbaContent(
       remote.nbaFreeAgents,
@@ -1310,6 +1323,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return patch((prev) => ({
           ...prev,
           nbaUpdates: prev.nbaUpdates.filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
+      },
+      upsertDeedLigNews(item) {
+        return patch((prev) => {
+          const list = prev.deedLigNews || []
+          const i = list.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const deedLigNews = [...list]
+            deedLigNews[i] = item
+            return { ...prev, deedLigNews }
+          }
+          return { ...prev, deedLigNews: [item, ...list] }
+        })
+      },
+      deleteDeedLigNews(id) {
+        return patch((prev) => ({
+          ...prev,
+          deedLigNews: (prev.deedLigNews || []).filter((n) => n.id !== id),
           cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },

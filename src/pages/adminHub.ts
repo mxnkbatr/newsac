@@ -25,6 +25,7 @@ export type AdminTab =
   | 'reels'
   | 'pages'
   | 'nba'
+  | 'deedLig'
 
 export type HubItem = {
   id: AdminTab
@@ -81,8 +82,8 @@ export function buildHubStages(data: AppData): HubStage[] {
     },
     {
       step: 2,
-      title: 'NBA',
-      desc: 'Мэдээлэл, Free Agency, Mamba, Sacfun, Facebook, Quiz',
+      title: 'NBA · Дээд Лиг',
+      desc: 'NBA болон Монголын сагсан бөмбөгийн мэдээлэл тусдаа',
       items: [
         {
           id: 'nba',
@@ -93,6 +94,14 @@ export function buildHubStages(data: AppData): HubStage[] {
             (data.nbaFreeAgents?.length || 0),
           ready: true,
           note: 'Бүх NBA хэсэг',
+        },
+        {
+          id: 'deedLig',
+          label: 'Дээд Лиг мэдээ',
+          page: '/deed-lig',
+          count: data.deedLigNews?.length || 0,
+          ready: true,
+          note: 'Ерөнхий мэдээнээс тусдаа',
         },
       ],
     },

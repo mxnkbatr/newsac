@@ -24,7 +24,7 @@ import { ShortsPage } from './pages/Shorts'
 import { ReelsPage } from './pages/Reels'
 import { PodcastsPage } from './pages/Podcasts'
 import { LivePage } from './pages/Live'
-import { DeedLigPage } from './pages/DeedLig'
+import { DeedLigPage, DeedLigDetailPage } from './pages/DeedLig'
 import { WallPage } from './pages/Wall'
 import { ArtistStudioPage } from './pages/ArtistStudio'
 import { BattlePage } from './pages/Battle'
@@ -77,6 +77,7 @@ export default function App() {
                 <Route path="podcasts" element={<PodcastsPage />} />
                 <Route path="live" element={<LivePage />} />
                 <Route path="deed-lig" element={<DeedLigPage />} />
+                <Route path="deed-lig/:id" element={<DeedLigDetailPage />} />
                 <Route path="wall" element={<WallPage />} />
                 <Route path="music" element={<Navigate to="/" replace />} />
                 <Route path="battle" element={<BattlePage />} />

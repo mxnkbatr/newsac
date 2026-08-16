@@ -47,6 +47,7 @@ import {
 } from './adminUi'
 import { buildHubStages, type AdminTab } from './adminHub'
 import { AdminNbaPanel, type NbaSub } from './AdminNbaPanel'
+import { AdminDeedLigPanel } from './AdminDeedLigPanel'
 import './Admin.css'
 
 type Tab = AdminTab
@@ -67,6 +68,7 @@ const NAV_GROUPS: { label: string; items: { id: Tab; label: string }[] }[] = [
     items: [
       { id: 'news', label: 'Мэдээ' },
       { id: 'nba', label: 'NBA' },
+      { id: 'deedLig', label: 'Дээд Лиг' },
       { id: 'hub', label: 'Төв' },
     ],
   },
@@ -531,6 +533,16 @@ export function AdminPage() {
               openEditor={openEditor}
               askDelete={askDelete}
               notify={notify}
+              saveAndSync={saveAndSync}
+            />
+          )}
+
+          {tab === 'deedLig' && (
+            <AdminDeedLigPanel
+              search={search}
+              setSearch={setSearch}
+              openEditor={openEditor}
+              askDelete={askDelete}
               saveAndSync={saveAndSync}
             />
           )}
