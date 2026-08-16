@@ -7,8 +7,7 @@ const links = [
   { to: '/news', label: 'Мэдээ' },
   { to: '/videos', label: 'Бичлэг' },
   { to: '/nba', label: 'NBA' },
-  { to: '/music', label: 'Music' },
-  { to: '/live', label: 'Live' },
+  { to: '/deed-lig', label: 'Дээд Лиг' },
   { to: '/shop', label: 'Shop' },
 ]
 
@@ -16,7 +15,7 @@ const mobileMoreLinks = [
   { to: '/news', label: 'Мэдээ', icon: 'N' },
   { to: '/videos', label: 'Бичлэг', icon: '▶' },
   { to: '/nba', label: 'NBA', icon: 'NB' },
-  { to: '/music', label: 'Music', icon: '♪' },
+  { to: '/deed-lig', label: 'Дээд Лиг', icon: 'ДЛ' },
   { to: '/live', label: 'Live', icon: '●' },
   { to: '/shop', label: 'Shop', icon: '◈' },
   { to: '/tickets', label: 'Тасалбар', icon: 'T' },

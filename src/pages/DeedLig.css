@@ -1,0 +1,124 @@
+.deed-lig-page {
+  --deed-green: #7cba5a;
+  background:
+    radial-gradient(ellipse 70% 45% at 8% -8%, rgba(124, 186, 90, 0.16), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 92% 8%, rgba(227, 27, 35, 0.12), transparent 50%),
+    var(--bg);
+}
+
+.deed-hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  padding: 2.5rem 0 2.6rem;
+}
+
+.deed-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(105deg, rgba(7, 7, 7, 0.94) 30%, rgba(7, 7, 7, 0.55) 72%, rgba(7, 7, 7, 0.9)),
+    url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=80')
+      center / cover;
+  pointer-events: none;
+}
+
+.deed-hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.deed-hero .section-kicker {
+  color: var(--deed-green);
+}
+
+.deed-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 7vw, 3.8rem);
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.deed-hero p {
+  color: var(--ink-dim);
+  max-width: 48ch;
+  line-height: 1.55;
+  margin: 0 0 1.1rem;
+}
+
+.deed-hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.deed-clubs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.deed-club {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 1rem 1.05rem;
+}
+
+.deed-club strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.deed-club span {
+  color: var(--ink-dim);
+  font-size: 0.82rem;
+}
+
+.deed-notes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.deed-note {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: 1.15rem 1.2rem;
+}
+
+.deed-note span {
+  color: var(--deed-green);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.deed-note h3 {
+  margin: 0.4rem 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+}
+
+.deed-note p {
+  margin: 0;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+@media (min-width: 720px) {
+  .deed-clubs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .deed-notes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .deed-hero {
+    padding: 3.25rem 0 3.4rem;
+  }
+}

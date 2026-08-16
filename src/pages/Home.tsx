@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext'
 import { useStore } from '../store/StoreContext'
 import { NewsletterBox, PollWidget, SponsorSlot } from '../components/Widgets'
 import type { DailyDrop } from '../store/types'
-import { useChartPlayer } from '../context/ChartPlayerContext'
 import { youtubeThumb } from '../lib/youtube'
 import './Home.css'
 
@@ -108,7 +107,6 @@ function TodayStrip() {
 function AppCommandCenter() {
   const { user, isMember } = useAuth()
   const { data } = useStore()
-  const topSong = [...data.chartSongs].sort((a, b) => a.rank - b.rank)[0]
   const stories = [...(data.homeStories || [])]
     .filter((s) => s.active)
     .sort((a, b) => a.order - b.order)
@@ -130,29 +128,6 @@ function AppCommandCenter() {
             <b>›</b>
           </Link>
         </div>
-
-        {topSong && (
-          <Link to="/music" className="now-listening desktop-music-only">
-            <span className="now-listening-cover">
-              <img src={topSong.cover} alt="" />
-              <i aria-hidden="true">▶</i>
-            </span>
-            <span className="now-listening-copy">
-              <small>Одоо сонс · Чарт #{topSong.rank}</small>
-              <strong>{topSong.title}</strong>
-              <em>
-                {topSong.artist} · {topSong.plays}
-              </em>
-            </span>
-            <span className="now-listening-wave" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <i />
-            </span>
-            <b aria-hidden="true">›</b>
-          </Link>
-        )}
 
         <div className="story-rail" aria-label="Newsac шинэ зүйлс">
           <div className="story-chip tone-live story-chip-ig" aria-hidden="true">
@@ -193,12 +168,10 @@ function AppCommandCenter() {
 export function Home() {
   const { user, reactTo } = useAuth()
   const { data, track } = useStore()
-  const { playSong, current: chartCurrent, playing: chartPlaying } = useChartPlayer()
   const news = data.news
   const videos = data.videos
   const rappers = data.rappers
   const rankings = data.rankings
-  const topSongs = [...data.chartSongs].sort((a, b) => a.rank - b.rank).slice(0, 5)
 
   const hotNews = (() => {
     const byId = new Map(news.map((n) => [n.id, n]))
@@ -331,6 +304,28 @@ export function Home() {
         </div>
       </section>
 
+      <section className="section section-alt">
+        <div className="container">
+          <div className="section-head reveal">
+            <div>
+              <div className="section-kicker">Football</div>
+              <h2 className="section-title">Дээд Лиг</h2>
+            </div>
+            <Link to="/deed-lig" className="section-link">
+              Нээх →
+            </Link>
+          </div>
+          <Link to="/deed-lig" className="home-deed reveal reveal-delay-1">
+            <div>
+              <span>Монголын хөлбөмбөг</span>
+              <strong>SP Falcons · Deren · FC Ulaanbaatar · Khangarid</strong>
+              <p>Улирлын мэдээ, клуб, тоглолт — тун удахгүй энд.</p>
+            </div>
+            <b>Дээд Лиг</b>
+          </Link>
+        </div>
+      </section>
+
       <section className="section section-alt desktop-editorial-only">
         <div className="container">
           <SponsorSlot slot="home" />
@@ -439,52 +434,6 @@ export function Home() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="section section-alt">
-        <div className="container">
-          <div className="section-head reveal">
-            <div>
-              <div className="section-kicker">Шинэ дуу</div>
-              <h2 className="section-title">Энэ 7 хоногт цацагдсан дуунууд</h2>
-            </div>
-            <Link to="/rankings" className="section-link">
-              Бүтэн жагсаалт →
-            </Link>
-          </div>
-
-          <ol className="home-chart reveal reveal-delay-1">
-            {topSongs.map((song) => {
-              const active = chartCurrent?.id === song.id
-              return (
-                <li key={song.id} className={active ? 'on' : ''}>
-                  <span>{String(song.rank).padStart(2, '0')}</span>
-                  <img src={song.cover} alt="" loading="lazy" />
-                  <div>
-                    <strong>
-                      {song.title}
-                      {song.isNew ? <i className="home-chart-new"> · ШИНЭ</i> : null}
-                    </strong>
-                    <em>
-                      {song.artist} · {song.plays}
-                    </em>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-primary desktop-music-only"
-                    onClick={() => playSong(song)}
-                  >
-                    {active && chartPlaying ? '❚❚' : '▶'}
-                  </button>
-                </li>
-              )
-            })}
-          </ol>
-
-          {!topSongs.length && (
-            <p className="rank-note">Одоогоор энэ 7 хоногийн дуу бүртгэгдээгүй.</p>
-          )}
         </div>
       </section>
 

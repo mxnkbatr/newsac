@@ -14,8 +14,9 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     actions: [
       { to: '/news', label: 'Мэдээ', icon: 'N' },
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
-      { to: '/music', label: 'Music', icon: '♪' },
       { to: '/nba', label: 'NBA', icon: 'NB' },
+      { to: '/deed-lig', label: 'Дээд Лиг', icon: 'ДЛ' },
+      { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
   {
@@ -59,11 +60,19 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     ],
   },
   {
-    match: (p) => p.startsWith('/music') || p.startsWith('/rappers') || p.startsWith('/rankings'),
+    match: (p) => p.startsWith('/rappers') || p.startsWith('/rankings'),
     actions: [
-      { to: '/music', label: 'Music', icon: '♪' },
       { to: '/live', label: 'Live', icon: '●' },
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
+      { to: '/nba', label: 'NBA', icon: 'NB' },
+    ],
+  },
+  {
+    match: (p) => p.startsWith('/deed-lig'),
+    actions: [
+      { to: '/nba', label: 'NBA', icon: 'NB' },
+      { to: '/news', label: 'Мэдээ', icon: 'N' },
+      { to: '/live', label: 'Live', icon: '●' },
     ],
   },
   {

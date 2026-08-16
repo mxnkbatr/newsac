@@ -24,8 +24,8 @@ import { ShortsPage } from './pages/Shorts'
 import { ReelsPage } from './pages/Reels'
 import { PodcastsPage } from './pages/Podcasts'
 import { LivePage } from './pages/Live'
+import { DeedLigPage } from './pages/DeedLig'
 import { WallPage } from './pages/Wall'
-import { MusicPage } from './pages/Music'
 import { ArtistStudioPage } from './pages/ArtistStudio'
 import { BattlePage } from './pages/Battle'
 import {
@@ -76,8 +76,9 @@ export default function App() {
                 <Route path="tickets" element={<TicketsPage />} />
                 <Route path="podcasts" element={<PodcastsPage />} />
                 <Route path="live" element={<LivePage />} />
+                <Route path="deed-lig" element={<DeedLigPage />} />
                 <Route path="wall" element={<WallPage />} />
-                <Route path="music" element={<MusicPage />} />
+                <Route path="music" element={<Navigate to="/" replace />} />
                 <Route path="battle" element={<BattlePage />} />
                 <Route path="nba" element={<NbaPage />} />
                 <Route path="nba/updates" element={<NbaUpdatesPage />} />

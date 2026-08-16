@@ -648,6 +648,47 @@
   gap: 0.75rem;
 }
 
+.home-deed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.25rem;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 70% 120% at 0% 50%, rgba(124, 186, 90, 0.16), transparent 55%),
+    var(--bg-2);
+}
+
+.home-deed span {
+  display: block;
+  color: #7cba5a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-deed strong {
+  display: block;
+  margin: 0.35rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 3.4vw, 1.35rem);
+}
+
+.home-deed p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+}
+
+.home-deed b {
+  flex-shrink: 0;
+  color: var(--red);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
 .home-originals {
   border: 1px solid var(--line);
   background:
