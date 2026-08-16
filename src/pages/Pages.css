@@ -866,10 +866,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   position: relative;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-family: inherit;
 }
 
 .auth-or::before,

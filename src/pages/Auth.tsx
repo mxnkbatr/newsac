@@ -9,7 +9,6 @@ export function AuthPage() {
   const [gender, setGender] = useState<Gender | ''>('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(() => readAuthError())
   const [busy, setBusy] = useState(false)
 
@@ -115,13 +114,43 @@ export function AuthPage() {
         ) : (
           <>
             <h1>Нэвтрэх</h1>
-            <p className="auth-sub">
-              Gmail-ээр шууд нэвтэрнэ. Имэйл рүү код ирэхгүй.
-            </p>
+            <p className="auth-sub">Gmail болон нууц үгөөр нэвтэрнэ.</p>
+
+            <form onSubmit={(e) => void onPasswordLogin(e)} className="auth-form">
+              <label>
+                Gmail
+                <input
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@gmail.com"
+                />
+              </label>
+              <label>
+                Нууц үг
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  minLength={6}
+                  autoComplete="current-password"
+                />
+              </label>
+              {error && <p className="auth-error">{error}</p>}
+              <button type="submit" className="btn btn-primary btn-block" disabled={busy || loading}>
+                {busy ? 'Түр хүлээнэ үү...' : 'Нэвтрэх'}
+              </button>
+            </form>
+
+            <p className="auth-or">эсвэл</p>
 
             <button
               type="button"
-              className="btn btn-primary btn-block auth-google"
+              className="btn btn-ghost btn-block auth-google"
               disabled={busy || loading}
               onClick={() => void onGoogle()}
             >
@@ -145,48 +174,6 @@ export function AuthPage() {
               </svg>
               {busy ? 'Гүүгл рүү...' : 'Gmail-ээр нэвтрэх'}
             </button>
-
-            {error && !showPassword && <p className="auth-error">{error}</p>}
-
-            <button
-              type="button"
-              className="auth-or"
-              onClick={() => setShowPassword((v) => !v)}
-            >
-              {showPassword ? 'Хаах' : 'Эсвэл нууц үг'}
-            </button>
-
-            {showPassword && (
-              <form onSubmit={(e) => void onPasswordLogin(e)} className="auth-form">
-                <label>
-                  Gmail
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="you@gmail.com"
-                  />
-                </label>
-                <label>
-                  Нууц үг
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    minLength={6}
-                    autoComplete="current-password"
-                  />
-                </label>
-                {error && <p className="auth-error">{error}</p>}
-                <button type="submit" className="btn btn-ghost btn-block" disabled={busy || loading}>
-                  {busy ? 'Түр хүлээнэ үү...' : 'Нууц үгээр нэвтрэх'}
-                </button>
-              </form>
-            )}
           </>
         )}
 
