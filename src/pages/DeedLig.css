@@ -1,7 +1,7 @@
 .deed-lig-page {
-  --deed-green: #7cba5a;
+  --deed-orange: #e67a22;
   background:
-    radial-gradient(ellipse 70% 45% at 8% -8%, rgba(124, 186, 90, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 8% -8%, rgba(230, 122, 34, 0.18), transparent 55%),
     radial-gradient(ellipse 50% 40% at 92% 8%, rgba(227, 27, 35, 0.12), transparent 50%),
     var(--bg);
 }
@@ -19,7 +19,7 @@
   inset: 0;
   background:
     linear-gradient(105deg, rgba(7, 7, 7, 0.94) 30%, rgba(7, 7, 7, 0.55) 72%, rgba(7, 7, 7, 0.9)),
-    url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=80')
+    url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80')
       center / cover;
   pointer-events: none;
 }
@@ -30,7 +30,7 @@
 }
 
 .deed-hero .section-kicker {
-  color: var(--deed-green);
+  color: var(--deed-orange);
 }
 
 .deed-hero h1 {
@@ -89,7 +89,7 @@
 }
 
 .deed-note span {
-  color: var(--deed-green);
+  color: var(--deed-orange);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;

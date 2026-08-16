@@ -5,31 +5,33 @@ import './Pages.css'
 import './DeedLig.css'
 
 const clubs = [
-  { id: 'falcons', name: 'SP Falcons', city: 'Улаанбаатар' },
-  { id: 'deren', name: 'Deren FC', city: 'Дархан' },
-  { id: 'ubu', name: 'FC Ulaanbaatar', city: 'Улаанбаатар' },
-  { id: 'khangarid', name: 'Khangarid', city: 'Эрдэнэт' },
-  { id: 'erchim', name: 'Erchim', city: 'Улаанбаатар' },
-  { id: 'khoromkhon', name: 'Khoromkhon', city: 'Улаанбаатар' },
-  { id: 'khovd', name: 'Khovd', city: 'Ховд' },
-  { id: 'azarganuud', name: 'Tuv Azarganuud', city: 'Төв' },
+  { id: 'knights', name: 'BCH Найтс', city: 'Улаанбаатар' },
+  { id: 'khuleguud', name: 'Хасын Хүлэгүүд', city: 'Улаанбаатар' },
+  { id: 'apes', name: 'SG Эйпс', city: 'Улаанбаатар' },
+  { id: 'miners', name: 'Омни Эрдэнэт Майнерс', city: 'Эрдэнэт' },
+  { id: 'bodons', name: 'Сэлэнгэ Бодонс', city: 'Сэлэнгэ' },
+  { id: 'shonkhoruud', name: 'Хаан Шонхорууд', city: 'Ховд' },
+  { id: 'darkhan', name: 'Дархан Юнайтед', city: 'Дархан' },
+  { id: 'brothers', name: 'Завхан Бродерс', city: 'Завхан' },
+  { id: 'mongolians', name: 'Монголианс', city: 'Улаанбаатар' },
+  { id: 'metal', name: 'Бишрэлт Металл', city: 'Улаанбаатар' },
 ]
 
 const notes = [
   {
     tag: 'Лиг',
-    title: 'Монголын хөлбөмбөгийн үндэсний Дээд лиг',
+    title: 'Монголын сагсан бөмбөгийн Үндэсний Дээд лиг',
     text: 'Улирлын хүснэгт, тоглолтын хуваарь, клубын мэдээг Newsac дээр нэг дороос дагана.',
   },
   {
     tag: 'Тоглолт',
     title: 'Долоо хоногийн board',
-    text: 'Төв цэнгэлдэх, дерби, голын тоглолт — recap болон highlight-ыг энд нэмнэ.',
+    text: 'МBank Arena, дерби, playoff — recap болон highlight-ыг энд нэмнэ.',
   },
   {
     tag: 'Community',
     title: 'UB + хөдөө нэг цонх',
-    text: 'Эрдэнэт, Дархан, Ховд, Улаанбаатар — Дээд Лигийг зөвхөн нийслэлээр биш харна.',
+    text: 'Эрдэнэт, Дархан, Ховд, Сэлэнгэ, Завхан — Дээд Лигийг зөвхөн нийслэлээр биш харна.',
   },
 ]
 
@@ -45,18 +47,18 @@ export function DeedLigPage() {
     <div className="deed-lig-page">
       <header className="deed-hero">
         <div className="container">
-          <div className="section-kicker">Newsac · Football</div>
+          <div className="section-kicker">Newsac · Basketball</div>
           <h1>Дээд Лиг</h1>
           <p>
-            Монголын хөлбөмбөгийн үндэсний Дээд лиг. Клуб, тоглолт, улирлын яриа — NBA-тай
+            Монголын сагсан бөмбөгийн Үндэсний Дээд лиг. Клуб, тоглолт, улирлын яриа — NBA-тай
             зэрэгцүүлээд Newsac дээр.
           </p>
           <div className="deed-hero-links">
             <Link to="/news" className="btn btn-primary">
               Мэдээ үзэх
             </Link>
-            <Link to="/live" className="btn btn-ghost">
-              Live
+            <Link to="/nba" className="btn btn-ghost">
+              NBA
             </Link>
           </div>
         </div>

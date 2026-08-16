@@ -308,7 +308,7 @@ export function Home() {
         <div className="container">
           <div className="section-head reveal">
             <div>
-              <div className="section-kicker">Football</div>
+              <div className="section-kicker">Basketball</div>
               <h2 className="section-title">Дээд Лиг</h2>
             </div>
             <Link to="/deed-lig" className="section-link">
@@ -317,8 +317,8 @@ export function Home() {
           </div>
           <Link to="/deed-lig" className="home-deed reveal reveal-delay-1">
             <div>
-              <span>Монголын хөлбөмбөг</span>
-              <strong>SP Falcons · Deren · FC Ulaanbaatar · Khangarid</strong>
+              <span>Монголын сагсан бөмбөг</span>
+              <strong>Хасын Хүлэгүүд · SG Эйпс · BCH Найтс · Сэлэнгэ Бодонс</strong>
               <p>Улирлын мэдээ, клуб, тоглолт — тун удахгүй энд.</p>
             </div>
             <b>Дээд Лиг</b>

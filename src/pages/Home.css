@@ -656,13 +656,13 @@
   padding: 1.2rem 1.25rem;
   border: 1px solid var(--line);
   background:
-    radial-gradient(ellipse 70% 120% at 0% 50%, rgba(124, 186, 90, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 120% at 0% 50%, rgba(230, 122, 34, 0.18), transparent 55%),
     var(--bg-2);
 }
 
 .home-deed span {
   display: block;
-  color: #7cba5a;
+  color: #e67a22;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
