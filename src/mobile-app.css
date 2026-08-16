@@ -454,8 +454,8 @@
 @media (max-width: 860px) {
   :root {
     --top-bar: calc(52px + env(safe-area-inset-top, 0px));
-    --dock-h: 4.1rem;
-    --dock-clear: calc(var(--dock-h) + 3.2rem + env(safe-area-inset-bottom, 0px));
+    --dock-h: 0px;
+    --dock-clear: calc(1.35rem + env(safe-area-inset-bottom, 0px));
     --player-h: 4rem;
     --player-clear: calc(var(--dock-clear) + var(--player-h));
     --app-surface: #101114;

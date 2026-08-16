@@ -29,7 +29,7 @@ export type FieldDef = {
 export type ToastState = { text: string; error?: boolean } | null
 
 /** Phone gallery/camera → Supabase Storage URL, or compressed data URL fallback */
-function fileToCompressedDataUrl(file: File, maxSide = 960, quality = 0.72): Promise<string> {
+function fileToCompressedDataUrl(file: File, maxSide = 1400, quality = 0.78): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(new Error('read failed'))
@@ -39,7 +39,7 @@ function fileToCompressedDataUrl(file: File, maxSide = 960, quality = 0.72): Pro
       img.onload = () => {
         const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
         const w = Math.max(1, Math.round(img.width * scale))
-        const h = Math.max(1, Math.round(img.height * scale))
+        const h = Math.max(1, round(img.height * scale))
         const canvas = document.createElement('canvas')
         canvas.width = w
         canvas.height = h
@@ -57,6 +57,19 @@ function fileToCompressedDataUrl(file: File, maxSide = 960, quality = 0.72): Pro
   })
 }
 
+function round(n: number) {
+  return Math.max(1, Math.round(n))
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('read failed'))
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.readAsDataURL(file)
+  })
+}
+
 async function resolveImageFile(file: File): Promise<string> {
   if (supabaseConfigured) {
     try {
@@ -65,7 +78,11 @@ async function resolveImageFile(file: File): Promise<string> {
       /* fall back to data URL if storage bucket missing */
     }
   }
-  return fileToCompressedDataUrl(file)
+  try {
+    return await fileToCompressedDataUrl(file)
+  } catch {
+    return readFileAsDataUrl(file)
+  }
 }
 
 export function Toast({ toast }: { toast: ToastState }) {
@@ -129,48 +146,101 @@ function ImageField({
   value: string | number | boolean
   onChange: (v: string | number | boolean) => void
 }) {
-  const src = String(value || '')
+  return (
+    <PhotoPicker
+      id={def.key}
+      label={def.label}
+      value={String(value || '')}
+      onChange={(url) => onChange(url)}
+      placeholder={def.placeholder}
+      required={def.required}
+    />
+  )
+}
+
+export function PhotoPicker({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  required,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (url: string) => void
+  placeholder?: string
+  required?: boolean
+}) {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
+  const pick = (file: File | undefined) => {
+    if (!file) return
+    setBusy(true)
+    setErr(null)
+    void resolveImageFile(file)
+      .then((url) => onChange(url))
+      .catch((ex: unknown) => {
+        setErr(ex instanceof Error ? ex.message : 'Зураг оруулж чадсангүй')
+      })
+      .finally(() => setBusy(false))
+  }
+
   return (
     <div className="admin-field admin-field-image">
-      <label htmlFor={`f-${def.key}`}>{def.label}</label>
-      {src ? (
+      <span className="admin-field-label">
+        {label}
+        {required ? ' *' : ''}
+      </span>
+      {value ? (
         <div className="admin-image-preview">
-          <img src={src} alt="" />
+          <img src={value} alt="" />
         </div>
-      ) : null}
-      <label className={`admin-image-pick${busy ? ' is-busy' : ''}`}>
-        <input
-          id={`f-${def.key}-file`}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          disabled={busy}
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (!file) return
-            setBusy(true)
-            setErr(null)
-            void resolveImageFile(file)
-              .then((url) => onChange(url))
-              .catch((ex: unknown) => {
-                setErr(ex instanceof Error ? ex.message : 'Зураг оруулж чадсангүй')
-              })
-              .finally(() => setBusy(false))
-          }}
-        />
-        {busy ? 'Зураг илгээж байна…' : '📷 Зураг сонгох / аваах'}
-      </label>
+      ) : (
+        <div className="admin-image-preview is-empty">Photos</div>
+      )}
+      <div className="admin-image-actions">
+        <label className={`admin-image-pick${busy ? ' is-busy' : ''}`}>
+          <input
+            id={`f-${id}-gallery`}
+            type="file"
+            accept="image/*"
+            disabled={busy}
+            onChange={(e) => {
+              pick(e.target.files?.[0])
+              e.target.value = ''
+            }}
+          />
+          {busy ? 'Илгээж байна…' : 'Photos-оос сонгох'}
+        </label>
+        <label className={`admin-image-pick is-camera${busy ? ' is-busy' : ''}`}>
+          <input
+            id={`f-${id}-camera`}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            disabled={busy}
+            onChange={(e) => {
+              pick(e.target.files?.[0])
+              e.target.value = ''
+            }}
+          />
+          Камер
+        </label>
+      </div>
       {err ? <p className="admin-field-error">{err}</p> : null}
-      <input
-        id={`f-${def.key}`}
-        type="url"
-        value={src.startsWith('data:') ? '' : src}
-        placeholder={def.placeholder || 'эсвэл зураг URL'}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <details className="admin-image-url">
+        <summary>эсвэл холбоос / URL</summary>
+        <input
+          id={`f-${id}`}
+          type="url"
+          value={value.startsWith('data:') ? '' : value}
+          placeholder={placeholder || 'https://...'}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </details>
     </div>
   )
 }
@@ -254,7 +324,11 @@ export function FormFields({
   const rows: FieldDef[][] = []
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i]
-    if (f.half && fields[i + 1]?.half) {
+    if (f.type === 'image') {
+      rows.push([f])
+      continue
+    }
+    if (f.half && fields[i + 1]?.half && fields[i + 1].type !== 'image') {
       rows.push([f, fields[i + 1]])
       i++
     } else {

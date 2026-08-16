@@ -272,28 +272,6 @@ export function ProfilePage() {
             </Link>
           </li>
           <li>
-            <Link to="/battle" className="prof-menu-item">
-              <span className="prof-menu-icon battle" aria-hidden="true" />
-              <span className="prof-menu-text">
-                <strong>Battle / Cypher</strong>
-              </span>
-              <span className="prof-chevron" aria-hidden="true">
-                ›
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/wall" className="prof-menu-item">
-              <span className="prof-menu-icon wall" aria-hidden="true" />
-              <span className="prof-menu-text">
-                <strong>Community Wall</strong>
-              </span>
-              <span className="prof-chevron" aria-hidden="true">
-                ›
-              </span>
-            </Link>
-          </li>
-          <li>
             <Link to="/shop" className="prof-menu-item">
               <span className="prof-menu-icon shop" aria-hidden="true" />
               <span className="prof-menu-text">

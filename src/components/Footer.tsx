@@ -40,9 +40,6 @@ export function Footer() {
             <li>
               <Link to="/partnership">Хамтран ажиллах</Link>
             </li>
-            <li>
-              <Link to="/advertise">Сурталчилгаа байршуулах</Link>
-            </li>
           </ul>
         </div>
 

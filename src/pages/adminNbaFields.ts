@@ -2,24 +2,15 @@ import type { FieldDef } from './adminUi'
 
 export const nbaUpdateFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
+  {
+    key: 'image',
+    label: 'Зураг',
+    type: 'image',
+    required: true,
+    placeholder: 'Photos-оос сонгоно',
+  },
   { key: 'tag', label: 'Tag (Trade, Injury...)', half: true, required: true },
   { key: 'when', label: 'Хэзээ', half: true, placeholder: '2 цагийн өмнө' },
-  { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
-  { key: 'image', label: 'Зураг URL', type: 'url', half: true },
-  { key: 'blurb', label: 'Товч', type: 'textarea', required: true },
-  {
-    key: 'body',
-    label: 'Бүрэн текст (мөр бүр = 1 догол)',
-    type: 'textarea',
-    required: true,
-  },
-]
-
-export const nbaHotFields: FieldDef[] = [
-  { key: 'title', label: 'Гарчиг', required: true },
-  { key: 'rank', label: 'Rank', type: 'number', half: true, required: true },
-  { key: 'heat', label: 'Heat (HOT/MID)', half: true },
-  { key: 'team', label: 'Баг / сэдэв', half: true },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
   { key: 'blurb', label: 'Товч', type: 'textarea', required: true },
   {
@@ -34,7 +25,8 @@ export const nbaFaFields: FieldDef[] = [
   { key: 'name', label: 'Нэр', required: true },
   { key: 'rank', label: 'Rank', type: 'number', half: true, required: true },
   { key: 'position', label: 'Position', half: true },
-  { key: 'lastTeam', label: 'Last team', half: true },
+  { key: 'lastTeam', label: 'Өмнөх баг', half: true },
+  { key: 'newTeam', label: 'Шинэ баг', half: true },
   { key: 'age', label: 'Нас', half: true },
   { key: 'fit', label: 'Best fit', half: true },
   { key: 'note', label: 'Товч', type: 'textarea', required: true },
@@ -67,6 +59,31 @@ export const nbaQuizFields: FieldDef[] = [
 export const nbaSacfunFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
   { key: 'text', label: 'Текст', type: 'textarea', required: true },
+]
+
+export const nbaSacfunVideoFields: FieldDef[] = [
+  { key: 'title', label: 'Гарчиг', required: true },
+  { key: 'youtubeId', label: 'YouTube линк / ID', required: true, placeholder: 'https://youtu.be/...' },
+]
+
+export const nbaMambaFields: FieldDef[] = [
+  { key: 'title', label: 'Гарчиг', required: true },
+  { key: 'kicker', label: 'Kicker', required: true },
+  { key: 'lead', label: 'Оршил', type: 'textarea', required: true },
+  {
+    key: 'story',
+    label: 'Түүх (мөр бүр = 1 догол)',
+    type: 'textarea',
+    required: true,
+  },
+  {
+    key: 'points',
+    label: '4 зарчим (мөр бүр: Гарчиг :: тайлбар)',
+    type: 'textarea',
+    required: true,
+  },
+  { key: 'quote', label: 'Ишлэл', type: 'textarea', required: true },
+  { key: 'takeaway', label: 'Takeaway', type: 'textarea', required: true },
 ]
 
 export function linesOf(value: unknown) {

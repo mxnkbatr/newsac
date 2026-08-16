@@ -234,7 +234,7 @@
   .nav-more-panel {
     position: fixed;
     right: 0.55rem;
-    bottom: calc(var(--dock-clear, 5.5rem) + 0.25rem);
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     left: 0.55rem;
     z-index: 105;
     display: block;

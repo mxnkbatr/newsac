@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { StoreProvider } from './store/StoreContext'
 import { PlayerProvider } from './context/PlayerContext'
@@ -32,13 +32,11 @@ import {
   NbaPage,
   NbaUpdatesPage,
   NbaUpdateDetailPage,
-  NbaHotPage,
-  NbaHotDetailPage,
   NbaMambaPage,
   NbaFreeAgencyPage,
   NbaFreeAgencyDetailPage,
   NbaSacfunPage,
-  NbaYoutubePage,
+  NbaFacebookPage,
   NbaQuizPage,
 } from './pages/Nba'
 import { AboutPage } from './pages/About'
@@ -84,13 +82,14 @@ export default function App() {
                 <Route path="nba" element={<NbaPage />} />
                 <Route path="nba/updates" element={<NbaUpdatesPage />} />
                 <Route path="nba/updates/:id" element={<NbaUpdateDetailPage />} />
-                <Route path="nba/hot" element={<NbaHotPage />} />
-                <Route path="nba/hot/:id" element={<NbaHotDetailPage />} />
+                <Route path="nba/hot" element={<Navigate to="/nba" replace />} />
+                <Route path="nba/hot/:id" element={<Navigate to="/nba" replace />} />
                 <Route path="nba/mamba" element={<NbaMambaPage />} />
                 <Route path="nba/free-agency" element={<NbaFreeAgencyPage />} />
                 <Route path="nba/free-agency/:id" element={<NbaFreeAgencyDetailPage />} />
                 <Route path="nba/sacfun" element={<NbaSacfunPage />} />
-                <Route path="nba/youtube" element={<NbaYoutubePage />} />
+                <Route path="nba/facebook" element={<NbaFacebookPage />} />
+                <Route path="nba/youtube" element={<Navigate to="/nba/facebook" replace />} />
                 <Route path="nba/quiz" element={<NbaQuizPage />} />
                 <Route path="posts" element={<YoutubePostsPage />} />
                 <Route path="about" element={<AboutPage />} />

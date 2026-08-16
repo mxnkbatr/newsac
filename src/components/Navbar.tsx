@@ -20,20 +20,13 @@ const mobileMoreLinks = [
   { to: '/live', label: 'Live', icon: '●' },
   { to: '/shop', label: 'Shop', icon: '◈' },
   { to: '/tickets', label: 'Тасалбар', icon: 'T' },
-  { to: '/posts', label: 'YT Posts', icon: '✎' },
   { to: '/podcasts', label: 'Podcast', icon: 'P' },
-  { to: '/wall', label: 'Wall', icon: 'W' },
-  { to: '/battle', label: 'Battle', icon: '⚡' },
-  { to: '/rappers', label: 'Артистууд', icon: 'A' },
-  { to: '/rankings', label: 'Rank', icon: '#' },
-  { to: '/reels', label: 'Reels', icon: '◎' },
   { to: '/shorts', label: 'Live Cypher', icon: '⚡' },
   { to: '/membership', label: 'Fan Pass', icon: '★' },
   { to: '/artist', label: 'Artist Profile', icon: 'AP' },
   { to: '/about', label: 'Бидний тухай', icon: 'ℹ' },
   { to: '/contact', label: 'Холбоо барих', icon: '@' },
   { to: '/partnership', label: 'Хамтран ажиллах', icon: '↔' },
-  { to: '/advertise', label: 'Сурталчилгаа', icon: '◈' },
 ]
 
 const MENU_INTRO_KEY = 'newsac_menu_intro_v1'

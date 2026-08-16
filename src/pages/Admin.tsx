@@ -40,6 +40,7 @@ import {
   EditorModal,
   EntityList,
   Modal,
+  PhotoPicker,
   Toast,
   type FieldDef,
   type ToastState,
@@ -422,7 +423,9 @@ export function AdminPage() {
                       checked={Boolean(flags[f.key])}
                       onChange={(e) => {
                         store.setSiteFlags({ [f.key]: e.target.checked })
-                        notify(e.target.checked ? `${f.label} асаалттай` : `${f.label} унтарлаа`)
+                        void saveAndSync(
+                          e.target.checked ? `${f.label} асаалттай` : `${f.label} унтарлаа`,
+                        )
                       }}
                     />
                   </label>
@@ -523,12 +526,12 @@ export function AdminPage() {
             <AdminNbaPanel
               sub={nbaSub}
               setSub={setNbaSub}
-              setTab={(t) => setTab(t)}
               search={search}
               setSearch={setSearch}
               openEditor={openEditor}
               askDelete={askDelete}
               notify={notify}
+              saveAndSync={saveAndSync}
             />
           )}
 
@@ -597,7 +600,7 @@ export function AdminPage() {
                             ]
                             next[slot] = e.target.value
                             store.setHomeHotNewsIds(next)
-                            notify(`Hot #${slot + 1} шинэчлэгдлээ`)
+                            void saveAndSync(`Hot #${slot + 1} шинэчлэгдлээ`)
                           }}
                         >
                           {store.data.news.map((n) => (
@@ -654,7 +657,7 @@ export function AdminPage() {
                       return false
                     }
                     if (!image) {
-                      notify('Зураг сонгох эсвэл URL оруулна уу', true)
+                      notify('Photos-оос зураг сонгоно уу', true)
                       return false
                     }
                     const item: NewsItem = {
@@ -694,7 +697,7 @@ export function AdminPage() {
                       return false
                     }
                     if (!image) {
-                      notify('Зураг сонгох эсвэл URL оруулна уу', true)
+                      notify('Photos-оос зураг сонгоно уу', true)
                       return false
                     }
                     const snapshot = store.upsertNews({
@@ -871,7 +874,7 @@ export function AdminPage() {
                     }
                     store.upsertRapper(item)
                     if (item.ownerEmail) store.linkRapperOwner(id, item.ownerEmail)
-                    notify('Рэппер нэмэгдлээ')
+                    void saveAndSync('Рэппер нэмэгдлээ')
                   },
                 )
               }
@@ -912,7 +915,7 @@ export function AdminPage() {
                       ownerEmail,
                     })
                     if (ownerEmail) store.linkRapperOwner(id, ownerEmail)
-                    notify('Рэппер хадгалагдлаа')
+                    void saveAndSync('Рэппер хадгалагдлаа')
                   },
                   n.name,
                 )
@@ -921,7 +924,7 @@ export function AdminPage() {
                 const n = store.data.rappers.find((x) => x.id === id)
                 askDelete(n?.name || 'рэппер', () => {
                   store.deleteRapper(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -962,7 +965,7 @@ export function AdminPage() {
                       stock: Number(v.stock) || 0,
                       active: Boolean(v.active),
                     })
-                    notify('Бараа нэмэгдлээ')
+                    void saveAndSync('Бараа нэмэгдлээ')
                   },
                 )
               }
@@ -984,7 +987,7 @@ export function AdminPage() {
                       stock: Number(v.stock) || 0,
                       active: Boolean(v.active),
                     })
-                    notify('Бараа хадгалагдлаа')
+                    void saveAndSync('Бараа хадгалагдлаа')
                   },
                   n.name,
                 )
@@ -993,7 +996,7 @@ export function AdminPage() {
                 const n = store.data.products.find((x) => x.id === id)
                 askDelete(n?.name || 'бараа', () => {
                   store.deleteProduct(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1047,7 +1050,7 @@ export function AdminPage() {
                       vipLeft: Number(v.vipLeft) || 0,
                       active: Boolean(v.active),
                     })
-                    notify('Тоглолт нэмэгдлээ')
+                    void saveAndSync('Тоглолт нэмэгдлээ')
                   },
                 )
               }
@@ -1075,7 +1078,7 @@ export function AdminPage() {
                       vipLeft: Number(v.vipLeft) || 0,
                       active: Boolean(v.active),
                     })
-                    notify('Тоглолт хадгалагдлаа')
+                    void saveAndSync('Тоглолт хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1084,7 +1087,7 @@ export function AdminPage() {
                 const n = store.data.shows.find((x) => x.id === id)
                 askDelete(n?.title || 'тоглолт', () => {
                   store.deleteShow(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1127,7 +1130,7 @@ export function AdminPage() {
                       guests: String(v.guests || ''),
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    notify('Podcast нэмэгдлээ')
+                    void saveAndSync('Podcast нэмэгдлээ')
                   },
                 )
               }
@@ -1154,7 +1157,7 @@ export function AdminPage() {
                       guests: String(v.guests || ''),
                       membersOnly: Boolean(v.membersOnly),
                     })
-                    notify('Podcast хадгалагдлаа')
+                    void saveAndSync('Podcast хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1163,7 +1166,7 @@ export function AdminPage() {
                 const n = store.data.podcasts.find((x) => x.id === id)
                 askDelete(n?.title || 'podcast', () => {
                   store.deletePodcast(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1205,7 +1208,7 @@ export function AdminPage() {
                       youtubeId,
                       image: String(v.image || '').trim() || ytThumbOr(youtubeId, IMG.podcast),
                     })
-                    notify('Drop нэмэгдлээ')
+                    void saveAndSync('Drop нэмэгдлээ')
                   },
                 )
               }
@@ -1228,7 +1231,7 @@ export function AdminPage() {
                       youtubeId,
                       image: String(v.image || '').trim() || ytThumbOr(youtubeId, n.image),
                     })
-                    notify('Drop хадгалагдлаа')
+                    void saveAndSync('Drop хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1237,7 +1240,7 @@ export function AdminPage() {
                 const n = store.data.dailyDrops.find((x) => x.id === id)
                 askDelete(n?.title || 'drop', () => {
                   store.deleteDailyDrop(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1283,7 +1286,7 @@ export function AdminPage() {
                       order: Number(v.order) || 1,
                       active: Boolean(v.active),
                     })
-                    notify('Story нэмэгдлээ')
+                    void saveAndSync('Story нэмэгдлээ')
                   },
                 )
               }
@@ -1307,7 +1310,7 @@ export function AdminPage() {
                       order: Number(v.order) || n.order,
                       active: Boolean(v.active),
                     })
-                    notify('Story хадгалагдлаа')
+                    void saveAndSync('Story хадгалагдлаа')
                   },
                   n.label,
                 )
@@ -1316,7 +1319,7 @@ export function AdminPage() {
                 const n = store.data.homeStories.find((x) => x.id === id)
                 askDelete(n?.label || 'story', () => {
                   store.deleteHomeStory(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1358,7 +1361,7 @@ export function AdminPage() {
                       cover: String(v.cover),
                       hostName: String(v.hostName || '').trim() || undefined,
                     })
-                    notify('Live нэмэгдлээ')
+                    void saveAndSync('Live нэмэгдлээ')
                   },
                 )
               }
@@ -1388,7 +1391,7 @@ export function AdminPage() {
                       cover: String(v.cover),
                       hostName: String(v.hostName || '').trim() || undefined,
                     })
-                    notify('Live хадгалагдлаа')
+                    void saveAndSync('Live хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1397,7 +1400,7 @@ export function AdminPage() {
                 const n = store.data.livestreams.find((x) => x.id === id)
                 askDelete(n?.title || 'live', () => {
                   store.deleteLivestream(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1430,7 +1433,7 @@ export function AdminPage() {
                       colds: 0,
                       comments: [],
                     })
-                    notify('Пост нэмэгдлээ')
+                    void saveAndSync('Пост нэмэгдлээ')
                   },
                 )
               }
@@ -1452,14 +1455,14 @@ export function AdminPage() {
                       text: String(v.text).trim(),
                       image: String(v.image || '').trim() || undefined,
                     })
-                    notify('Пост хадгалагдлаа')
+                    void saveAndSync('Пост хадгалагдлаа')
                   },
                 )
               }}
               onDelete={(id) => {
                 askDelete('энэ пост', () => {
                   store.deleteWallPost(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1500,7 +1503,7 @@ export function AdminPage() {
                       active: Boolean(v.active),
                       cpm: Number(v.cpm) || 0,
                     })
-                    notify('Sponsor нэмэгдлээ')
+                    void saveAndSync('Sponsor нэмэгдлээ')
                   },
                 )
               }
@@ -1522,7 +1525,7 @@ export function AdminPage() {
                       active: Boolean(v.active),
                       cpm: Number(v.cpm) || 0,
                     })
-                    notify('Sponsor хадгалагдлаа')
+                    void saveAndSync('Sponsor хадгалагдлаа')
                   },
                   n.name,
                 )
@@ -1531,7 +1534,7 @@ export function AdminPage() {
                 const n = store.data.sponsors.find((x) => x.id === id)
                 askDelete(n?.name || 'sponsor', () => {
                   store.deleteSponsor(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1619,7 +1622,7 @@ export function AdminPage() {
                       youtubeId: ytFrom(v.youtubeId) || undefined,
                       isNew: Boolean(v.isNew),
                     })
-                    notify('Дуу нэмэгдлээ')
+                    void saveAndSync('Дуу нэмэгдлээ')
                   },
                 )
               }
@@ -1645,7 +1648,7 @@ export function AdminPage() {
                       youtubeId: ytFrom(v.youtubeId) || undefined,
                       isNew: Boolean(v.isNew),
                     })
-                    notify('Дуу хадгалагдлаа')
+                    void saveAndSync('Дуу хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1654,7 +1657,7 @@ export function AdminPage() {
                 const n = store.data.chartSongs.find((x) => x.id === id)
                 askDelete(n?.title || 'дуу', () => {
                   store.deleteChartSong(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1710,7 +1713,7 @@ export function AdminPage() {
                       ],
                     }
                     store.upsertBattle(item)
-                    notify('Battle нэмэгдлээ')
+                    void saveAndSync('Battle нэмэгдлээ')
                   },
                 )
               }
@@ -1744,7 +1747,7 @@ export function AdminPage() {
                         { ...n.sides[1], name: String(v.sideB).trim() },
                       ],
                     })
-                    notify('Battle хадгалагдлаа')
+                    void saveAndSync('Battle хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1753,7 +1756,7 @@ export function AdminPage() {
                 const n = store.data.battles.find((x) => x.id === id)
                 askDelete(n?.title || 'battle', () => {
                   store.deleteBattle(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1784,7 +1787,7 @@ export function AdminPage() {
                       rapperId: String(v.rapperId || '').trim() || undefined,
                     }
                     store.upsertShort(item)
-                    notify('Reel нэмэгдлээ')
+                    void saveAndSync('Reel нэмэгдлээ')
                   },
                 )
               }
@@ -1808,7 +1811,7 @@ export function AdminPage() {
                       start: Number(v.start) || 0,
                       rapperId: String(v.rapperId || '').trim() || undefined,
                     })
-                    notify('Reel хадгалагдлаа')
+                    void saveAndSync('Reel хадгалагдлаа')
                   },
                   n.title,
                 )
@@ -1817,7 +1820,7 @@ export function AdminPage() {
                 const n = store.data.shorts.find((x) => x.id === id)
                 askDelete(n?.title || 'reel', () => {
                   store.deleteShort(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -1872,7 +1875,7 @@ export function AdminPage() {
                         .forEach((p) => store.upsertPoll({ ...p, active: false }))
                     }
                     store.upsertPoll(poll)
-                    notify('Poll нэмэгдлээ')
+                    void saveAndSync('Poll нэмэгдлээ')
                   },
                 )
               }
@@ -1916,7 +1919,7 @@ export function AdminPage() {
                       active: Boolean(v.active),
                       endsAt: String(v.endsAt),
                     })
-                    notify('Poll хадгалагдлаа')
+                    void saveAndSync('Poll хадгалагдлаа')
                   },
                   n.question,
                 )
@@ -1925,7 +1928,7 @@ export function AdminPage() {
                 const n = store.data.polls.find((x) => x.id === id)
                 askDelete(n?.question || 'poll', () => {
                   store.deletePoll(id)
-                  notify('Устгагдлаа')
+                  void saveAndSync('Устгагдлаа')
                 })
               }}
             />
@@ -2007,15 +2010,19 @@ export function AdminPage() {
             <div className="staff-box">
               <h3>Тухай хуудас</h3>
               <p>
-                Менюний «Тухай» дээр харагдах зураг + богино танилцуулга. Зураг URL
-                оруулна (өөрийн зураг upload хийсний дараа link).
+                Менюний «Тухай» дээр харагдах зураг + богино танилцуулга. Зургийг утасныхаа
+                Photos-оос шууд сонгоно.
               </p>
               <form
                 className="admin-form"
                 onSubmit={(e) => {
                   e.preventDefault()
+                  if (!aboutDraft.photo.trim()) {
+                    notify('Зураг Photos-оос сонгоно уу', true)
+                    return
+                  }
                   store.setAbout(aboutDraft)
-                  notify('Тухай хадгалагдлаа')
+                  void saveAndSync('Тухай хадгалагдлаа')
                 }}
               >
                 <div className="admin-field">
@@ -2053,24 +2060,13 @@ export function AdminPage() {
                     />
                   </div>
                 </div>
-                <div className="admin-field">
-                  <label htmlFor="about-photo">Зураг URL</label>
-                  <input
-                    id="about-photo"
-                    type="url"
-                    value={aboutDraft.photo}
-                    onChange={(e) =>
-                      setAboutDraft((d) => ({ ...d, photo: e.target.value }))
-                    }
-                    required
-                    placeholder="https://..."
-                  />
-                </div>
-                {aboutDraft.photo && (
-                  <div className="admin-about-preview">
-                    <img src={aboutDraft.photo} alt="" />
-                  </div>
-                )}
+                <PhotoPicker
+                  id="about-photo"
+                  label="Зураг"
+                  value={aboutDraft.photo}
+                  required
+                  onChange={(photo) => setAboutDraft((d) => ({ ...d, photo }))}
+                />
                 <div className="admin-field">
                   <label htmlFor="about-bio">Танилцуулга (товч)</label>
                   <textarea
@@ -2113,7 +2109,7 @@ export function AdminPage() {
                   else {
                     setStaffMsg('Нэмэгдлээ.')
                     setStaffEmail('')
-                    notify('Staff нэмэгдлээ')
+                    void saveAndSync('Staff нэмэгдлээ')
                   }
                 }}
               >
@@ -2138,7 +2134,7 @@ export function AdminPage() {
                     setStaffMsg(msg || `${user.email} нэмэгдлээ.`)
                     if (!msg) {
                       store.grantAdmin()
-                      notify('Gmail нэмэгдлээ')
+                      void saveAndSync('Gmail нэмэгдлээ')
                     }
                   }}
                 >
@@ -2157,7 +2153,7 @@ export function AdminPage() {
                         onClick={() => {
                           askDelete(email, () => {
                             store.removeAdminEmail(email)
-                            notify('Staff хасагдлаа')
+                            void saveAndSync('Staff хасагдлаа')
                           })
                         }}
                       >

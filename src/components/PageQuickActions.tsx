@@ -22,15 +22,15 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     match: (p) => p.startsWith('/news'),
     actions: [
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
-      { to: '/posts', label: 'Posts', icon: '✎' },
-      { to: '/wall', label: 'Wall', icon: 'W' },
+      { to: '/live', label: 'Live', icon: '●' },
+      { to: '/nba', label: 'NBA', icon: 'NB' },
     ],
   },
   {
     match: (p) => p.startsWith('/videos') || p.startsWith('/posts'),
     actions: [
-      { to: '/reels', label: 'Reels', icon: '◎' },
       { to: '/live', label: 'Live', icon: '●' },
+      { to: '/news', label: 'Мэдээ', icon: 'N' },
       { to: '/shorts', label: 'Cypher', icon: '⚡' },
     ],
   },
@@ -55,23 +55,23 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     actions: [
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
       { to: '/tickets', label: 'Тасалбар', icon: 'T' },
-      { to: '/wall', label: 'Wall', icon: 'W' },
+      { to: '/news', label: 'Мэдээ', icon: 'N' },
     ],
   },
   {
     match: (p) => p.startsWith('/music') || p.startsWith('/rappers') || p.startsWith('/rankings'),
     actions: [
-      { to: '/rappers', label: 'Артист', icon: 'A' },
-      { to: '/battle', label: 'Battle', icon: '⚡' },
-      { to: '/rankings', label: 'Rank', icon: '#' },
+      { to: '/music', label: 'Music', icon: '♪' },
+      { to: '/live', label: 'Live', icon: '●' },
+      { to: '/videos', label: 'Бичлэг', icon: '▶' },
     ],
   },
   {
     match: (p) => p.startsWith('/nba'),
     actions: [
-      { to: '/nba/hot', label: 'Hot', icon: 'H' },
       { to: '/nba/updates', label: 'Update', icon: 'U' },
       { to: '/nba/quiz', label: 'Quiz', icon: '?' },
+      { to: '/nba/mamba', label: 'Mamba', icon: 'M' },
     ],
   },
   {

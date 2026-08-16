@@ -1,21 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
-import { YOUTUBE_CHANNEL_URL, YOUTUBE_HANDLE } from '../data/brand'
-import { mambaMentality, nbaYtVideos } from '../data/nba'
+import {
+  FACEBOOK_PAGE_NAME,
+  FACEBOOK_PAGE_URL,
+  SACFUN_YOUTUBE_HANDLE,
+  SACFUN_YOUTUBE_URL,
+} from '../data/brand'
 import { SponsorSlot } from '../components/Widgets'
 import { useStore } from '../store/StoreContext'
+import { youtubeEmbedSrc, youtubeThumb } from '../lib/youtube'
 import './Pages.css'
 import './Nba.css'
 
 const nbaFilters = [
   { to: '/nba', label: 'Нүүр', match: (p: string) => p === '/nba' },
-  { to: '/reels', label: 'Reels', match: (p: string) => p.startsWith('/reels') },
   {
     to: '/nba/updates',
     label: 'Мэдээлэл',
     match: (p: string) => p.startsWith('/nba/updates'),
   },
-  { to: '/nba/hot', label: 'Hot', match: (p: string) => p.startsWith('/nba/hot') },
   { to: '/nba/mamba', label: 'Mamba', match: (p: string) => p.startsWith('/nba/mamba') },
   {
     to: '/nba/free-agency',
@@ -24,9 +27,9 @@ const nbaFilters = [
   },
   { to: '/nba/sacfun', label: 'Sacfun', match: (p: string) => p.startsWith('/nba/sacfun') },
   {
-    to: '/nba/youtube',
-    label: 'YouTube',
-    match: (p: string) => p.startsWith('/nba/youtube'),
+    to: '/nba/facebook',
+    label: 'Facebook',
+    match: (p: string) => p.startsWith('/nba/facebook'),
   },
   { to: '/nba/quiz', label: 'Quiz', match: (p: string) => p.startsWith('/nba/quiz') },
 ]
@@ -94,16 +97,14 @@ function NbaSubHead({
   )
 }
 
-/** NBA нүүр — цэвэр hub + Reels */
+/** NBA нүүр — цэвэр hub */
 export function NbaPage() {
   useNbaTitle('NBA')
   const { data } = useStore()
   const nbaUpdates = data.nbaUpdates
-  const nbaHotNews = data.nbaHotNews
   const freeAgents = data.nbaFreeAgents
   const nbaQuiz = data.nbaQuiz
   const featured = nbaUpdates[0]
-  const reels = data.shorts.slice(0, 8)
 
   return (
     <div className="nba-page">
@@ -131,37 +132,6 @@ export function NbaPage() {
         </div>
       </header>
 
-      {reels.length > 0 && (
-        <section className="nba-section nba-reels-section">
-          <div className="container">
-            <div className="nba-section-head">
-              <div>
-                <div className="section-kicker">Reels</div>
-                <h2>Босоо бичлэг</h2>
-              </div>
-              <Link to="/reels" className="section-link">
-                Бүгдийг үзэх →
-              </Link>
-            </div>
-            <div className="nba-reels-rail" aria-label="NBA Reels">
-              {reels.map((clip) => (
-                <Link key={clip.id} to="/reels" className="nba-reel-chip">
-                  <span className="nba-reel-thumb">
-                    <img
-                      src={`https://i.ytimg.com/vi/${clip.youtubeId}/hqdefault.jpg`}
-                      alt=""
-                      loading="lazy"
-                    />
-                    <i aria-hidden>▶</i>
-                  </span>
-                  <strong>{clip.title}</strong>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="nba-section">
         <div className="container">
           <div className="nba-section-head">
@@ -177,24 +147,24 @@ export function NbaPage() {
               <span>{nbaUpdates.length} нийтлэл</span>
             </p>
             <p>
-              <Link to="/nba/hot">Hot</Link>
-              <span>{nbaHotNews.length} сэдэв</span>
-            </p>
-            <p>
-              <Link to="/reels">Reels</Link>
-              <span>{data.shorts.length} бичлэг</span>
+              <Link to="/nba/free-agency">Free Agency</Link>
+              <span>{freeAgents.length} нэр</span>
             </p>
             <p>
               <Link to="/nba/quiz">Quiz</Link>
               <span>{nbaQuiz.length} асуулт</span>
             </p>
             <p>
-              <Link to="/nba/free-agency">Free Agency</Link>
-              <span>{freeAgents.length} нэр</span>
-            </p>
-            <p>
               <Link to="/nba/mamba">Mamba</Link>
               <span>унших</span>
+            </p>
+            <p>
+              <Link to="/nba/sacfun">Sacfun</Link>
+              <span>YouTube</span>
+            </p>
+            <p>
+              <Link to="/nba/facebook">Facebook</Link>
+              <span>page</span>
             </p>
           </div>
           <SponsorSlot slot="nba" alwaysShow />
@@ -266,77 +236,9 @@ export function NbaUpdateDetailPage() {
               <p key={p.slice(0, 28)}>{p}</p>
             ))}
           </div>
-          <a
-            href={YOUTUBE_CHANNEL_URL}
-            className="nba-inline-yt"
-            target="_blank"
-            rel="noreferrer"
-          >
-            YouTube дээр үргэлжлүүл → {YOUTUBE_HANDLE}
+          <a href={FACEBOOK_PAGE_URL} className="nba-inline-yt" target="_blank" rel="noreferrer">
+            Facebook page · {FACEBOOK_PAGE_NAME} →
           </a>
-        </div>
-      </article>
-    </div>
-  )
-}
-
-export function NbaHotPage() {
-  useNbaTitle('Hot news')
-  const { data } = useStore()
-  const nbaHotNews = data.nbaHotNews
-  return (
-    <div className="nba-page">
-      <NbaSubHead
-        kicker="Trending"
-        title="Hot news"
-        desc="Сэдэв дээр дарж дэлгэрэнгүй уншина."
-      />
-      <section className="nba-section">
-        <div className="container nba-list">
-          {nbaHotNews.map((h) => (
-            <Link key={h.id} to={`/nba/hot/${h.id}`} className="nba-list-card nba-list-card-plain">
-              <span className="nba-hot-rank">{String(h.rank).padStart(2, '0')}</span>
-              <div>
-                <span className="nba-update-tag">
-                  {h.heat} · {h.team} · {h.readMin} мин
-                </span>
-                <h2>{h.title}</h2>
-                <p>{h.blurb}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-    </div>
-  )
-}
-
-export function NbaHotDetailPage() {
-  const { id } = useParams()
-  const { data } = useStore()
-  const item = data.nbaHotNews.find((h) => h.id === id)
-  useNbaTitle(item?.title || 'Hot news')
-
-  if (!item) return <Navigate to="/nba/hot" replace />
-
-  return (
-    <div className="nba-page">
-      <article className="nba-article">
-        <div className="container nba-article-inner">
-          <NbaBack />
-          <Link to="/nba/hot" className="nba-crumb">
-            ← Hot news
-          </Link>
-          <span className="nba-update-tag">
-            #{item.rank} · {item.heat} · {item.team} · {item.readMin} мин
-          </span>
-          <h1>{item.title}</h1>
-          <p className="nba-article-lead">{item.blurb}</p>
-          <div className="nba-article-body">
-            {item.body.map((p) => (
-              <p key={p.slice(0, 24)}>{p}</p>
-            ))}
-          </div>
         </div>
       </article>
     </div>
@@ -345,27 +247,29 @@ export function NbaHotDetailPage() {
 
 export function NbaMambaPage() {
   useNbaTitle('Mamba Mentality')
+  const { data } = useStore()
+  const mamba = data.nbaMamba
   return (
     <div className="nba-page">
-      <NbaSubHead kicker={mambaMentality.kicker} title={mambaMentality.title} desc="~5 мин унших" />
+      <NbaSubHead kicker={mamba.kicker} title={mamba.title} desc="~6 мин унших" />
       <section className="nba-section">
         <div className="container nba-mamba">
-          <p className="nba-mamba-lead">{mambaMentality.lead}</p>
+          <p className="nba-mamba-lead">{mamba.lead}</p>
           <div className="nba-mamba-story">
-            {mambaMentality.story.map((p) => (
+            {mamba.story.map((p) => (
               <p key={p.slice(0, 28)}>{p}</p>
             ))}
           </div>
           <div className="nba-mamba-grid">
-            {mambaMentality.points.map((pt) => (
+            {mamba.points.map((pt) => (
               <article key={pt.h} className="nba-mamba-card">
                 <h3>{pt.h}</h3>
                 <p>{pt.p}</p>
               </article>
             ))}
           </div>
-          <blockquote className="nba-quote">{mambaMentality.quote}</blockquote>
-          <p className="nba-mamba-take">{mambaMentality.takeaway}</p>
+          <blockquote className="nba-quote">{mamba.quote}</blockquote>
+          <p className="nba-mamba-take">{mamba.takeaway}</p>
         </div>
       </section>
     </div>
@@ -375,13 +279,13 @@ export function NbaMambaPage() {
 export function NbaFreeAgencyPage() {
   useNbaTitle('Free Agency')
   const { data } = useStore()
-  const freeAgents = data.nbaFreeAgents
+  const freeAgents = [...data.nbaFreeAgents].sort((a, b) => a.rank - b.rank)
   return (
     <div className="nba-page">
       <NbaSubHead
-        kicker="Market"
-        title="Top Free Agency"
-        desc="Нэр дээр дарж дэлгэрэнгүй үзнэ."
+        kicker="2026 Market"
+        title="Free Agency"
+        desc="2026 оны зун — нэр дээр дарж дэлгэрэнгүй уншина. Admin-аас засаж, нэмнэ."
       />
       <section className="nba-section">
         <div className="container nba-list">
@@ -396,7 +300,10 @@ export function NbaFreeAgencyPage() {
                 <h2>{fa.name}</h2>
                 <div className="nba-fa-meta">
                   <span>{fa.position}</span>
-                  <span>{fa.lastTeam}</span>
+                  <span>
+                    {fa.lastTeam}
+                    {fa.newTeam && fa.newTeam !== fa.lastTeam ? ` → ${fa.newTeam}` : ''}
+                  </span>
                   <span>{fa.age} нас</span>
                 </div>
                 <p>{fa.note}</p>
@@ -435,10 +342,13 @@ export function NbaFreeAgencyDetailPage() {
               <p key={p.slice(0, 24)}>{p}</p>
             ))}
             <p>
-              <strong>Best fit:</strong> {item.fit}
+              <strong>Өмнөх баг:</strong> {item.lastTeam}
             </p>
             <p>
-              <strong>Last team:</strong> {item.lastTeam}
+              <strong>Шинэ баг:</strong> {item.newTeam || item.lastTeam}
+            </p>
+            <p>
+              <strong>Best fit:</strong> {item.fit}
             </p>
           </div>
         </div>
@@ -449,11 +359,100 @@ export function NbaFreeAgencyDetailPage() {
 
 export function NbaSacfunPage() {
   useNbaTitle('Sacfun')
-  const { data } = useStore()
+  const { data, syncSacfunYoutube } = useStore()
   const sacfunBits = data.nbaSacfun
+  const videos = data.nbaSacfunVideos || []
+  const [activeId, setActiveId] = useState(videos[0]?.youtubeId || '')
+  const [syncing, setSyncing] = useState(false)
+  const triedSync = useRef(false)
+
+  useEffect(() => {
+    if (videos.length || triedSync.current) return
+    triedSync.current = true
+    let cancelled = false
+    setSyncing(true)
+    void syncSacfunYoutube()
+      .catch(() => {
+        /* API key missing / offline — page still shows channel link */
+      })
+      .finally(() => {
+        if (!cancelled) setSyncing(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [videos.length, syncSacfunYoutube])
+
+  useEffect(() => {
+    if (!activeId && videos[0]) setActiveId(videos[0].youtubeId)
+  }, [activeId, videos])
+
+  const current = videos.find((v) => v.youtubeId === activeId) || videos[0]
+  const embed = useMemo(
+    () => (current ? youtubeEmbedSrc(current.youtubeId, { nocookie: true }) : ''),
+    [current],
+  )
+
   return (
     <div className="nba-page">
-      <NbaSubHead kicker="Community" title="Sacfun" desc="Newsac × NBA — fun mode" />
+      <NbaSubHead
+        kicker="Community"
+        title="Sacfun"
+        desc={`YouTube ${SACFUN_YOUTUBE_HANDLE} · fun mode`}
+      />
+      <section className="nba-section nba-yt-section">
+        <div className="container">
+          <div className="nba-yt-banner">
+            <div>
+              <h3>Sacfun YouTube</h3>
+              <p>
+                Clip of the week, reaction, highlight. Суваг дээр subscribe хийгээд эндээс шууд
+                үзээрэй.
+              </p>
+              <a className="btn btn-primary" href={SACFUN_YOUTUBE_URL} target="_blank" rel="noreferrer">
+                Суваг нээх · {SACFUN_YOUTUBE_HANDLE}
+              </a>
+            </div>
+          </div>
+
+          {current && embed ? (
+            <div className="nba-sacfun-player">
+              <div className="video-frame">
+                <iframe
+                  src={embed}
+                  title={current.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              <h2>{current.title}</h2>
+              {current.published ? <p>{current.published}</p> : null}
+            </div>
+          ) : (
+            <p className="nba-sacfun-empty">
+              {syncing
+                ? 'Бичлэг татаж байна…'
+                : 'Одоогоор бичлэг алга. Суваг руу ороод үзэх эсвэл Admin-аас YouTube ID нэмнэ үү.'}
+            </p>
+          )}
+
+          {videos.length > 1 ? (
+            <div className="nba-sacfun-vids" aria-label="Sacfun бичлэгүүд">
+              {videos.map((clip) => (
+                <button
+                  key={clip.id}
+                  type="button"
+                  className={`nba-sacfun-vid${clip.youtubeId === current?.youtubeId ? ' active' : ''}`}
+                  onClick={() => setActiveId(clip.youtubeId)}
+                >
+                  <img src={youtubeThumb(clip.youtubeId)} alt="" loading="lazy" />
+                  <strong>{clip.title}</strong>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </section>
       <section className="nba-section">
         <div className="container nba-sacfun">
           {sacfunBits.map((s) => (
@@ -468,38 +467,43 @@ export function NbaSacfunPage() {
   )
 }
 
-export function NbaYoutubePage() {
-  useNbaTitle('YouTube')
+export function NbaFacebookPage() {
+  useNbaTitle('Facebook')
   return (
     <div className="nba-page">
-      <NbaSubHead kicker="Watch" title="YouTube суваг" desc={YOUTUBE_HANDLE} />
+      <NbaSubHead kicker="Follow" title="Facebook page" desc={FACEBOOK_PAGE_URL} />
       <section className="nba-section nba-yt-section">
         <div className="container">
           <div className="nba-yt-banner">
             <div>
-              <h3>Newsac YouTube дээр үргэлжлүүл</h3>
+              <h3>Newsac Facebook</h3>
               <p>
-                Week-in-review, Free Agency board, Mamba яриа, Sacfun clip. Subscribe хийгээд
-                хоцрохгүй байгаарай.
+                NBA мэдээлэл, Sacfun clip, community take — Newsac page дээр үргэлжлүүлнэ. Like
+                хийгээд хоцрохгүй байгаарай.
               </p>
-              <a
-                className="btn btn-primary"
-                href={YOUTUBE_CHANNEL_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Суваг руу орох · {YOUTUBE_HANDLE}
+              <a className="btn btn-primary" href={FACEBOOK_PAGE_URL} target="_blank" rel="noreferrer">
+                Page нээх · {FACEBOOK_PAGE_NAME}
               </a>
             </div>
             <ul className="nba-yt-list">
-              {nbaYtVideos.map((v) => (
-                <li key={v.id}>
-                  <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noreferrer">
-                    <strong>{v.title}</strong>
-                    <span>{v.note}</span>
-                  </a>
-                </li>
-              ))}
+              <li>
+                <a href={FACEBOOK_PAGE_URL} target="_blank" rel="noreferrer">
+                  <strong>Newsac page</strong>
+                  <span>facebook.com/YoutuberNewSac</span>
+                </a>
+              </li>
+              <li>
+                <Link to="/nba/updates">
+                  <strong>NBA мэдээлэл</strong>
+                  <span>Сүүлийн нийтлэлүүдийг энд уншина</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/nba/sacfun">
+                  <strong>Sacfun бичлэг</strong>
+                  <span>{SACFUN_YOUTUBE_HANDLE}</span>
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -519,10 +523,11 @@ export function NbaQuizPage() {
   const [explain, setExplain] = useState<string | null>(null)
 
   const question = nbaQuiz[qi]
-  const progress = done ? 100 : ((qi + (picked !== null ? 1 : 0)) / nbaQuiz.length) * 100
+  const progress =
+    !nbaQuiz.length || done ? 100 : ((qi + (picked !== null ? 1 : 0)) / nbaQuiz.length) * 100
 
   function choose(idx: number) {
-    if (picked !== null || done) return
+    if (!question || picked !== null || done) return
     setPicked(idx)
     if (idx === question.answer) setScore((s) => s + 1)
     setExplain(question.explain)
@@ -544,7 +549,7 @@ export function NbaQuizPage() {
       <NbaSubHead
         kicker="Play"
         title="NBA Quiz"
-        desc={done ? 'Дууссан' : `${qi + 1} / ${nbaQuiz.length} асуулт`}
+        desc={done ? 'Дууссан' : `${Math.min(qi + 1, nbaQuiz.length)} / ${nbaQuiz.length} асуулт`}
       />
       <section className="nba-section">
         <div className="container">
@@ -552,7 +557,9 @@ export function NbaQuizPage() {
             <div className="nba-quiz-progress" aria-hidden>
               <i style={{ width: `${progress}%` }} />
             </div>
-            {done ? (
+            {!nbaQuiz.length ? (
+              <p>Асуулт байхгүй.</p>
+            ) : done ? (
               <div className="nba-quiz-result">
                 <strong>
                   {score}/{nbaQuiz.length}
@@ -560,8 +567,8 @@ export function NbaQuizPage() {
                 <p>
                   {score === nbaQuiz.length
                     ? 'Mamba mode — төгс!'
-                    : score >= 4
-                      ? 'Сайн байна. YouTube дээр илүү гүнзгийлээрэй.'
+                    : score >= Math.ceil(nbaQuiz.length * 0.7)
+                      ? 'Сайн байна. Мэдээлэл болон Free Agency-г дахин уншаарай.'
                       : 'Дахин оролдоорой — film session хэрэгтэй.'}
                 </p>
                 <div className="nba-quiz-result-actions">
@@ -578,17 +585,12 @@ export function NbaQuizPage() {
                   >
                     Дахин эхлэх
                   </button>
-                  <a
-                    className="btn btn-ghost"
-                    href={YOUTUBE_CHANNEL_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    YouTube үзэх
-                  </a>
+                  <Link className="btn btn-ghost" to="/nba/facebook">
+                    Facebook page
+                  </Link>
                 </div>
               </div>
-            ) : (
+            ) : question ? (
               <>
                 <h3>{question.q}</h3>
                 <div className="nba-quiz-choices">
@@ -613,7 +615,7 @@ export function NbaQuizPage() {
                 </div>
                 {explain && <p className="nba-quiz-explain">{explain}</p>}
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </section>

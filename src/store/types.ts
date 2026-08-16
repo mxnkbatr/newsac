@@ -332,6 +332,7 @@ export type NbaFreeAgent = {
   name: string
   position: string
   lastTeam: string
+  newTeam: string
   age: string
   note: string
   detail: string[]
@@ -350,6 +351,24 @@ export type NbaSacfunBit = {
   id: string
   title: string
   text: string
+}
+
+export type NbaMamba = {
+  title: string
+  kicker: string
+  lead: string
+  story: string[]
+  points: { h: string; p: string }[]
+  quote: string
+  takeaway: string
+}
+
+export type NbaSacfunVideo = {
+  id: string
+  youtubeId: string
+  title: string
+  description?: string
+  published?: string
 }
 
 export type AppData = {
@@ -374,6 +393,9 @@ export type AppData = {
   nbaFreeAgents: NbaFreeAgent[]
   nbaQuiz: NbaQuizQ[]
   nbaSacfun: NbaSacfunBit[]
+  nbaSacfunVideos: NbaSacfunVideo[]
+  nbaMamba: NbaMamba
+  lastSacfunYoutubeSync?: string
   /** Нүүр дээрх халуун 3 мэдээний ID (дараалал чухал) */
   homeHotNewsIds: string[]
   about: AboutPage

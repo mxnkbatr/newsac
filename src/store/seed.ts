@@ -2,7 +2,7 @@ import type { AppData } from './types'
 import { news, videos, rappers, rankings } from '../data/content'
 import {
   freeAgents,
-  nbaHotNews,
+  mambaMentality,
   nbaQuiz,
   nbaUpdates,
   sacfunBits,
@@ -569,10 +569,12 @@ export function createSeed(): AppData {
     ],
     battles: [],
     nbaUpdates: [...nbaUpdates],
-    nbaHotNews: [...nbaHotNews],
+    nbaHotNews: [],
     nbaFreeAgents: [...freeAgents],
     nbaQuiz: [...nbaQuiz],
     nbaSacfun: [...sacfunBits],
+    nbaSacfunVideos: [],
+    nbaMamba: { ...mambaMentality, story: [...mambaMentality.story], points: mambaMentality.points.map((p) => ({ ...p })) },
     homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
     about: {
       name: 'Цэндийн Батбаатар',
@@ -595,6 +597,7 @@ export function createSeed(): AppData {
     subscribers: [],
     events: [],
     lastYoutubeSync: undefined,
+    lastSacfunYoutubeSync: undefined,
     lastCloudSync: undefined,
     cmsTombstones: [],
   }

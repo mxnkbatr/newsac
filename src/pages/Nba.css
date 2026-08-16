@@ -701,6 +701,55 @@
   font-size: 0.92rem;
 }
 
+.nba-sacfun-player {
+  margin: 1.25rem 0 1.5rem;
+}
+
+.nba-sacfun-player h2 {
+  margin: 0.85rem 0 0.25rem;
+  font-size: 1.15rem;
+}
+
+.nba-sacfun-player p,
+.nba-sacfun-empty {
+  margin: 0.75rem 0 0;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+}
+
+.nba-sacfun-vids {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0 0 1.5rem;
+}
+
+.nba-sacfun-vid {
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: inherit;
+  padding: 0.45rem;
+  cursor: pointer;
+}
+
+.nba-sacfun-vid img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.nba-sacfun-vid strong {
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.nba-sacfun-vid.active {
+  border-color: var(--red);
+}
+
 .nba-yt-section {
   background:
     radial-gradient(ellipse 60% 80% at 100% 50%, rgba(227, 27, 35, 0.14), transparent 55%);
@@ -881,6 +930,10 @@
 
   .nba-sacfun {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .nba-sacfun-vids {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .nba-yt-banner {

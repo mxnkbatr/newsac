@@ -72,8 +72,7 @@ export function ContactPage() {
         </li>
       </ul>
       <p className="corp-note">
-        <Link to="/about">Бидний тухай</Link> · <Link to="/partnership">Хамтран ажиллах</Link> ·{' '}
-        <Link to="/advertise">Сурталчилгаа</Link>
+        <Link to="/about">Бидний тухай</Link> · <Link to="/partnership">Хамтран ажиллах</Link>
       </p>
     </CorporateShell>
   )

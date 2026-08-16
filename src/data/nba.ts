@@ -9,23 +9,13 @@ export type NbaStory = {
   image: string
 }
 
-export type NbaHot = {
-  id: string
-  rank: number
-  title: string
-  team: string
-  heat: string
-  blurb: string
-  body: string[]
-  readMin: number
-}
-
 export type FreeAgent = {
   id: string
   rank: number
   name: string
   position: string
   lastTeam: string
+  newTeam: string
   age: string
   note: string
   detail: string[]
@@ -40,376 +30,402 @@ export type QuizQ = {
   explain: string
 }
 
+export type MambaPage = {
+  title: string
+  kicker: string
+  lead: string
+  story: string[]
+  points: { h: string; p: string }[]
+  quote: string
+  takeaway: string
+}
+
 export const nbaUpdates: NbaStory[] = [
   {
-    id: 'u1',
-    tag: 'Trade',
-    title: 'Зүүн конференцийн худалдааны цонх халуун байна',
+    id: 'nba-u-26-lebron-sixers',
+    tag: 'Free Agency',
+    title: 'LeBron James «сүүлийн шийдвэр»-ээ зарлалаа — Philadelphia 76ers',
     blurb:
-      'Playoff seed-ийн төлөө contender-үүд wing болон big нэмэхээр хөдөлж байна. Deadline ойртох тусам phone line намжихгүй.',
+      'Lakers-ээс салсны дараа 41 настай карьерын онооны аварга хоёр жилийн veteran min гэрээгээр Sixers-т ирэв. Maxey, Embiid, Jaylen Brown-той нэг court.',
     body: [
-      'Зүүн талд 6–10-р байрын зөрүү маш жижиг болсон. Ийм үед нэг л trade багийн identity-г өөрчилж чадна: 3&D wing нэмэх үү, эсвэл rim protection-оо бэхжүүлэх үү?',
-      'Cap sheet болон draft capital-ийн хослол чухал. Зарим баг “win-now” горимд шилжиж, future pick-ээ зарж байна. Нөгөө хэсэг нь seller-ээр үлдэж, young talent цуглуулж байна.',
-      'Newsac-ийн уншигчдад зөвлөе: зөвхөн нэрийг биш — contract years, injury history, fit-ийг хамт хар. Том нэр болгон шийдэл биш.',
+      'LeBron James 2026 оны зун Lakers-тэй замаа салсны дараа тэтгэвэрт гарах хувилбарыг ч бодож байсан. Гэтэл 7-р сарын сүүлээр “my last decision” гэж бичиж, Philadelphia 76ers-тэй 2 жил / $8 саяын veteran min гэрээ байгуулснаа зарлав.',
+      'Sixers энэ offseason-д Jaylen Brown-ийг Celtics-ээс нэмсэн. Одоо төсөөлөлд Tyrese Maxey, V.J. Edgecombe, Brown, James, Joel Embiid гэсэн starting five харагдаж байна — All-Star, MVP, Finals MVP-ийн нийлбэр маш өндөр.',
+      'Асуулт нь эрүүл мэнд болон нас. Embiid-ийн availability, LeBron-ийн minutes, East-ийн physical series. Гэхдээ цаасан дээр энэ бол лигийн хамгийн чанга «win-now» төслүүдийн нэг.',
+      'Newsac уншигчдад: зөвхөн нэрийг биш. Sixers 1983 оноос хойш аваргалаагүй, 2001 оноос хойш East-ийн 2-р шатнаас гарч чадаагүй. Энэ зун тэр түүхийг эвдэхээр хөдөлсөн.',
     ],
-    when: '2 цагийн өмнө',
-    readMin: 4,
+    when: '7-р сар, 2026',
+    readMin: 5,
     image:
       'https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    id: 'u2',
-    tag: 'Injury',
-    title: 'Оддын load management — долоо хоногийн тайлан',
+    id: 'nba-u-26-lakers-reset',
+    tag: 'Lakers',
+    title: 'Lakers: Reaves max, Kessler sign-and-trade — Luka-гийн хажууд шинэ core',
     blurb:
-      'Гол тоглогчдын minutes restriction, буцах хуваарь, playoff-ын өмнөх “ramping up” төлөвлөгөө.',
+      'Austin Reaves 4 жилийн max-аар үлдлээ. Walker Kessler Utah-аас 4 жил / ~$130 саяар ирэв. LeBron явсны дараах L.A. өөр баг болж байна.',
     body: [
-      'Улирлын төгсгөлд health > standings гэсэн үзэл баримтлал хүчтэй. Зарим од back-to-back-ээс чөлөөлөгдөж, зарим нь minutes 28–32 дотор тоглож байна.',
-      'Training staff-ийн мэдээг дагах нь чухал: “questionable” гэдэг үг өдөр бүр өөр утгатай байж болно. Буцах өдөр биш, буцах хэлбэр (minutes, role) илүү чухал.',
-      'Фэнүүдийн хувьд: fantasy/lineup-аас илүү урт хугацааны зураг. Баг playoff-д орвол эдгээр шийдвэр зөв байсныг харна.',
+      'Austin Reaves player option-оо тавиад Lakers-тэй 4 жилийн maximum (~$185 сая) гэрээ байгуулав. Nets, Pistons зэрэг багууд max санал өгөх төлөвтэй байсан тул L.A. эрт түгжсэн.',
+      'Төвд Walker Kessler Jazz-тай sign-and-trade-ээр 4 жил / ~$130 саяар ирэв. Rim protection + lob threat — Luka Dončić-ийн pick-and-roll-д шууд тохирох профайл.',
+      'Quentin Grimes (PHI), Sandro Mamukelashvili (TOR) зэрэг нэмэлтүүд ч Lakers руу ирсэн. LeBron-ийн дараа баг «star + youth + size» руу шилжиж байна.',
+      'Фэнүүдийн анхаарах зүйл: cap sheet хүндэрлээ. Reaves-ийн max нь win-now мөнгө. Дараагийн алхам бол defense identity — Kessler ганцаараа бүгдийг шийдэхгүй.',
     ],
-    when: '5 цагийн өмнө',
-    readMin: 3,
-    image:
-      'https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    id: 'u3',
-    tag: 'Draft',
-    title: 'Дараагийн драфтын mock: #1 pick хэн бэ?',
-    blurb:
-      'Scouts-ийн санал, workout clip, багийн хэрэгцээ — гурвыг нь нийлүүлж харвал board өөрчлөгдөнө.',
-    body: [
-      'Одоогийн consensus-д #1-д big-ийн нэр давамгайлж байна. Гэхдээ guard-heavy draft class гэдэг яриа ч хүчтэй.',
-      'Workout-ууд дээр shooting consistency болон switch defense хамгийн их асуулттай. Athleticism ганцаараа board-ыг өргөхгүй.',
-      'Жижиг зах зээлтэй багууд “safe two-way” сонгох хандлагатай. Big market contender-үүд trade-up яриа эхлүүлж болно.',
-    ],
-    when: 'Өчигдөр',
-    readMin: 5,
-    image:
-      'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    id: 'u4',
-    tag: 'Intl',
-    title: 'Олон улсын лигээс NBA руу — шинэ нэрс',
-    blurb:
-      'EuroLeague / G League bridge-ээр ирэх хөгжилтэй тоглогчид. Spacing болон IQ-г импортлож байна.',
-    body: [
-      'Олон улсын тоглогчид NBA-д илүү хурдан дасан зохицож байна — physicality-ээс илүү decision speed чухал болсон.',
-      'EuroLeague-ийн stretch big болон secondary creator-ууд contender-үүдийн shortlist-д орсон. Two-way contract → roster spot зам нээлттэй.',
-      'Монголын үзэгчдэд: highlights-аас гадна full game film үз. Passing vision болон off-ball movement эндээс илүү тод харагдана.',
-    ],
-    when: '2 өдрийн өмнө',
+    when: '7-р сар, 2026',
     readMin: 4,
     image:
       'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    id: 'u5',
-    tag: 'Analysis',
-    title: 'Pace & space: яагаад 3 оноо тоглолтыг өөрчилсөн бэ?',
+    id: 'nba-u-26-east-board',
+    tag: 'East',
+    title: 'Зүүн конференц: Sixers superteam, Wizards Trae-гээ барив',
     blurb:
-      'Corner three, 5-out offense, drop coverage — энгийн харагдах зүйлс яагаад championship-ийг шийддэг вэ?',
+      'Philadelphia нэрсээ өсгөв. Washington Trae Young-ийг 4 жил / $213 саяар үлдээв. Boston Mitchell Robinson-оор paint-ээ бэхжүүллээ.',
     body: [
-      'Орчин үеийн NBA-д possession бүрийн expected value чухал. Corner three бол хамгийн үнэтэй “энгийн” шийдвэрүүдийн нэг.',
-      'Big-үүд rim-ээс холдож spacing өгөхөд lane нээгдэнэ. Guard-ууд paint рүү орох зайтай болж, kick-out нэмэгдэнэ.',
-      'Defense талд drop vs switch сонголт багийн identity. Амжилттай багууд нэг схемийг төгс хийхээс илүү, тоглолтын дундуур солих чадвартай.',
+      'East-ийн зураг 2026 оны 7-р сард хурдтай өөрчлөгдсөн. Sixers LeBron + Jaylen Brown нэмсэн нь Celtics, Knicks, Cavs-ийн тооцоог эвдэв.',
+      'Washington Wizards Trae Young-ийг 4 жил / $213 саяар үлдээв. Young rebuild-ийн «face» хэвээр — Edgecombe-той Sixers, эсвэл rising Pistons-тэй seed-ийн төлөөх тэмцэл сонирхолтой.',
+      'Boston Celtics Mitchell Robinson-ийг Knicks-ээс 3 жил / ~$47 саяар авсан. Brown явсны дараа rim protection болон offensive glass хэрэгтэй байсан.',
+      'Newsac take: East 1–6 бүгд «real». Paper superteam playoff-д injury-гаар унадаг. Health = standing гэж үзэх улирал болно.',
     ],
-    when: '3 өдрийн өмнө',
-    readMin: 6,
+    when: '7-р сар, 2026',
+    readMin: 4,
+    image:
+      'https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: 'nba-u-26-powell-collins',
+    tag: 'Market',
+    title: 'Wing market: Powell Чикагод, Collins Детройтад',
+    blurb:
+      'Norman Powell Heat-ээс Bulls руу 2 жил / $44 сая. John Collins Clippers-ээс Pistons руу 3 жил / $51 сая. Scoring wing-ийн үнэ тогтвортой өндөр.',
+    body: [
+      'Norman Powell Miami-д shot-making-ээ баталсан. Чикаго түүнийг 2 жил / ~$44 саяар авч, half-court isolation болон catch-and-shoot-оо нэмэв. Bulls-ийн direction тодорхой биш ч scoring punch нэмэгдлээ.',
+      'John Collins Pistons-т 3 жил / $51 саяар ирэв. Detroit өнгөрсөн жилүүдэд young core-оо өсгөсөн — Collins roll + dunk + spacing (хирсэн бол) тэнд тохирно.',
+      'Энэ хоёр гэрээ «max headline» биш. Гэхдээ playoff series-д 4-р үеийн scoring болон switching frontcourt яг ийм нэрсээр шийдэгддэг.',
+      'Free Agency самбарыг Newsac дээр тогтмол шинэчилнэ. Нэр дээр дарж дэлгэрэнгүй уншина уу.',
+    ],
+    when: '7-р сар, 2026',
+    readMin: 3,
+    image:
+      'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: 'nba-u-26-okc-hartenstein',
+    tag: 'West',
+    title: 'OKC Hartenstein-ээ 3 жил / $75 саяар барив',
+    blurb:
+      'Isaiah Hartenstein rim + short-roll pass. Чемпионы болон contender-ийн «quiet» хэсэг яагаад үнэтэй вэ?',
+    body: [
+      'Oklahoma City Isaiah Hartenstein-тэй 3 жил / $75 саяар дахин тохиролцов. Энэ бол highlight гэрээ биш — championship infrastructure.',
+      'Hartenstein pick-and-roll-д short roll дамжуулалт, paint deterrence, screening intelligence өгдөг. SGA-тай системд тэр «engine-ийн тос».',
+      'West-д Lakers size нэмсэн, Warriors Green/Porziņģis-ээ барьсан. OKC яг одоо «яагаад цонхыг одоо хаах вэ» гэсэн асуултад мөнгөөр хариулсан.',
+      'Улаанбаатарын үзэгчдэд: OKC-ийн тоглолтыг зөвхөн SGA-ийн изоляцаар битгий хар. 5-out, extra pass, big-ийн IQ — тэнд л баг ялгарна.',
+    ],
+    when: '7-р сар, 2026',
+    readMin: 3,
     image:
       'https://images.unsplash.com/photo-1608245449230-4ac190afb580?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    id: 'u6',
-    tag: 'Culture',
-    title: 'Шөнө дундын NBA: Улаанбаатарын үзэгчийн гарын авлага',
+    id: 'nba-u-26-camp-ub',
+    tag: 'UB гарын авлага',
+    title: '2026–27 training camp ойртож байна — UB цагаар хэрхэн үзэх вэ?',
     blurb:
-      'UB цагаар хэзээ тоглолт эхлэх вэ, аль stream дээр highlight хамгийн хурдан гарах вэ, хэрхэн “alive” мэдрэх вэ.',
+      '9-р сард camp, 10-р сард regular season. Шөнө дундын tip-off, recap, Sacfun clip — Newsac хэрхэн «alive» байлгах вэ.',
     body: [
-      'Ихэнх prime-time тоглолт UB-д өглөө эрт эсвэл шөнө дунд ордог. Тиймээс community chat, short recap, next-day analysis чухал.',
-      'Newsac дээр бид зөвхөн оноо биш — контекст өгдөг: яагаад coach timeout авсан, яагаад lineup өөрчлөгдсөн.',
-      'Зөвлөмж: бүтэн тоглолт үзэх боломжгүй бол 4-р үе + postgame. Тэнд л story төгсдөг.',
+      'NBA regular season 10-р сард эхэлнэ. Ихэнх prime-time тоглолт Улаанбаатарт шөнө эсвэл өглөө эрт орно. Тиймээс бүтэн 48 минут биш — 4-р үе + postgame + өглөөний recap чухал.',
+      'Энэ зун хамгийн их яригдах story: Sixers-ийн шинэ big 3/4, Lakers-ийн Luka + Reaves + Kessler, OKC-ийн repeat attempt, East-ийн нягтрал.',
+      'Newsac дээр Мэдээлэл хэсэгт контекст, Free Agency самбарт нэрс, Sacfun дээр @Newsacsacfun бичлэг, Quiz-ээр мэдлэгээ шалгана.',
+      'Зөвлөмж: бүтэн тоглолт үзэх боломжгүй бол box score биш — lineup, timeout, closing five. Тэнд л шөнө дундын NBA-ийн story төгсдөг.',
     ],
-    when: '4 өдрийн өмнө',
-    readMin: 3,
+    when: '8-р сар, 2026',
+    readMin: 4,
     image:
       'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=1200&q=80',
   },
-]
-
-export const nbaHotNews: NbaHot[] = [
   {
-    id: 'h1',
-    rank: 1,
-    title: 'Finals MVP race эрт эхэллээ',
-    team: 'League-wide',
-    heat: 'MAX',
-    blurb: 'Regular season MVP-ээс өөр түүх — clutch possession болон dual-threat impact.',
+    id: 'nba-u-26-mamba-why',
+    tag: 'Culture',
+    title: 'Яагаад Mamba Mentality одоо ч NBA ярианы төвд байдаг вэ?',
+    blurb:
+      'Kobe-ийн философи зөвхөн Lakers throwback биш. Load management, superteam, 41 насны LeBron — бүгд «process vs talent» асуулт.',
     body: [
-      'Finals MVP нь зөвхөн оноо биш. Defense, playmaking, “closing lineups”-д хэн үлдэнэ гэдэг шийддэг.',
-      'Энэ жилийн race-д 2–3 нэр эрт яригдаж байна. Гэхдээ May/June-д бүх зүйл өөрчлөгдөнө.',
+      'Mamba Mentality бол slogan биш. Kobe үүнийг өөрийн ажлын систем гэж тайлбарласан: хамгийн хэцүү мөчид хамгийн сайн хувилбараа гаргах, дараагийн possession руу шилжих.',
+      '2026 оны зун LeBron 24 дэх улирал руугаа орж байна. Reaves max авсан. Rookie, veteran, superteam — бүгд ижил шалгууртай: бэлтгэл, эрүүл мэнд, film.',
+      'Newsac-ийн Mamba хэсэгт бид зөвхөн ишлэл биш, өдөр тутмын 4 зарчмыг Монгол хэлээр тайлбарлана. Уншаад, Quiz-тэй хольж үзээрэй.',
     ],
+    when: '8-р сар, 2026',
     readMin: 3,
-  },
-  {
-    id: 'h2',
-    rank: 2,
-    title: 'Superteam rumor: гурав дахь одны яриа',
-    team: 'West',
-    heat: 'HIGH',
-    blurb: 'Star + star + star. Cap math хэцүү ч rumor machine намжихгүй.',
-    body: [
-      'West-ийн нэг contender гурав дахь од нэмэхээр agent-үүдтэй ярьж байна гэсэн мэдээ гарав.',
-      'Бодит байдал: salary matching + draft capital. Том deal болгонд “role players” ч багтдаг.',
-    ],
-    readMin: 2,
-  },
-  {
-    id: 'h3',
-    rank: 3,
-    title: 'Rookie of the Year — дунд улирлын leaderboard',
-    team: 'Rookies',
-    heat: 'HIGH',
-    blurb: 'Usage өссөн, efficiency хадгалсан нэрс түрүүлж явна.',
-    body: [
-      'ROY race-д scoring burst ганцаараа хангалтгүй. On/off rating, defense, availability чухал.',
-      'Зарим rookie “all-star trajectory” харуулж байна — гэхдээ sophomore year жинхэнэ шалгуур.',
-    ],
-    readMin: 2,
-  },
-  {
-    id: 'h4',
-    rank: 4,
-    title: 'Coach’s challenge rule өөрчлөлт',
-    team: 'NBA Ops',
-    heat: 'MID',
-    blurb: 'Timeout + challenge combo coach-уудын стратегид нөлөөлнө.',
-    body: [
-      'Шинэ clarification-ийн дараа late-game challenge илүү болгоомжтой болно.',
-      'Фэнүүдэд: replay дэлгэц удаан харагдах нь нормал — алдаа багасгахын тулд.',
-    ],
-    readMin: 2,
-  },
-  {
-    id: 'h5',
-    rank: 5,
-    title: 'All-Defense snub яриа эхэллээ',
-    team: 'Voters',
-    heat: 'MID',
-    blurb: 'Highlight steal vs team defense — хэн илүү “real” defender вэ?',
-    body: [
-      'Voters narrative болон advanced metrics зөрөх үед маргаан гардаг.',
-      'Newsac take: counting stats + film. Хоёулангүйгээр шударга биш.',
-    ],
-    readMin: 2,
+    image:
+      'https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=1200&q=80',
   },
 ]
 
-export const mambaMentality = {
+export const mambaMentality: MambaPage = {
   title: 'Mamba Mentality гэж юу вэ?',
-  kicker: 'Kobe Bryant',
+  kicker: 'Kobe Bryant · 1978–2020',
   lead:
-    'Ялагч байхын тулд өдөр бүр өөртэйгөө тулалдах — Kobe-ийн амьдрал, ажил, спортын философи. Энэ бол зөвхөн slogan биш, өдөр тутмын систем.',
+    'Ялагч байхын тулд өдөр бүр өөртэйгөө тулалдах. Kobe үүнийг постер биш, өдөр тутмын систем гэж нэрлэсэн. Авъяас хаалга нээнэ. Process хаалгыг нээлттэй байлгана.',
   story: [
-    'Kobe “Mamba Mentality”-г өөрийнхөө ажлын хэв маягийг тайлбарлахдаа хэрэглэсэн. Гол санаа: хамгийн хэцүү мөчид хамгийн сайн хувилбараа гаргах.',
-    'Тэр бэлтгэл дээр өрсөлдөгчөөсөө илүү эрт ирж, илүү олон repetition хийдэг байсан. Авъяас чухал — гэхдээ process илүү чухал.',
-    'Амьдралд энэ mindset зөвхөн basketball-д биш: сургууль, ажил, урлагт ч хэрэглэгдэнэ. Алдаагаа нуух биш, засч, дараагийн “possession”-д шилжих.',
+    'Kobe Bean Bryant 20 улирлыг бүгдийг Los Angeles Lakers-т өнгөрөөсөн. 5 удаагийн аварга, 2 удаагийн Finals MVP, 18 удаагийн All-Star. Гэхдээ Mamba Mentality статистикаас эхэлдэггүй — өглөөний бэлтгэлээс эхэлдэг.',
+    'Тэр «the work»-ийг нууцалдаггүй байсан. Өрсөлдөгчөөсөө эрт заал дээр, илүү олон repetition, илүү олон film session. Нэг шидэлт алдсан ч дараагийнхийг итгэлтэйгээр шиддэг байсан нь авьяас биш, бэлтгэлийн үр.',
+    '2013 онд Achilles тасарч, 2016 онд 60 оноо авч карьераа хаасан шөнө хүртэл тэр ижил хэлээр ярьсан: дарамт бол боломж. Алдаа бол дараагийн possession-ийн түлш.',
+    'Монголын үзэгч, тоглогч, артист, сурагчид яг энэ хэлийг ашиглаж болно. Basketball төдийгүй ажил, сургууль, студи дээр: төлөвлө, хэмж, зас, дахин хий. Өчигдрийн алдааг өнөөдрийн repetition болго.',
   ],
   points: [
     {
-      h: 'Obsessive craft',
-      p: 'Жижиг зүйлс: footwork, free throw, film session — бүгдийг мэргэжлийн түвшинд хийх. Дэлгэрэнгүй: нэг skill-ийг “хангалттай” гэж үзэхгүй.',
+      h: 'Гар урлал',
+      p: 'Footwork, free throw, weak hand, film — жижиг зүйлийг мэргэжлийн түвшинд хийнэ. «Хангалттай» гэсэн цэг байхгүй. Нэг skill-ийг өдөр бүр 1% сайжруулна.',
     },
     {
-      h: 'Fearless focus',
-      p: 'Алдаанаас айхгүй. Дарамттай мөчид илүү тайван, илүү хурц байх. Fear нь мэдээлэл — түүнийг action болго.',
+      h: 'Айдасгүй төвлөрөл',
+      p: 'Алдаанаас айхгүй. 4-р үеийн сүүлийн секундэд илүү тайван, илүү хурц. Айдас бол мэдээлэл — түүнийг action болгоно. Шүүмжлэл чимээгүй болгохгүй.',
     },
     {
-      h: 'Next play',
-      p: 'Алдаа болсон — дараагийн possession. Өнгөрсөнд гацахгүй, урагшаа. Short memory + long vision.',
+      h: 'Дараагийн possession',
+      p: 'Turnover болсон. Шидэлт алдсан. Яагаад гэдгийг секундэд тэмдэглээд урагшаа. Short memory, long vision. Өнгөрсөнд гацвал дараагийн дайралт үхнэ.',
     },
     {
-      h: 'Outwork everyone',
-      p: 'Авъяас ганцаараа хангалтгүй. Бэлтгэл, сэргэлт, mindset — 24/7. Recovery ч training-ийн нэг хэсэг.',
+      h: 'Бүхнээс илүү хичээх',
+      p: 'Авъяас ганцаараа хангалтгүй. Бэлтгэл, унтах, хоол, сэргэлт, mindset — бүгд training. Recovery ч ажлын хэсэг. Outwork гэдэг нь 24 цаг шуугих биш, зөв ажиллах.',
     },
   ],
   quote:
-    '«Everything negative — pressure, challenges — is all an opportunity for me to rise.»',
+    '«Everything negative — pressure, challenges — is all an opportunity for me to rise.» — Kobe Bryant',
   takeaway:
-    'Newsac дээр Mamba гэдэг нь “илүү хичээ” гэсэн хоосон үг биш. Энэ нь: төлөвлө, хэмж, зас, дахин хий — өдөр бүр.',
+    'Newsac дээр Mamba гэдэг нь «илүү хичээ» гэсэн хоосон үг биш. Төлөвлө. Хэмж. Зас. Дахин хий. Өдөр бүр. Энэ л mentality.',
 }
 
 export const freeAgents: FreeAgent[] = [
   {
-    id: 'fa1',
+    id: 'nba-fa-26-lebron',
     rank: 1,
-    name: 'Elite Wing Scorer',
+    name: 'LeBron James',
     position: 'SF / PF',
-    lastTeam: 'Contender',
-    age: '27',
-    note: '3&D + isolation. Max-level market.',
+    lastTeam: 'Los Angeles Lakers',
+    newTeam: 'Philadelphia 76ers',
+    age: '41',
+    note: '2 жил / $8 сая · veteran min. «My last decision.»',
     detail: [
-      'On-ball creation болон weak-side 3-ийн хослол contender-үүдэд хамгийн дутагдалтай.',
-      'Гэрээний хүлээлт: multi-year, near-max. Fit: spacing-тай big-тэй баг.',
+      'Карьерын онооны аварга, 4 удаагийн MVP 24 дэх улирал руугаа орж байна. Lakers-ээс салсны дараа тэтгэвэрт гарах хувилбар байсан.',
+      'Sixers-т Maxey, Jaylen Brown, Embiid-тэй хамт win-now төсөл. Minutes, load, closing lineup — бүгд асуулттай ч цаасан дээр East-ийн хамгийн чанга нэмэлт.',
     ],
-    fit: 'Win-now West / East 2–4 seed',
+    fit: 'Philadelphia 76ers — Maxey / Brown / Embiid spacing + playmaking',
   },
   {
-    id: 'fa2',
+    id: 'nba-fa-26-reaves',
     rank: 2,
-    name: 'Two-Way Guard',
-    position: 'PG / SG',
-    lastTeam: 'Playoff team',
-    age: '26',
-    note: 'Pick & roll engine, clutch minutes.',
-    detail: [
-      'Half-court offense-ийг зохион байгуулах чадвартай. Late-clock solution.',
-      'Defense дээр point-of-attack — энэ л үнийг өсгөнө.',
-    ],
-    fit: 'Star-аас secondary creator хэрэгтэй баг',
-  },
-  {
-    id: 'fa3',
-    rank: 3,
-    name: 'Rim Protector',
-    position: 'C',
-    lastTeam: 'East',
-    age: '29',
-    note: 'Switchable big, short-roll threat.',
-    detail: [
-      'Paint deterrence + short roll pass. Modern C-ийн стандарт.',
-      'Age 29 ч playoff-д “stabilizer” үүрэг гүйцэтгэнэ.',
-    ],
-    fit: 'Perimeter-heavy contender',
-  },
-  {
-    id: 'fa4',
-    rank: 4,
-    name: 'Stretch Big',
-    position: 'PF / C',
-    lastTeam: 'West',
-    age: '28',
-    note: 'Spacing + offensive rebound.',
-    detail: [
-      'Corner/slot 3 + offensive glass. Small-ball 5 болж чадна.',
-      'Contract: mid-level эсвэл soft max — market гүнээс хамаарна.',
-    ],
-    fit: 'Pace & space system',
-  },
-  {
-    id: 'fa5',
-    rank: 5,
-    name: 'Veteran Leader',
+    name: 'Austin Reaves',
     position: 'SG',
-    lastTeam: 'Multiple stops',
-    age: '33',
-    note: 'Locker room + playoff IQ.',
+    lastTeam: 'Los Angeles Lakers',
+    newTeam: 'Los Angeles Lakers',
+    age: '28',
+    note: '4 жилийн max · ~$185 сая. Luka-гийн хажууд түгжигдлээ.',
     detail: [
-      'Minutes бага ч “correct play”-ийг мэддэг. Young core-той багт үнэтэй.',
-      '1+1 эсвэл short deal илүү бодитой.',
+      'Player option-оо тавиад Lakers дээр max гарын үсэг зурав. Brooklyn, Detroit зэрэг багууд max түвшинд явна гэсэн яриа байсан.',
+      'On-ball creation, late-clock shot-making, Luka-тай chemistry. L.A.-ийн offseason-ийн #1 priority байсан бөгөөд тэд төлсөн.',
     ],
-    fit: 'Rising young roster',
+    fit: 'Lakers — Luka Dončić-ийн secondary creator',
   },
   {
-    id: 'fa6',
-    rank: 6,
-    name: '3&D Specialist',
-    position: 'SF',
-    lastTeam: 'Finals team',
-    age: '30',
-    note: 'Corner sniper, weak-side help.',
+    id: 'nba-fa-26-kessler',
+    rank: 3,
+    name: 'Walker Kessler',
+    position: 'C',
+    lastTeam: 'Utah Jazz',
+    newTeam: 'Los Angeles Lakers',
+    age: '25',
+    note: 'Sign-and-trade · 4 жил / ~$130 сая. Rim + lob.',
     detail: [
-      'Role тодорхой: shoot, defend, don’t turn over. Championship glue.',
-      'Үнэ нь “quiet” — гэхдээ playoff series-д мэдрэгдэнэ.',
+      'Jazz-аас Lakers руу sign-and-trade. Modern center: drop coverage, lob threat, вертикаль spacing.',
+      'LeBron явсны дараа L.A. size дутагдаж байсан. Kessler + Luka PnR бол 2026–27-ийн гол дайралт байх ёстой.',
     ],
-    fit: 'Any contender wing depth',
+    fit: 'Lakers — pick-and-roll rim protection',
+  },
+  {
+    id: 'nba-fa-26-trae',
+    rank: 4,
+    name: 'Trae Young',
+    position: 'PG',
+    lastTeam: 'Washington Wizards',
+    newTeam: 'Washington Wizards',
+    age: '27',
+    note: '4 жил / $213 сая. Wizards түүнийг нүүр царайгаараа үлдээв.',
+    detail: [
+      'Хагас талбайн pick-and-roll engine. Deep range, live dribble pass. Defense асуулттай хэвээр.',
+      'Washington rebuild дундаа max-оор барьсан нь «Young + young core» төслийг үргэлжлүүлнэ гэсэн дохио.',
+    ],
+    fit: 'Wizards — offense-ийн нэгдүгээр товч',
+  },
+  {
+    id: 'nba-fa-26-hartenstein',
+    rank: 5,
+    name: 'Isaiah Hartenstein',
+    position: 'C',
+    lastTeam: 'Oklahoma City Thunder',
+    newTeam: 'Oklahoma City Thunder',
+    age: '28',
+    note: '3 жил / $75 сая. Чемпионы «quiet» big.',
+    detail: [
+      'Short-roll passing, screen IQ, paint deterrence. Highlight биш — winning basketball.',
+      'OKC SGA-тай системээ хадгалж, contender window-оо одоо түгжихийг сонгосон.',
+    ],
+    fit: 'Thunder — 5-out rim + pass',
+  },
+  {
+    id: 'nba-fa-26-powell',
+    rank: 6,
+    name: 'Norman Powell',
+    position: 'SG',
+    lastTeam: 'Miami Heat',
+    newTeam: 'Chicago Bulls',
+    age: '33',
+    note: '2 жил / ~$44 сая. Instant offense.',
+    detail: [
+      'Catch-and-shoot + isolation scoring. Heat-д playoff shot-making-ээ харуулсан.',
+      'Bulls scoring punch нэмэв. Role тодорхой: шид, create, closing minutes-д хөргөхгүй.',
+    ],
+    fit: 'Bulls — second-side scoring',
+  },
+  {
+    id: 'nba-fa-26-collins',
+    rank: 7,
+    name: 'John Collins',
+    position: 'PF',
+    lastTeam: 'Los Angeles Clippers',
+    newTeam: 'Detroit Pistons',
+    age: '28',
+    note: '3 жил / $51 сая. Athleticism + roll gravity.',
+    detail: [
+      'Above-the-rim roll man, dunk gravity, зарим оройд stretch. Pistons-ийн young core-той athletic frontcourt.',
+      'Detroit rising seed байхад interior finishing болон offensive rebound хэрэгтэй. Collins тэр нүхийг бөглөнө.',
+    ],
+    fit: 'Pistons — PnR finisher / athletic four',
+  },
+  {
+    id: 'nba-fa-26-robinson',
+    rank: 8,
+    name: 'Mitchell Robinson',
+    position: 'C',
+    lastTeam: 'New York Knicks',
+    newTeam: 'Boston Celtics',
+    age: '28',
+    note: '3 жил / ~$47 сая. Rim + glass. Brown-ийн дараах paint.',
+    detail: [
+      'Elite offensive rebounder, rim runner, drop coverage. Injury history анхаарах ёстой.',
+      'Celtics Jaylen Brown-ийг алдсаны дараа paint болон physicality нэмэх шаардлагатай байсан. Robinson тэр профайл.',
+    ],
+    fit: 'Celtics — rim protection / offensive glass',
   },
 ]
 
 export const sacfunBits = [
   {
-    id: 's1',
+    id: 'nba-sf-26-court',
     title: 'Sacfun Court',
-    text: 'Highlight reaction, bold prediction, hot take — Newsac community-тай нэг court дээр. Долоо хоног бүр нэг “Court King” take сонгоно.',
+    text: 'Highlight reaction, bold prediction, hot take — Newsac community нэг court дээр. Долоо хоног бүрийн take-ээ Facebook page дээр үлдээгээрэй.',
   },
   {
-    id: 's2',
+    id: 'nba-sf-26-pickem',
     title: 'Pick’em Night',
-    text: 'Өнөөдрийн board: хэн ялах вэ, хэн 30+ авна вэ? Найзтайгаа score хөтөл. Ялагч дараагийн Quiz-д bonus авна (удахгүй).',
+    text: 'Өнөөдрийн board: хэн ялах вэ, хэн 30+ авна вэ? Найзтайгаа score хөтөл. Ялагч дараагийн Quiz-д нэрээ дурдуул.',
   },
   {
-    id: 's3',
+    id: 'nba-sf-26-ub',
     title: 'Mongol take',
-    text: 'UB цагаар шөнө дунд тоглолт — coffee + clutch. Таны hottest take-ээ Wall эсвэл YouTube comment дээр үлдээгээрэй.',
+    text: 'UB цагаар шөнө дунд тоглолт — coffee + clutch. Хамгийн гоё take-ээ Facebook эсвэл @Newsacsacfun коммент дээр бич.',
   },
   {
-    id: 's4',
+    id: 'nba-sf-26-clip',
     title: 'Clip of the week',
-    text: 'Долоо хоногийн хамгийн гоё play-г Newsac YouTube дээр break down хийнэ. Comment-ээр нэр дэвшүүл.',
-  },
-]
-
-export const nbaYtVideos = [
-  {
-    id: 'yt1',
-    title: 'NBA шинийн тойм · Newsac',
-    note: 'Долоо хоногийн хамгийн чухал story-г Монгол хэлээр',
-  },
-  {
-    id: 'yt2',
-    title: 'Mamba Mentality · яриа',
-    note: 'Mindset + highlight + community Q&A',
-  },
-  {
-    id: 'yt3',
-    title: 'Free Agency board',
-    note: 'Хэн хаашаа очих вэ — cap sheet-тэй тайлбар',
+    text: 'Долоо хоногийн play-г Sacfun YouTube (@Newsacsacfun) дээр тавина. Доороос шууд үзээрэй.',
   },
 ]
 
 export const nbaQuiz: QuizQ[] = [
   {
-    id: 'q1',
-    q: 'NBA-д нэг баг хэдэн тоглогчтой roster байдаг вэ (стандарт)?',
-    choices: ['12', '15', '18', '10'],
+    id: 'nba-q-26-1',
+    q: '2026 оны зун LeBron James аль багтай гэрээ байгуулсан бэ?',
+    choices: [
+      'Los Angeles Lakers',
+      'Philadelphia 76ers',
+      'Golden State Warriors',
+      'Miami Heat',
+    ],
     answer: 1,
-    explain: 'Стандарт active roster 15 (two-way-ийг оруулаад яриа өөр).',
+    explain: 'LeBron Lakers-ээс салж, Sixers-тэй 2 жилийн veteran min гэрээ байгуулсан («my last decision»).',
   },
   {
-    id: 'q2',
-    q: 'Kobe Bryant аль багт бүх карьераа өнгөрөөсөн бэ?',
-    choices: ['Chicago Bulls', 'Los Angeles Lakers', 'Boston Celtics', 'Miami Heat'],
+    id: 'nba-q-26-2',
+    q: 'Kobe Bryant бүх карьераа аль багт өнгөрөөсөн бэ?',
+    choices: ['Chicago Bulls', 'Los Angeles Lakers', 'Boston Celtics', 'Philadelphia 76ers'],
     answer: 1,
-    explain: 'Kobe бүх 20 улирлаа Lakers-т өнгөрөөсөн.',
+    explain: 'Kobe 20 улирлыг бүгдийг Lakers-т өнгөрөөсөн. 5 аварга, 18 All-Star.',
   },
   {
-    id: 'q3',
-    q: 'Shot clock хэдэн секунд вэ?',
+    id: 'nba-q-26-3',
+    q: 'NBA-д shot clock хэдэн секунд вэ?',
     choices: ['18', '20', '24', '30'],
     answer: 2,
-    explain: 'NBA shot clock 24 секунд.',
+    explain: 'NBA shot clock 24 секунд. FIBA ч мөн 24.',
   },
   {
-    id: 'q4',
-    q: 'Finals MVP шагнал юу гэж нэрлэгддэг вэ?',
-    choices: ['Larry O’Brien', 'Bill Russell', 'Magic Johnson', 'Naismith'],
+    id: 'nba-q-26-4',
+    q: 'Нэг баг талбай дээр нэгэн зэрэг хэдэн тоглогчтой вэ?',
+    choices: ['4', '5', '6', '7'],
+    answer: 1,
+    explain: 'Баг бүр 5, нийт 10 тоглогч талбай дээр.',
+  },
+  {
+    id: 'nba-q-26-5',
+    q: 'Regular season-д нэг баг хэдэн тоглолт хийдэг вэ?',
+    choices: ['72', '78', '82', '88'],
+    answer: 2,
+    explain: 'NBA regular season 82 тоглолт (bubble/COVID жилүүдийг эс тооцвол).',
+  },
+  {
+    id: 'nba-q-26-6',
+    q: 'Нэг үе хэдэн минут вэ (NBA)?',
+    choices: ['8', '10', '12', '15'],
+    answer: 2,
+    explain: 'NBA-д 4 үе × 12 минут. NCAA 2 × 20, FIBA 4 × 10.',
+  },
+  {
+    id: 'nba-q-26-7',
+    q: 'NBA-ийн 3 онооны шугам top of the key орчим хэдэн фут вэ?',
+    choices: ['19.75', '22', '23.75', '25'],
+    answer: 2,
+    explain: 'NBA 3PT шугам нумын оройд 23.75 фут, булан дээр 22 фут.',
+  },
+  {
+    id: 'nba-q-26-8',
+    q: 'Finals MVP цом ямар нэртэй вэ?',
+    choices: ['Larry O’Brien', 'Bill Russell Trophy', 'Magic Johnson Trophy', 'Naismith Trophy'],
     answer: 1,
     explain: 'Finals MVP = Bill Russell Trophy. Larry O’Brien бол багийн аваргаллын цом.',
   },
   {
-    id: 'q5',
-    q: 'Нэг үед хэдэн тоглогч талбай дээр байдаг вэ (нэг баг)?',
-    choices: ['4', '5', '6', '7'],
-    answer: 1,
-    explain: 'Баг бүр 5 тоглогчтой — нийт 10.',
+    id: 'nba-q-26-9',
+    q: 'Austin Reaves 2026 онд ямар гэрээтэй Lakers-т үлдсэн бэ?',
+    choices: [
+      '1 жилийн veteran min',
+      '2 жил / mid-level',
+      '4 жилийн maximum (~$185 сая)',
+      'Sign-and-trade-ээр Clippers',
+    ],
+    answer: 2,
+    explain: 'Reaves player option-оо тавиад Lakers-тэй 4 жилийн max гэрээ байгуулсан.',
   },
   {
-    id: 'q6',
-    q: 'Гурван онооны шугам ойролцоогоор хэдэн фут вэ (top of arc)?',
-    choices: ['19.75', '22', '23.75', '25'],
-    answer: 2,
-    explain: 'NBA 3PT шугам top of the key орчим 23.75 фут.',
+    id: 'nba-q-26-10',
+    q: 'Walker Kessler ямар аргаар Lakers-т ирсэн бэ?',
+    choices: [
+      'Draft',
+      'Utah Jazz-тай sign-and-trade',
+      'Buyout-оор Heat-ээс',
+      'Two-way contract',
+    ],
+    answer: 1,
+    explain: 'Kessler Jazz-тай sign-and-trade-ээр 4 жил / ~$130 саяар Lakers-т ирсэн.',
   },
 ]

@@ -10,6 +10,13 @@ export function todayIso() {
 
 export const newsFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
+  {
+    key: 'image',
+    label: 'Зураг',
+    type: 'image',
+    required: true,
+    placeholder: 'Photos-оос сонгоно',
+  },
   { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
   {
     key: 'body',
@@ -31,13 +38,6 @@ export const newsFields: FieldDef[] = [
   { key: 'category', label: 'Ангилал', half: true },
   { key: 'date', label: 'Огноо', half: true, placeholder: '2026.08.06' },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
-  {
-    key: 'image',
-    label: 'Зураг',
-    type: 'image',
-    required: true,
-    placeholder: 'эсвэл зураг URL',
-  },
   { key: 'membersOnly', label: 'Members only', type: 'checkbox' },
 ]
 
@@ -74,7 +74,7 @@ export const rapperFields: FieldDef[] = [
   { key: 'streams', label: 'Streams', half: true },
   { key: 'bio', label: 'Bio', type: 'textarea' },
   { key: 'story', label: 'Түүх', type: 'textarea' },
-  { key: 'image', label: 'Зураг URL', type: 'url' },
+  { key: 'image', label: 'Зураг', type: 'image', required: true },
   { key: 'tags', label: 'Tags (таслалаар)', placeholder: 'Trap, UB' },
   { key: 'ownerEmail', label: 'Artist Gmail' },
   { key: 'verified', label: 'Verified артист', type: 'checkbox' },
@@ -96,7 +96,7 @@ export const productFields: FieldDef[] = [
       { value: 'tip', label: 'Tip' },
     ],
   },
-  { key: 'image', label: 'Зураг URL', type: 'url', half: true },
+  { key: 'image', label: 'Зураг', type: 'image', required: true },
   { key: 'active', label: 'Идэвхтэй', type: 'checkbox' },
 ]
 
@@ -112,7 +112,7 @@ export const showFields: FieldDef[] = [
   { key: 'seatsLeft', label: 'Standard үлдэгдэл', type: 'number', half: true },
   { key: 'vipLeft', label: 'VIP үлдэгдэл', type: 'number', half: true },
   { key: 'description', label: 'Тайлбар', type: 'textarea' },
-  { key: 'image', label: 'Зураг URL', type: 'url' },
+  { key: 'image', label: 'Зураг', type: 'image', required: true },
   { key: 'active', label: 'Идэвхтэй', type: 'checkbox' },
 ]
 
@@ -120,7 +120,7 @@ export const podcastFields: FieldDef[] = [
   { key: 'title', label: 'Гарчиг', required: true },
   { key: 'description', label: 'Тайлбар', type: 'textarea' },
   { key: 'audioUrl', label: 'Audio URL', type: 'url', required: true },
-  { key: 'cover', label: 'Cover URL', type: 'url' },
+  { key: 'cover', label: 'Cover зураг', type: 'image' },
   { key: 'duration', label: 'Үргэлжлэх', half: true },
   { key: 'published', label: 'Нийтэлсэн', half: true },
   { key: 'guests', label: 'Зочин' },
@@ -148,7 +148,7 @@ export const dropFields: FieldDef[] = [
     placeholder: 'Video/Short бол заавал',
   },
   { key: 'teaser', label: 'Teaser', type: 'textarea' },
-  { key: 'image', label: 'Зураг URL (хоосон бол YT thumb)', type: 'url' },
+  { key: 'image', label: 'Зураг', type: 'image', placeholder: 'хоосон бол YouTube thumbnail' },
 ]
 
 export const homeStoryFields: FieldDef[] = [
@@ -199,21 +199,21 @@ export const liveFields: FieldDef[] = [
   { key: 'youtubeId', label: 'YouTube линк / ID', placeholder: 'https://youtu.be/...' },
   { key: 'startsAt', label: 'Эхлэх (ISO)' },
   { key: 'viewers', label: 'Үзэгчид', type: 'number', half: true },
-  { key: 'cover', label: 'Cover URL', type: 'url', half: true },
+  { key: 'cover', label: 'Cover зураг', type: 'image' },
   { key: 'hostName', label: 'Host нэр' },
 ]
 
 export const wallFields: FieldDef[] = [
   { key: 'authorName', label: 'Зохиогч', required: true },
   { key: 'text', label: 'Текст', type: 'textarea', required: true },
-  { key: 'image', label: 'Зураг URL', type: 'url' },
+  { key: 'image', label: 'Зураг', type: 'image' },
 ]
 
 export const sponsorFields: FieldDef[] = [
   { key: 'name', label: 'Нэр', required: true },
   { key: 'tagline', label: 'Tagline' },
   { key: 'url', label: 'URL', type: 'url' },
-  { key: 'image', label: 'Зураг URL', type: 'url' },
+  { key: 'image', label: 'Зураг', type: 'image', required: true },
   {
     key: 'slot',
     label: 'Slot',
@@ -245,7 +245,7 @@ export const chartFields: FieldDef[] = [
     label: 'YouTube линк / ID',
     placeholder: 'https://youtu.be/...',
   },
-  { key: 'cover', label: 'Cover URL', type: 'url' },
+  { key: 'cover', label: 'Cover зураг', type: 'image' },
   { key: 'isNew', label: 'Шинэ', type: 'checkbox' },
 ]
 
@@ -265,7 +265,7 @@ export const battleFields: FieldDef[] = [
   { key: 'endsAt', label: 'Дуусах (ISO)', half: true },
   { key: 'sideA', label: 'Тал 1 нэр', required: true, half: true },
   { key: 'sideB', label: 'Тал 2 нэр', required: true, half: true },
-  { key: 'cover', label: 'Cover URL', type: 'url' },
+  { key: 'cover', label: 'Cover зураг', type: 'image' },
 ]
 
 export const IMG = {

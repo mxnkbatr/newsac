@@ -82,7 +82,7 @@ export function buildHubStages(data: AppData): HubStage[] {
     {
       step: 2,
       title: 'NBA',
-      desc: 'Мэдээлэл, Hot, Free Agency, Quiz, Reels — тусдаа',
+      desc: 'Мэдээлэл, Free Agency, Mamba, Sacfun, Facebook, Quiz',
       items: [
         {
           id: 'nba',
@@ -90,18 +90,9 @@ export function buildHubStages(data: AppData): HubStage[] {
           page: '/nba',
           count:
             (data.nbaUpdates?.length || 0) +
-            (data.nbaHotNews?.length || 0) +
             (data.nbaFreeAgents?.length || 0),
           ready: true,
           note: 'Бүх NBA хэсэг',
-        },
-        {
-          id: 'reels',
-          label: 'Reels',
-          page: '/reels',
-          count: data.shorts.length,
-          ready: true,
-          note: 'YouTube Shorts',
         },
       ],
     },

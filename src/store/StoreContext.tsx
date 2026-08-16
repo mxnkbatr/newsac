@@ -38,8 +38,10 @@ import type {
   NewsComment,
   NbaFreeAgent,
   NbaHot,
+  NbaMamba,
   NbaQuizQ,
   NbaSacfunBit,
+  NbaSacfunVideo,
   NbaStory,
 } from './types'
 import { YOUTUBE_CHANNEL_URL } from '../data/brand'
@@ -123,16 +125,20 @@ type StoreValue = {
   upsertBattle: (item: Battle) => void
   deleteBattle: (id: string) => void
   voteBattle: (battleId: string, sideId: string) => string | null
-  upsertNbaUpdate: (item: NbaStory) => void
-  deleteNbaUpdate: (id: string) => void
+  upsertNbaUpdate: (item: NbaStory) => AppData
+  deleteNbaUpdate: (id: string) => AppData
   upsertNbaHot: (item: NbaHot) => void
   deleteNbaHot: (id: string) => void
-  upsertNbaFreeAgent: (item: NbaFreeAgent) => void
-  deleteNbaFreeAgent: (id: string) => void
-  upsertNbaQuiz: (item: NbaQuizQ) => void
-  deleteNbaQuiz: (id: string) => void
-  upsertNbaSacfun: (item: NbaSacfunBit) => void
-  deleteNbaSacfun: (id: string) => void
+  upsertNbaFreeAgent: (item: NbaFreeAgent) => AppData
+  deleteNbaFreeAgent: (id: string) => AppData
+  upsertNbaQuiz: (item: NbaQuizQ) => AppData
+  deleteNbaQuiz: (id: string) => AppData
+  upsertNbaSacfun: (item: NbaSacfunBit) => AppData
+  deleteNbaSacfun: (id: string) => AppData
+  upsertNbaSacfunVideo: (item: NbaSacfunVideo) => AppData
+  deleteNbaSacfunVideo: (id: string) => AppData
+  setNbaMamba: (page: NbaMamba) => AppData
+  syncSacfunYoutube: () => Promise<number>
   linkRapperOwner: (
     rapperId: string,
     ownerEmail: string,
@@ -174,6 +180,66 @@ function mergeList<T extends { id: string }>(
   const ids = new Set(base.map((item) => item.id))
   const extras = local.filter((item) => !ids.has(item.id))
   return extras.length ? [...extras, ...base] : base
+}
+
+/** Old placeholder NBA rows — drop so new seed content can appear. */
+const NBA_LEGACY_IDS = new Set([
+  'u1',
+  'u2',
+  'u3',
+  'u4',
+  'u5',
+  'u6',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'fa1',
+  'fa2',
+  'fa3',
+  'fa4',
+  'fa5',
+  'fa6',
+  'q1',
+  'q2',
+  'q3',
+  'q4',
+  'q5',
+  'q6',
+  's1',
+  's2',
+  's3',
+  's4',
+  'yt1',
+  'yt2',
+  'yt3',
+])
+
+function mergeNbaContent<T extends { id: string }>(
+  remote: T[] | undefined,
+  local: T[] | undefined,
+  seed: T[],
+  tombs?: Set<string>,
+): T[] {
+  const drop = (items: T[] | undefined) =>
+    (items || []).filter((item) => !NBA_LEGACY_IDS.has(item.id) && !tombs?.has(item.id))
+  const seedClean = drop(seed)
+  const byId = new Map<string, T>()
+  for (const item of seedClean) byId.set(item.id, item)
+  for (const item of drop(local)) byId.set(item.id, item)
+  for (const item of drop(remote)) byId.set(item.id, item)
+  const seedIds = seedClean.map((item) => item.id)
+  const extraIds = [...byId.keys()].filter((id) => !seedIds.includes(id))
+  return [...seedIds, ...extraIds].map((id) => byId.get(id)!).filter(Boolean)
+}
+
+function mergeNbaMamba(remote: NbaMamba | undefined, local: NbaMamba | undefined, seed: NbaMamba) {
+  const isCustom = (page?: NbaMamba) =>
+    Boolean(page?.title && page.lead && page.takeaway && page.takeaway !== seed.takeaway)
+  if (isCustom(remote)) return remote as NbaMamba
+  if (isCustom(local)) return local as NbaMamba
+  return seed
 }
 
 function tombstoneSet(...lists: Array<string[] | undefined>) {
@@ -250,13 +316,22 @@ function loadData(): AppData {
       battles: Array.isArray(parsed.battles)
         ? parsed.battles.filter((b) => b.id !== 'battle-1' && b.id !== 'battle-2')
         : seed.battles,
-      nbaUpdates: parsed.nbaUpdates?.length ? parsed.nbaUpdates : seed.nbaUpdates,
-      nbaHotNews: parsed.nbaHotNews?.length ? parsed.nbaHotNews : seed.nbaHotNews,
-      nbaFreeAgents: parsed.nbaFreeAgents?.length
-        ? parsed.nbaFreeAgents
-        : seed.nbaFreeAgents,
-      nbaQuiz: parsed.nbaQuiz?.length ? parsed.nbaQuiz : seed.nbaQuiz,
-      nbaSacfun: parsed.nbaSacfun?.length ? parsed.nbaSacfun : seed.nbaSacfun,
+      nbaUpdates: mergeNbaContent(undefined, parsed.nbaUpdates, seed.nbaUpdates, tombs),
+      nbaHotNews: [],
+      nbaFreeAgents: mergeNbaContent(
+        undefined,
+        parsed.nbaFreeAgents,
+        seed.nbaFreeAgents,
+        tombs,
+      ).map((fa) => ({
+        ...fa,
+        newTeam: fa.newTeam || fa.lastTeam || '',
+      })),
+      nbaQuiz: mergeNbaContent(undefined, parsed.nbaQuiz, seed.nbaQuiz, tombs),
+      nbaSacfun: mergeNbaContent(undefined, parsed.nbaSacfun, seed.nbaSacfun, tombs),
+      nbaSacfunVideos: Array.isArray(parsed.nbaSacfunVideos) ? parsed.nbaSacfunVideos : [],
+      nbaMamba: mergeNbaMamba(undefined, parsed.nbaMamba, seed.nbaMamba),
+      lastSacfunYoutubeSync: parsed.lastSacfunYoutubeSync,
       homeHotNewsIds: rejectTombs(
         (
           Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
@@ -360,11 +435,28 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
     livestreams: mergeList(remote.livestreams, local.livestreams, seed.livestreams),
     wallPosts: mergeList(remote.wallPosts, local.wallPosts, seed.wallPosts),
     battles: Array.isArray(remote.battles) ? remote.battles : seed.battles,
-    nbaUpdates: mergeList(remote.nbaUpdates, local.nbaUpdates, seed.nbaUpdates),
-    nbaHotNews: mergeList(remote.nbaHotNews, local.nbaHotNews, seed.nbaHotNews),
-    nbaFreeAgents: mergeList(remote.nbaFreeAgents, local.nbaFreeAgents, seed.nbaFreeAgents),
-    nbaQuiz: remote.nbaQuiz?.length ? remote.nbaQuiz : seed.nbaQuiz,
-    nbaSacfun: mergeList(remote.nbaSacfun, local.nbaSacfun, seed.nbaSacfun),
+    nbaUpdates: mergeNbaContent(remote.nbaUpdates, local.nbaUpdates, seed.nbaUpdates, tombs),
+    nbaHotNews: [],
+    nbaFreeAgents: mergeNbaContent(
+      remote.nbaFreeAgents,
+      local.nbaFreeAgents,
+      seed.nbaFreeAgents,
+      tombs,
+    ).map((fa) => ({
+      ...fa,
+      newTeam: fa.newTeam || fa.lastTeam || '',
+    })),
+    nbaQuiz: mergeNbaContent(remote.nbaQuiz, local.nbaQuiz, seed.nbaQuiz, tombs),
+    nbaSacfun: mergeNbaContent(remote.nbaSacfun, local.nbaSacfun, seed.nbaSacfun, tombs),
+    nbaSacfunVideos:
+      remote.nbaSacfunVideos?.length
+        ? remote.nbaSacfunVideos
+        : local.nbaSacfunVideos?.length
+          ? local.nbaSacfunVideos
+          : seed.nbaSacfunVideos || [],
+    nbaMamba: mergeNbaMamba(remote.nbaMamba, local.nbaMamba, seed.nbaMamba),
+    lastSacfunYoutubeSync:
+      remote.lastSacfunYoutubeSync || local.lastSacfunYoutubeSync,
     homeHotNewsIds: rejectTombs(
       (
         Array.isArray(remote.homeHotNewsIds)
@@ -734,6 +826,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
 
         return songs.length
+      },
+      async syncSacfunYoutube() {
+        const remote = await fetchChannelVideos('Newsacsacfun', 18)
+        const videos: NbaSacfunVideo[] = remote.map((v) => ({
+          id: `sacfun-yt-${v.youtubeId}`,
+          youtubeId: v.youtubeId,
+          title: v.title,
+          description: v.description,
+          published: v.published,
+        }))
+        let added = 0
+        patch((prev) => {
+          const existing = new Set((prev.nbaSacfunVideos || []).map((v) => v.youtubeId))
+          const fresh = videos.filter((v) => !existing.has(v.youtubeId))
+          added = fresh.length
+          const byYt = new Map(videos.map((v) => [v.youtubeId, v]))
+          const nbaSacfunVideos = [
+            ...fresh,
+            ...(prev.nbaSacfunVideos || []).map((v) => {
+              const upd = byYt.get(v.youtubeId)
+              return upd ? { ...v, ...upd, id: v.id } : v
+            }),
+          ]
+          return {
+            ...prev,
+            nbaSacfunVideos,
+            lastSacfunYoutubeSync: new Date().toISOString(),
+          }
+        })
+        return added
       },
       upsertNews(item) {
         return patch((prev) => {
@@ -1174,7 +1296,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return null
       },
       upsertNbaUpdate(item) {
-        patch((prev) => {
+        return patch((prev) => {
           const i = prev.nbaUpdates.findIndex((n) => n.id === item.id)
           if (i >= 0) {
             const nbaUpdates = [...prev.nbaUpdates]
@@ -1185,9 +1307,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
       },
       deleteNbaUpdate(id) {
-        patch((prev) => ({
+        return patch((prev) => ({
           ...prev,
           nbaUpdates: prev.nbaUpdates.filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },
       upsertNbaHot(item) {
@@ -1208,24 +1331,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }))
       },
       upsertNbaFreeAgent(item) {
-        patch((prev) => {
-          const i = prev.nbaFreeAgents.findIndex((n) => n.id === item.id)
+        return patch((prev) => {
+          const next = {
+            ...item,
+            newTeam: item.newTeam || item.lastTeam || '',
+          }
+          const i = prev.nbaFreeAgents.findIndex((n) => n.id === next.id)
           if (i >= 0) {
             const nbaFreeAgents = [...prev.nbaFreeAgents]
-            nbaFreeAgents[i] = item
+            nbaFreeAgents[i] = next
             return { ...prev, nbaFreeAgents }
           }
-          return { ...prev, nbaFreeAgents: [item, ...prev.nbaFreeAgents] }
+          return { ...prev, nbaFreeAgents: [next, ...prev.nbaFreeAgents] }
         })
       },
       deleteNbaFreeAgent(id) {
-        patch((prev) => ({
+        return patch((prev) => ({
           ...prev,
           nbaFreeAgents: prev.nbaFreeAgents.filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },
       upsertNbaQuiz(item) {
-        patch((prev) => {
+        return patch((prev) => {
           const i = prev.nbaQuiz.findIndex((n) => n.id === item.id)
           if (i >= 0) {
             const nbaQuiz = [...prev.nbaQuiz]
@@ -1236,13 +1364,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
       },
       deleteNbaQuiz(id) {
-        patch((prev) => ({
+        return patch((prev) => ({
           ...prev,
           nbaQuiz: prev.nbaQuiz.filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },
       upsertNbaSacfun(item) {
-        patch((prev) => {
+        return patch((prev) => {
           const i = prev.nbaSacfun.findIndex((n) => n.id === item.id)
           if (i >= 0) {
             const nbaSacfun = [...prev.nbaSacfun]
@@ -1253,10 +1382,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
       },
       deleteNbaSacfun(id) {
-        patch((prev) => ({
+        return patch((prev) => ({
           ...prev,
           nbaSacfun: prev.nbaSacfun.filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
+      },
+      upsertNbaSacfunVideo(item) {
+        return patch((prev) => {
+          const youtubeId = normalizeYouTubeId(item.youtubeId)
+          const next = { ...item, youtubeId }
+          const list = prev.nbaSacfunVideos || []
+          const i = list.findIndex((n) => n.id === next.id || n.youtubeId === youtubeId)
+          if (i >= 0) {
+            const nbaSacfunVideos = [...list]
+            nbaSacfunVideos[i] = { ...nbaSacfunVideos[i], ...next }
+            return { ...prev, nbaSacfunVideos }
+          }
+          return { ...prev, nbaSacfunVideos: [next, ...list] }
+        })
+      },
+      deleteNbaSacfunVideo(id) {
+        return patch((prev) => ({
+          ...prev,
+          nbaSacfunVideos: (prev.nbaSacfunVideos || []).filter(
+            (n) => n.id !== id && n.youtubeId !== id,
+          ),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
+      },
+      setNbaMamba(page) {
+        return patch((prev) => ({ ...prev, nbaMamba: page }))
       },
       linkRapperOwner(rapperId, ownerEmail, ownerUserId) {
         const email = ownerEmail.trim().toLowerCase()
