@@ -1,30 +1,16 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { useAuth, type Gender } from '../context/AuthContext'
+import { useAuth, readAuthError, type Gender } from '../context/AuthContext'
 import './Pages.css'
 
 export function AuthPage() {
-  const {
-    user,
-    loading,
-    profileComplete,
-    login,
-    register,
-    verifySignupCode,
-    resendSignupCode,
-    saveDemographics,
-  } = useAuth()
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [step, setStep] = useState<'form' | 'verify'>('form')
-  const [name, setName] = useState('')
+  const { user, loading, profileComplete, login, saveDemographics, signInWithGoogle } = useAuth()
   const [age, setAge] = useState('')
   const [gender, setGender] = useState<Gender | ''>('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [code, setCode] = useState('')
-  const [pendingEmail, setPendingEmail] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(() => readAuthError())
   const [busy, setBusy] = useState(false)
 
   if (!loading && user && profileComplete) return <Navigate to="/profile" replace />
@@ -36,67 +22,21 @@ export function AuthPage() {
     return { demo: { age: Math.round(n), gender } }
   }
 
-  function resetMessages() {
-    setError(null)
-    setInfo(null)
-  }
-
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault()
+  async function onGoogle() {
     setBusy(true)
-    resetMessages()
-
-    if (mode === 'register') {
-      const parsed = parseDemo()
-      if ('err' in parsed && parsed.err) {
-        setError(parsed.err)
-        setBusy(false)
-        return
-      }
-      const result = await register(name, email, password, parsed.demo!)
-      setBusy(false)
-      if (result.status === 'error') {
-        setError(result.message)
-        return
-      }
-      if (result.status === 'verify') {
-        setPendingEmail(result.email)
-        setStep('verify')
-        setCode('')
-        setInfo('newsac.mn-ээс Gmail рүү 6 оронтой код илгээлээ. Имэйлээ шалгана уу.')
-        return
-      }
-      return
-    }
-
-    const err = await login(email, password)
+    setError(null)
+    const err = await signInWithGoogle()
     setBusy(false)
     if (err) setError(err)
   }
 
-  async function onVerify(e: FormEvent) {
+  async function onPasswordLogin(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
-    resetMessages()
-    const err = await verifySignupCode(pendingEmail, code)
+    setError(null)
+    const err = await login(email, password)
     setBusy(false)
-    if (err) {
-      setError(err)
-      return
-    }
-    setInfo('Бүртгэл амжилттай баталгаажлаа.')
-  }
-
-  async function onResend() {
-    setBusy(true)
-    resetMessages()
-    const err = await resendSignupCode(pendingEmail)
-    setBusy(false)
-    if (err) {
-      setError(err)
-      return
-    }
-    setInfo('Шинэ код дахин илгээлээ. Gmail-ээ шалгана уу.')
+    if (err) setError(err)
   }
 
   async function onComplete(e: FormEvent) {
@@ -172,176 +112,81 @@ export function AuthPage() {
               </button>
             </form>
           </>
-        ) : step === 'verify' ? (
-          <>
-            <h1>Код баталгаажуулах</h1>
-            <p className="auth-sub">
-              <strong>{pendingEmail}</strong> хаяг руу newsac.mn-ээс илгээсэн 6 оронтой кодыг оруулна уу.
-            </p>
-            <form onSubmit={(e) => void onVerify(e)} className="auth-form">
-              <label>
-                Баталгаажуулах код
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  required
-                  placeholder="123456"
-                  maxLength={6}
-                  pattern="\d{6}"
-                />
-              </label>
-              {error && <p className="auth-error">{error}</p>}
-              {info && <p className="auth-info">{info}</p>}
-              <button type="submit" className="btn btn-primary btn-block" disabled={busy || loading || code.length !== 6}>
-                {busy ? 'Шалгаж байна...' : 'Баталгаажуулах'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-block"
-                disabled={busy || loading}
-                onClick={() => void onResend()}
-              >
-                Код дахин илгээх
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-block"
-                disabled={busy}
-                onClick={() => {
-                  setStep('form')
-                  setCode('')
-                  resetMessages()
-                }}
-              >
-                ← Буцах
-              </button>
-            </form>
-          </>
         ) : (
           <>
-            <div className="auth-tabs">
-              <button
-                type="button"
-                className={mode === 'register' ? 'active' : ''}
-                onClick={() => {
-                  setMode('register')
-                  setStep('form')
-                  resetMessages()
-                }}
-              >
-                Бүртгүүлэх
-              </button>
-              <button
-                type="button"
-                className={mode === 'login' ? 'active' : ''}
-                onClick={() => {
-                  setMode('login')
-                  setStep('form')
-                  resetMessages()
-                }}
-              >
-                Нэвтрэх
-              </button>
-            </div>
-
-            <h1>{mode === 'register' ? 'Шинэ гишүүн' : 'Дахиад тавтай морил'}</h1>
+            <h1>Нэвтрэх</h1>
             <p className="auth-sub">
-              {mode === 'register'
-                ? 'Бүртгүүлсний дараа newsac.mn-ээс Gmail рүү баталгаажуулах код ирнэ.'
-                : 'Gmail болон нууц үгөөр нэвтэрнэ.'}
+              Gmail-ээр шууд нэвтэрнэ. Имэйл рүү код ирэхгүй.
             </p>
 
-            <form onSubmit={(e) => void onSubmit(e)} className="auth-form">
-              {mode === 'register' && (
-                <>
-                  <label>
-                    Нэр
-                    <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      placeholder="Жишээ: Bat"
-                      autoComplete="name"
-                    />
-                  </label>
-                  <label>
-                    Таны нас
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={13}
-                      max={100}
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                      required
-                      placeholder="Жишээ: 22"
-                    />
-                  </label>
-                  <fieldset className="auth-gender">
-                    <legend>Таны хүйс</legend>
-                    <label className={gender === 'male' ? 'active' : ''}>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="male"
-                        checked={gender === 'male'}
-                        onChange={() => setGender('male')}
-                        required
-                      />
-                      Эрэгтэй
-                    </label>
-                    <label className={gender === 'female' ? 'active' : ''}>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="female"
-                        checked={gender === 'female'}
-                        onChange={() => setGender('female')}
-                      />
-                      Эмэгтэй
-                    </label>
-                  </fieldset>
-                </>
-              )}
-
-              <label>
-                Gmail
-                <input
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@gmail.com"
+            <button
+              type="button"
+              className="btn btn-primary btn-block auth-google"
+              disabled={busy || loading}
+              onClick={() => void onGoogle()}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M21.6 12.23c0-.74-.07-1.45-.19-2.13H12v4.03h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.99-4.3 2.99-7.42Z"
                 />
-              </label>
-              <label>
-                Нууц үг
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  minLength={6}
-                  autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                <path
+                  fill="currentColor"
+                  d="M12 22c2.7 0 4.96-.9 6.62-2.35l-3.23-2.5c-.9.6-2.04.96-3.39.96-2.6 0-4.81-1.76-5.6-4.12H3.06v2.58A10 10 0 0 0 12 22Z"
                 />
-              </label>
+                <path
+                  fill="currentColor"
+                  d="M6.4 13.99A6 6 0 0 1 6.08 12c0-.69.12-1.36.32-1.99V7.43H3.06A10 10 0 0 0 2 12c0 1.62.39 3.14 1.06 4.57l3.34-2.58Z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M12 5.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 2.97 14.7 2 12 2 7.94 2 4.44 4.33 3.06 7.43l3.34 2.58C7.19 7.72 9.4 5.96 12 5.96Z"
+                />
+              </svg>
+              {busy ? 'Гүүгл рүү...' : 'Gmail-ээр нэвтрэх'}
+            </button>
 
-              {error && <p className="auth-error">{error}</p>}
-              {info && <p className="auth-info">{info}</p>}
+            {error && !showPassword && <p className="auth-error">{error}</p>}
 
-              <button type="submit" className="btn btn-primary btn-block" disabled={busy || loading}>
-                {busy
-                  ? 'Түр хүлээнэ үү...'
-                  : mode === 'register'
-                    ? 'Бүртгүүлэх'
-                    : 'Нэвтрэх'}
-              </button>
-            </form>
+            <button
+              type="button"
+              className="auth-or"
+              onClick={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? 'Хаах' : 'Эсвэл нууц үг'}
+            </button>
+
+            {showPassword && (
+              <form onSubmit={(e) => void onPasswordLogin(e)} className="auth-form">
+                <label>
+                  Gmail
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="you@gmail.com"
+                  />
+                </label>
+                <label>
+                  Нууц үг
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    minLength={6}
+                    autoComplete="current-password"
+                  />
+                </label>
+                {error && <p className="auth-error">{error}</p>}
+                <button type="submit" className="btn btn-ghost btn-block" disabled={busy || loading}>
+                  {busy ? 'Түр хүлээнэ үү...' : 'Нууц үгээр нэвтрэх'}
+                </button>
+              </form>
+            )}
           </>
         )}
 

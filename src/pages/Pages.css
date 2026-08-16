@@ -855,14 +855,21 @@
 }
 
 .auth-or {
+  display: block;
   max-width: 420px;
+  width: 100%;
   margin: 1rem 0;
+  padding: 0.35rem 0;
   text-align: center;
   color: var(--ink-faint);
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   position: relative;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .auth-or::before,

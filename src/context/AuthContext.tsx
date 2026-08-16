@@ -96,8 +96,28 @@ const emptyProfile = (): ProfileData => ({
   votedBattles: [],
 })
 
+const AUTH_ERR_KEY = 'newsac_auth_err'
+
+export function readAuthError() {
+  try {
+    const msg = sessionStorage.getItem(AUTH_ERR_KEY)
+    if (msg) sessionStorage.removeItem(AUTH_ERR_KEY)
+    return msg
+  } catch {
+    return null
+  }
+}
+
+function writeAuthError(message: string) {
+  try {
+    sessionStorage.setItem(AUTH_ERR_KEY, message)
+  } catch {
+    /* ignore */
+  }
+}
+
 function isGmail(email: string) {
-  return /^[^\s@]+@gmail\.com$/i.test(email.trim())
+  return /^[^\s@]+@(gmail|googlemail)\.com$/i.test(email.trim())
 }
 
 function validateDemographics(demo: AuthDemographics): string | null {
@@ -221,6 +241,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const applySessionUser = useCallback((su: SupabaseUser | null) => {
+    if (su?.email && !isGmail(su.email)) {
+      writeAuthError('Зөвхөн Gmail (@gmail.com) хаягаар нэвтэрнэ.')
+      void supabase.auth.signOut()
+      setUser(null)
+      return
+    }
     setUser(su ? mapUser(su) : null)
   }, [])
 
