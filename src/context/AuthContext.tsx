@@ -407,16 +407,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
         if (password.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.'
 
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
-        })
+        const { data, error } = await supabase.auth.signUp({ email, password })
         if (error) return error.message
-        if (data.user && !data.session) {
-          return 'Имэйл хаяг руу баталгаажуулах код илгээлээ. Шалгана уу.'
+
+        // If Supabase requires email confirmation, auto sign-in anyway
+        if (!data.session) {
+          const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
+          if (loginErr) {
+            // confirmation genuinely required — tell user clearly
+            return 'Имэйл рүү баталгаажуулах линк илгээлээ. Нэвтрэх товч дарж орно уу.'
+          }
         }
-        if (data.user) markSpinPending()
+
+        markSpinPending()
         return null
       },
       async login(emailRaw, password) {
