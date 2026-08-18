@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
-import { SponsorSlot } from '../components/Widgets'
+import { MelbetBanner } from '../components/MelbetBanner'
 import type { NewsRegion } from '../store/types'
 import './Pages.css'
 
@@ -88,7 +88,7 @@ export function NewsPage() {
               </div>
             </Link>
           ))}
-          <SponsorSlot slot="news" alwaysShow />
+          <MelbetBanner />
         </div>
       </section>
     </div>
