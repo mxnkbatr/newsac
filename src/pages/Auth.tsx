@@ -214,7 +214,7 @@ export function AuthPage() {
               {error && <p className="auth-error">{error}</p>}
               <button
                 type="submit"
-                className="btn btn-outline btn-block auth-cta"
+                className="btn btn-ghost btn-block auth-cta"
                 disabled={busy || loading}
               >
                 {busy

@@ -806,7 +806,6 @@
   justify-content: center;
   padding: 3rem clamp(1.5rem, 4vw, 4rem);
   background: var(--bg);
-  max-width: 520px;
 }
 
 /* brand row inside panel */
@@ -939,6 +938,14 @@
   min-height: 48px;
   border-radius: 6px !important;
   font-size: 0.9rem;
+  background: var(--bg-2) !important;
+  border-color: var(--line-strong) !important;
+  color: var(--ink) !important;
+}
+
+.auth-cta:hover:not(:disabled) {
+  border-color: var(--ink-dim) !important;
+  background: var(--bg-3, color-mix(in srgb, var(--bg-2) 85%, #fff)) !important;
 }
 
 /* switch tab text + button */
@@ -1224,15 +1231,19 @@
   }
 
   .auth-visual {
-    min-height: 220px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-    padding: calc(var(--nav-h) + 1.5rem) 1.5rem 1.75rem;
+    display: none;
+  }
+
+  .auth-page {
+    grid-template-columns: 1fr;
+    min-height: 100svh;
   }
 
   .auth-panel {
-    padding: 1.75rem 1.25rem 6rem;
+    padding: 2rem 1.5rem 6rem;
     max-width: 100%;
+    justify-content: flex-start;
+    padding-top: calc(var(--nav-h, 56px) + 2rem);
   }
 
   .rank-legend {
