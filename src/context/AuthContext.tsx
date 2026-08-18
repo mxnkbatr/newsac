@@ -18,6 +18,7 @@ export type User = {
   id: string
   name: string
   email: string
+  avatarUrl?: string | null
   joinedAt: string
   age?: number | null
   gender?: Gender | null
@@ -52,8 +53,12 @@ type AuthContextValue = {
   ) => Promise<RegisterResult>
   verifySignupCode: (email: string, code: string) => Promise<string | null>
   resendSignupCode: (email: string) => Promise<string | null>
-  signUp: (email: string, password: string) => Promise<string | null>
+  signUp: (email: string, password: string) => Promise<RegisterResult>
   login: (email: string, password: string) => Promise<string | null>
+  requestPasswordReset: (email: string) => Promise<string | null>
+  verifyPasswordResetCode: (email: string, code: string) => Promise<string | null>
+  updatePassword: (newPassword: string) => Promise<string | null>
+  updateProfileBasics: (payload: { name: string; avatarUrl?: string | null }) => Promise<string | null>
   signInWithGoogle: (demo?: AuthDemographics) => Promise<string | null>
   saveDemographics: (demo: AuthDemographics) => Promise<string | null>
   logout: () => Promise<void>
@@ -75,6 +80,8 @@ const PROFILES_KEY = 'newsac_profiles_v3'
 const PENDING_DEMO_KEY = 'newsac_pending_demo_v1'
 
 type ProfileData = {
+  name?: string
+  avatarUrl?: string | null
   age?: number | null
   gender?: Gender | null
   favorites: string[]
@@ -87,6 +94,8 @@ type ProfileData = {
 }
 
 const emptyProfile = (): ProfileData => ({
+  name: '',
+  avatarUrl: null,
   age: null,
   gender: null,
   favorites: [],
@@ -210,7 +219,10 @@ function mapUser(su: SupabaseUser): User {
   }
 
   const email = (su.email || '').toLowerCase()
+  const profileName = typeof profile.name === 'string' ? profile.name.trim() : ''
+  const profileAvatar = typeof profile.avatarUrl === 'string' ? profile.avatarUrl.trim() : ''
   const name =
+    profileName ||
     (typeof meta.full_name === 'string' && meta.full_name) ||
     (typeof meta.name === 'string' && meta.name) ||
     email.split('@')[0] ||
@@ -219,6 +231,7 @@ function mapUser(su: SupabaseUser): User {
     id: su.id,
     name,
     email,
+    avatarUrl: profileAvatar || null,
     joinedAt: su.created_at,
     age: profile.age ?? fromMetaAge ?? null,
     gender: profile.gender ?? fromMetaGender ?? null,
@@ -297,8 +310,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const profile = getProfile(userId)
     setUser({
       id: userId,
-      name,
+      name: profile.name?.trim() || name,
       email,
+      avatarUrl: profile.avatarUrl?.trim() || null,
       joinedAt,
       age: profile.age ?? null,
       gender: profile.gender ?? null,
@@ -402,25 +416,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null
       },
       async signUp(emailRaw, password) {
-        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        if (!supabaseConfigured) {
+          return { status: 'error', message: 'Supabase тохируулаагүй байна (.env.local).' }
+        }
         const email = emailRaw.trim().toLowerCase()
-        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
-        if (password.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.'
-
-        const { data, error } = await supabase.auth.signUp({ email, password })
-        if (error) return error.message
-
-        // If Supabase requires email confirmation, auto sign-in anyway
-        if (!data.session) {
-          const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
-          if (loginErr) {
-            // confirmation genuinely required — tell user clearly
-            return 'Имэйл рүү баталгаажуулах линк илгээлээ. Нэвтрэх товч дарж орно уу.'
-          }
+        if (!isGmail(email)) {
+          return { status: 'error', message: 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.' }
+        }
+        if (password.length < 6) {
+          return { status: 'error', message: 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.' }
         }
 
-        markSpinPending()
-        return null
+        const { data, error } = await supabase.auth.signUp({ email, password })
+        if (error) return { status: 'error', message: error.message }
+        if (data.user && !data.session) {
+          return { status: 'verify', email }
+        }
+        return { status: 'ok' }
       },
       async login(emailRaw, password) {
         if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
@@ -434,6 +446,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           return error.message
         }
+        return null
+      },
+      async requestPasswordReset(emailRaw) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth`,
+        })
+        if (error) return error.message
+        return null
+      },
+      async verifyPasswordResetCode(emailRaw, codeRaw) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        const token = codeRaw.replace(/\s/g, '')
+        if (!/^\d{6}$/.test(token)) return '6 оронтой кодоо зөв оруулна уу.'
+        const { error } = await supabase.auth.verifyOtp({
+          email,
+          token,
+          type: 'recovery',
+        })
+        if (error) return error.message
+        return null
+      },
+      async updatePassword(newPassword) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        if (newPassword.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.'
+        const { error } = await supabase.auth.updateUser({ password: newPassword })
+        if (error) return error.message
+        return null
+      },
+      async updateProfileBasics(payload) {
+        if (!user) return 'Эхлээд нэвтэрнэ үү.'
+        const name = payload.name.trim()
+        if (!name) return 'Нэрээ оруулна уу.'
+        const avatarUrl = (payload.avatarUrl || '').trim()
+        patchProfile(user.id, { name, avatarUrl: avatarUrl || null })
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            full_name: name,
+            name,
+            avatar_url: avatarUrl || null,
+          },
+        })
+        if (error) return error.message
+        refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
         return null
       },
       async signInWithGoogle(demo) {

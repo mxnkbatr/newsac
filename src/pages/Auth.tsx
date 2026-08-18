@@ -5,15 +5,41 @@ import './Pages.css'
 
 type Tab = 'login' | 'register'
 
+function normalizeError(err: unknown): string {
+  if (typeof err === 'string' && err.trim()) return err
+  if (err && typeof err === 'object') {
+    const maybeMessage = (err as { message?: unknown }).message
+    if (typeof maybeMessage === 'string' && maybeMessage.trim()) return maybeMessage
+  }
+  return 'Алдаа гарлаа. Дахин оролдоно уу.'
+}
+
 export function AuthPage() {
-  const { user, loading, profileComplete, login, signUp, saveDemographics, signInWithGoogle } =
-    useAuth()
+  const {
+    user,
+    loading,
+    profileComplete,
+    login,
+    signUp,
+    requestPasswordReset,
+    verifyPasswordResetCode,
+    verifySignupCode,
+    resendSignupCode,
+    updatePassword,
+    saveDemographics,
+    signInWithGoogle,
+  } = useAuth()
   const [tab, setTab] = useState<Tab>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null)
+  const [recoveryEmail, setRecoveryEmail] = useState<string | null>(null)
   const [age, setAge] = useState('')
   const [gender, setGender] = useState<Gender | ''>('')
   const [error, setError] = useState<string | null>(() => readAuthError())
+  const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   if (!loading && user && profileComplete) return <Navigate to="/profile" replace />
@@ -28,19 +54,119 @@ export function AuthPage() {
   async function onGoogle() {
     setBusy(true)
     setError(null)
-    const err = await signInWithGoogle()
+    setInfo(null)
+    let err: unknown = null
+    try {
+      err = await signInWithGoogle()
+    } catch (caught) {
+      err = caught
+    }
     setBusy(false)
-    if (err) setError(err)
+    if (err) setError(normalizeError(err))
   }
 
   async function onPassword(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    const fn = tab === 'login' ? login : signUp
-    const err = await fn(email, password)
+    setInfo(null)
+    let err: unknown = null
+    try {
+      if (tab === 'login') {
+        err = await login(email, password)
+      } else {
+        const result = await signUp(email, password)
+        if (result.status === 'error') err = result.message
+        if (result.status === 'verify') {
+          setPendingVerifyEmail(result.email)
+          setInfo(`${result.email} рүү 6 оронтой код илгээлээ.`)
+        }
+      }
+    } catch (caught) {
+      err = caught
+    }
     setBusy(false)
-    if (err) setError(err)
+    if (err) setError(normalizeError(err))
+  }
+
+  async function onVerifySignupCode() {
+    if (!pendingVerifyEmail) return
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    let err: unknown = null
+    try {
+      err = await verifySignupCode(pendingVerifyEmail, code)
+    } catch (caught) {
+      err = caught
+    }
+    setBusy(false)
+    if (err) {
+      setError(normalizeError(err))
+      return
+    }
+    setInfo('Баталгаажлаа. Одоо үргэлжлүүлнэ үү.')
+  }
+
+  async function onResendSignupCode() {
+    if (!pendingVerifyEmail) return
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    const err = await resendSignupCode(pendingVerifyEmail)
+    setBusy(false)
+    if (err) {
+      setError(normalizeError(err))
+      return
+    }
+    setInfo('Шинэ код илгээлээ.')
+  }
+
+  async function onForgotPassword() {
+    if (!email.trim()) {
+      setError('Эхлээд Gmail хаягаа оруулна уу.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    let err: unknown = null
+    try {
+      err = await requestPasswordReset(email)
+    } catch (caught) {
+      err = caught
+    }
+    setBusy(false)
+    if (err) {
+      setError(normalizeError(err))
+      return
+    }
+    const targetEmail = email.trim().toLowerCase()
+    setRecoveryEmail(targetEmail)
+    setInfo(`${targetEmail} рүү 6 оронтой сэргээх код илгээлээ.`)
+  }
+
+  async function onResetByCode() {
+    if (!recoveryEmail) return
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    let err: unknown = null
+    try {
+      err = await verifyPasswordResetCode(recoveryEmail, code)
+      if (!err) err = await updatePassword(newPassword)
+    } catch (caught) {
+      err = caught
+    }
+    setBusy(false)
+    if (err) {
+      setError(normalizeError(err))
+      return
+    }
+    setInfo('Нууц үг шинэчлэгдлээ. Одоо шинэ нууц үгээр нэвтэрнэ үү.')
+    setRecoveryEmail(null)
+    setCode('')
+    setNewPassword('')
   }
 
   async function onComplete(e: FormEvent) {
@@ -51,8 +177,13 @@ export function AuthPage() {
       setError(parsed.err)
       return
     }
-    const err = await saveDemographics(parsed.demo!)
-    if (err) setError(err)
+    let err: unknown = null
+    try {
+      err = await saveDemographics(parsed.demo!)
+    } catch (caught) {
+      err = caught
+    }
+    if (err) setError(normalizeError(err))
   }
 
   const needsComplete = Boolean(user && !profileComplete)
@@ -211,18 +342,98 @@ export function AuthPage() {
                   autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
                 />
               </label>
+              {tab === 'login' && (
+                <button
+                  type="button"
+                  className="auth-forgot-btn"
+                  onClick={() => void onForgotPassword()}
+                  disabled={busy || loading}
+                >
+                  Нууц үг мартсан уу?
+                </button>
+              )}
+              {tab === 'register' && pendingVerifyEmail && (
+                <>
+                  <label>
+                    Баталгаажуулах код
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]{6}"
+                      placeholder="123456"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      required
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-block auth-cta"
+                    onClick={() => void onVerifySignupCode()}
+                    disabled={busy || loading}
+                  >
+                    Код баталгаажуулах
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-forgot-btn"
+                    onClick={() => void onResendSignupCode()}
+                    disabled={busy || loading}
+                  >
+                    Код дахин илгээх
+                  </button>
+                </>
+              )}
+              {tab === 'login' && recoveryEmail && (
+                <>
+                  <label>
+                    Сэргээх код
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]{6}"
+                      placeholder="123456"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Шинэ нууц үг
+                    <input
+                      type="password"
+                      minLength={6}
+                      placeholder="Шинэ нууц үг"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-block auth-cta"
+                    onClick={() => void onResetByCode()}
+                    disabled={busy || loading}
+                  >
+                    Кодоор сэргээх
+                  </button>
+                </>
+              )}
+              {info && <p className="auth-info">{info}</p>}
               {error && <p className="auth-error">{error}</p>}
-              <button
-                type="submit"
-                className="btn btn-ghost btn-block auth-cta"
-                disabled={busy || loading}
-              >
-                {busy
-                  ? 'Түр хүлээнэ үү...'
-                  : tab === 'login'
-                    ? 'Нэвтрэх'
-                    : 'Бүртгүүлэх'}
-              </button>
+              {!(tab === 'register' && pendingVerifyEmail) && (
+                <button
+                  type="submit"
+                  className="btn btn-ghost btn-block auth-cta"
+                  disabled={busy || loading}
+                >
+                  {busy
+                    ? 'Түр хүлээнэ үү...'
+                    : tab === 'login'
+                      ? 'Нэвтрэх'
+                      : 'Бүртгүүлэх'}
+                </button>
+              )}
             </form>
 
             {/* switch tab */}

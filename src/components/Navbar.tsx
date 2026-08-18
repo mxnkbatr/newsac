@@ -87,7 +87,9 @@ export function Navbar() {
   }, [pathname])
 
   useEffect(() => {
-    if (!isMobileNav() || menuIntroSeen()) return
+    // Auto-open menu intro only on home route.
+    // Deep links (e.g. /news/:id) should never pop open the menu.
+    if (!isMobileNav() || menuIntroSeen() || pathname !== '/') return
 
     const timers: number[] = []
     let poll = 0
@@ -129,8 +131,7 @@ export function Navbar() {
       window.clearInterval(poll)
       window.removeEventListener('newsac-onboarding-done', onBoardDone)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [pathname])
 
   return (
     <>

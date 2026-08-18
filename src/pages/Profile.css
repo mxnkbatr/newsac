@@ -81,6 +81,13 @@
   line-height: 1;
 }
 
+.prof-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
 .prof-hero-text {
   position: relative;
   z-index: 1;
@@ -190,6 +197,71 @@
 
 .prof-block {
   margin-bottom: 1.35rem;
+}
+
+.prof-account-form {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.prof-account-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 700;
+}
+
+.prof-account-form input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--bg-2);
+  color: var(--ink);
+  padding: 0.65rem 0.8rem;
+  font-size: 0.95rem;
+}
+
+.prof-account-form input[type='file'] {
+  padding: 0.45rem 0.55rem;
+  min-height: 48px;
+}
+
+.prof-account-form input[readonly] {
+  opacity: 0.82;
+}
+
+.prof-avatar-preview {
+  display: flex;
+  justify-content: center;
+  margin: 0.1rem 0 0.2rem;
+}
+
+.prof-avatar-preview img {
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+}
+
+.prof-form-info {
+  margin: 0.1rem 0 0;
+  color: #7dcea0;
+  font-size: 0.86rem;
+}
+
+.prof-form-error {
+  margin: 0.1rem 0 0;
+  color: #ff8a90;
+  font-size: 0.86rem;
 }
 
 .prof-block-head {

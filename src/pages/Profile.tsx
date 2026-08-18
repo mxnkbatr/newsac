@@ -22,14 +22,36 @@ function initialOf(name: string) {
 }
 
 export function ProfilePage() {
-  const { user, logout, isMember, membershipTier, setPushEnabled, profileComplete } = useAuth()
+  const {
+    user,
+    logout,
+    isMember,
+    membershipTier,
+    setPushEnabled,
+    profileComplete,
+    updateProfileBasics,
+    updatePassword,
+  } = useAuth()
   const { data, isEmailAdmin } = useStore()
   const { playEpisode } = usePlayer()
   const [offline, setOffline] = useState<OfflineMeta[]>(() => listOfflineMeta())
+  const [profileName, setProfileName] = useState('')
+  const [profileImage, setProfileImage] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [savingPassword, setSavingPassword] = useState(false)
+  const [profileInfo, setProfileInfo] = useState<string | null>(null)
+  const [profileError, setProfileError] = useState<string | null>(null)
 
   useEffect(() => {
     setOffline(listOfflineMeta())
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    setProfileName(user.name || '')
+    setProfileImage(user.avatarUrl || '')
+  }, [user])
 
   if (!user) return <Navigate to="/auth" replace />
   if (!profileComplete) return <Navigate to="/auth" replace />
@@ -76,12 +98,71 @@ export function ProfilePage() {
     setOffline(listOfflineMeta())
   }
 
+  async function saveProfileBasics() {
+    if (!user) return
+    setSavingProfile(true)
+    setProfileError(null)
+    setProfileInfo(null)
+    const err = await updateProfileBasics({ name: profileName, avatarUrl: profileImage })
+    setSavingProfile(false)
+    if (err) {
+      setProfileError(err)
+      return
+    }
+    setProfileInfo('Профайл шинэчлэгдлээ.')
+  }
+
+  function onPickAvatar(file: File | null) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setProfileError('Зөвхөн зураг файл сонгоно уу.')
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileError('Зураг 2MB-ээс бага байх ёстой.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      if (!result) {
+        setProfileError('Зураг уншиж чадсангүй.')
+        return
+      }
+      setProfileError(null)
+      setProfileImage(result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  async function savePassword() {
+    if (!newPassword.trim()) {
+      setProfileError('Шинэ нууц үгээ оруулна уу.')
+      return
+    }
+    setSavingPassword(true)
+    setProfileError(null)
+    setProfileInfo(null)
+    const err = await updatePassword(newPassword.trim())
+    setSavingPassword(false)
+    if (err) {
+      setProfileError(err)
+      return
+    }
+    setNewPassword('')
+    setProfileInfo('Нууц үг амжилттай солигдлоо.')
+  }
+
   return (
     <div className="prof">
       <header className="prof-hero">
         <div className="prof-hero-glow" aria-hidden="true" />
         <div className="prof-avatar" aria-hidden="true">
-          <span>{initialOf(user.name)}</span>
+          {user.avatarUrl ? (
+            <img src={user.avatarUrl} alt="" />
+          ) : (
+            <span>{initialOf(user.name)}</span>
+          )}
         </div>
         <div className="prof-hero-text">
           <p className="prof-kicker">Профайл</p>
@@ -119,6 +200,78 @@ export function ProfilePage() {
           <span>Офлайн</span>
         </div>
       </div>
+
+      <section className="prof-block">
+        <div className="prof-block-head">
+          <h2>👤 MY PROFILE</h2>
+        </div>
+        <div className="prof-account-form">
+          <label>
+            Нэр өөрчлөх
+            <input
+              type="text"
+              value={profileName}
+              onChange={(e) => setProfileName(e.target.value)}
+              placeholder="Таны нэр"
+            />
+          </label>
+          <label>
+            Profile зураг
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => onPickAvatar(e.target.files?.[0] || null)}
+            />
+          </label>
+          <label>
+            Profile зураг (URL - optional)
+            <input
+              type="url"
+              value={profileImage}
+              onChange={(e) => setProfileImage(e.target.value)}
+              placeholder="https://..."
+            />
+          </label>
+          {profileImage ? (
+            <div className="prof-avatar-preview">
+              <img src={profileImage} alt="Profile preview" />
+            </div>
+          ) : null}
+          <label>
+            📧 Gmail хаяг
+            <input type="email" value={user.email} readOnly />
+          </label>
+          <button
+            type="button"
+            className="btn btn-primary btn-block"
+            onClick={() => void saveProfileBasics()}
+            disabled={savingProfile}
+          >
+            {savingProfile ? 'Хадгалж байна...' : 'Профайл хадгалах'}
+          </button>
+
+          <label>
+            Нууц үг солих
+            <input
+              type="password"
+              minLength={6}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Шинэ нууц үг"
+            />
+          </label>
+          <button
+            type="button"
+            className="btn btn-ghost btn-block"
+            onClick={() => void savePassword()}
+            disabled={savingPassword}
+          >
+            {savingPassword ? 'Шинэчилж байна...' : 'Нууц үг шинэчлэх'}
+          </button>
+          {profileInfo ? <p className="prof-form-info">{profileInfo}</p> : null}
+          {profileError ? <p className="prof-form-error">{profileError}</p> : null}
+        </div>
+      </section>
 
       <section className="prof-block">
         <div className="prof-block-head">

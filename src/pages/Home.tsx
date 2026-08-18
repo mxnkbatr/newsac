@@ -233,6 +233,12 @@ export function Home() {
             </div>
           </div>
 
+          {user ? (
+            <p className="hero-greet reveal in">
+              Hi {user.name.split(' ')[0] || 'Newsac'} 👋
+            </p>
+          ) : null}
+
           <h1 className="reveal in reveal-delay-1">
             Монголын <em>хип-хоп</em> зах зээл
           </h1>

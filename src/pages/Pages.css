@@ -948,6 +948,27 @@
   background: var(--bg-3, color-mix(in srgb, var(--bg-2) 85%, #fff)) !important;
 }
 
+.auth-forgot-btn {
+  justify-self: end;
+  background: none;
+  border: 0;
+  color: var(--ink-dim);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 0.1rem 0;
+}
+
+.auth-forgot-btn:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.auth-forgot-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* switch tab text + button */
 .auth-switch {
   margin-top: 1.25rem;
