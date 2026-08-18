@@ -115,12 +115,9 @@ export function TicketsPage() {
 
         <div className="container">
           <div className="tickets-drop-panel">
-            <strong>{soon ? 'Drop-д бэлэн үлдээрэй' : 'Тасалбар'}</strong>
-            <p>
-              {soon
-                ? 'Нээгдэхэд Newsac дээр эхлээд мэдэгдэнэ. Профайл дээр push асаалттай байлгаарай.'
-                : 'Тоглолт сонгоод захиалга хийнэ.'}
-            </p>
+            <strong>
+              {soon ? 'ХОТЫГ ДОРГИОХ ТОГЛОЛТУУДЫН ТАСАЛБАР ТУН УДАХГҮЙ…' : 'Тасалбар'}
+            </strong>
             <div className="tickets-drop-actions">
               <Link to="/" className="btn btn-primary">
                 Нүүр рүү

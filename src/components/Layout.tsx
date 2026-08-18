@@ -6,6 +6,7 @@ import { MiniPlayer } from './MiniPlayer'
 import { ChartMiniPlayer } from './ChartMiniPlayer'
 import { FullMusicPlayer } from './FullMusicPlayer'
 import { PageQuickActions } from './PageQuickActions'
+import { SpinWheelGate } from './SpinWheelGate'
 import { usePlayer } from '../context/PlayerContext'
 import { useChartPlayer } from '../context/ChartPlayerContext'
 import './Layout.css'
@@ -89,6 +90,7 @@ export function Layout() {
       <FullMusicPlayer />
       <MiniPlayer />
       <PageQuickActions />
+      <SpinWheelGate />
 
       <nav className="mobile-dock" aria-label="Мобайл цэс">
         {dock.map((item, i) => (

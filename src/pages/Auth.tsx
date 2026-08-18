@@ -3,12 +3,16 @@ import { Link, Navigate } from 'react-router-dom'
 import { useAuth, readAuthError, type Gender } from '../context/AuthContext'
 import './Pages.css'
 
+type Tab = 'login' | 'register'
+
 export function AuthPage() {
-  const { user, loading, profileComplete, login, saveDemographics, signInWithGoogle } = useAuth()
-  const [age, setAge] = useState('')
-  const [gender, setGender] = useState<Gender | ''>('')
+  const { user, loading, profileComplete, login, signUp, saveDemographics, signInWithGoogle } =
+    useAuth()
+  const [tab, setTab] = useState<Tab>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [age, setAge] = useState('')
+  const [gender, setGender] = useState<Gender | ''>('')
   const [error, setError] = useState<string | null>(() => readAuthError())
   const [busy, setBusy] = useState(false)
 
@@ -17,7 +21,7 @@ export function AuthPage() {
   function parseDemo() {
     const n = Number(age)
     if (!gender) return { err: 'Хүйсээ сонгоно уу.' as string }
-    if (!Number.isFinite(n)) return { err: 'Насаа оруулна уу.' as string }
+    if (!Number.isFinite(n) || n < 13 || n > 100) return { err: 'Насаа оруулна уу.' as string }
     return { demo: { age: Math.round(n), gender } }
   }
 
@@ -29,11 +33,12 @@ export function AuthPage() {
     if (err) setError(err)
   }
 
-  async function onPasswordLogin(e: FormEvent) {
+  async function onPassword(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    const err = await login(email, password)
+    const fn = tab === 'login' ? login : signUp
+    const err = await fn(email, password)
     setBusy(false)
     if (err) setError(err)
   }
@@ -54,6 +59,7 @@ export function AuthPage() {
 
   return (
     <div className="auth-page">
+      {/* left brand panel */}
       <div className="auth-visual" aria-hidden="true">
         <img src="/logo.png" alt="" />
         <div>
@@ -62,12 +68,19 @@ export function AuthPage() {
         </div>
       </div>
 
+      {/* right form panel */}
       <div className="auth-panel">
         {needsComplete ? (
+          /* ── profile completion ── */
           <>
-            <h1>Профайл гүйцээнэ үү</h1>
+            <div className="auth-brand-row">
+              <div className="auth-brand-icon">✦</div>
+              <span>Newsac</span>
+            </div>
+            <h1 className="auth-heading">Профайл гүйцээнэ үү</h1>
             <p className="auth-sub">Нас, хүйсээ оруулаад үргэлжлүүлнэ үү.</p>
-            <form onSubmit={onComplete} className="auth-form">
+
+            <form onSubmit={(e) => void onComplete(e)} className="auth-form">
               <label>
                 Таны нас
                 <input
@@ -106,19 +119,77 @@ export function AuthPage() {
                 </label>
               </fieldset>
               {error && <p className="auth-error">{error}</p>}
-              <button type="submit" className="btn btn-primary btn-block" disabled={busy || loading}>
+              <button
+                type="submit"
+                className="btn btn-primary btn-block auth-cta"
+                disabled={busy || loading}
+              >
                 Хадгалах
               </button>
             </form>
           </>
         ) : (
+          /* ── login / register ── */
           <>
-            <h1>Нэвтрэх</h1>
-            <p className="auth-sub">Gmail болон нууц үгөөр нэвтэрнэ.</p>
+            <div className="auth-brand-row">
+              <div className="auth-brand-icon">✦</div>
+              <span>Newsac</span>
+            </div>
 
-            <form onSubmit={(e) => void onPasswordLogin(e)} className="auth-form">
+            <h1 className="auth-heading">
+              {tab === 'login' ? 'Нэвтрэх' : 'Бүртгүүлэх'}
+            </h1>
+            <p className="auth-sub">
+              {tab === 'login'
+                ? 'Newsac акаунтаараа нэвтэрнэ үү.'
+                : 'Шинэ акаунт үүсгэнэ үү.'}
+            </p>
+
+            {/* Google button — primary action */}
+            <button
+              type="button"
+              className="auth-google-btn"
+              disabled={busy || loading}
+              onClick={() => void onGoogle()}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path
+                  fill="#EA4335"
+                  d="M5.27 12a6.73 6.73 0 0 1 .34-2.11L2.22 7.55A11 11 0 0 0 1 12c0 1.62.36 3.15 1 4.52l3.39-2.36A6.73 6.73 0 0 1 5.27 12Z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 18.73c-2.09 0-3.94-.85-5.3-2.21l-3.36 2.35C5.15 21.1 8.38 23 12 23c3.5 0 6.64-1.76 8.53-4.45l-3.35-2.59A6.73 6.73 0 0 1 12 18.73Z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.27 12c0-.74.13-1.44.34-2.11L2.22 7.55A10.95 10.95 0 0 0 1 12c0 1.62.36 3.15 1 4.52l3.27-2.52Z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M23 12c0-.65-.06-1.29-.17-1.91H12v3.82h6.18a5.25 5.25 0 0 1-2.27 3.44l3.35 2.59C21.39 18.07 23 15.25 23 12Z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.27c1.61 0 3.06.56 4.21 1.64L19.07 4A10.96 10.96 0 0 0 12 1C8.38 1 5.15 2.9 3.34 5.82l3.36 2.34A6.73 6.73 0 0 1 12 5.27Z"
+                />
+              </svg>
+              {busy
+                ? 'Түр хүлээнэ үү...'
+                : tab === 'login'
+                  ? 'Gmail-ээр нэвтрэх'
+                  : 'Gmail-ээр бүртгүүлэх'}
+            </button>
+
+            {/* divider */}
+            <div className="auth-divider">
+              <span>эсвэл имэйл, нууц үгээр</span>
+            </div>
+
+            {/* email + password form */}
+            <form onSubmit={(e) => void onPassword(e)} className="auth-form">
               <label>
-                Gmail
+                Gmail хаяг
                 <input
                   type="email"
                   autoComplete="email"
@@ -137,47 +208,59 @@ export function AuthPage() {
                   required
                   placeholder="••••••••"
                   minLength={6}
-                  autoComplete="current-password"
+                  autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
                 />
               </label>
               {error && <p className="auth-error">{error}</p>}
-              <button type="submit" className="btn btn-primary btn-block" disabled={busy || loading}>
-                {busy ? 'Түр хүлээнэ үү...' : 'Нэвтрэх'}
+              <button
+                type="submit"
+                className="btn btn-outline btn-block auth-cta"
+                disabled={busy || loading}
+              >
+                {busy
+                  ? 'Түр хүлээнэ үү...'
+                  : tab === 'login'
+                    ? 'Нэвтрэх'
+                    : 'Бүртгүүлэх'}
               </button>
             </form>
 
-            <p className="auth-or">эсвэл</p>
-
-            <button
-              type="button"
-              className="btn btn-ghost btn-block auth-google"
-              disabled={busy || loading}
-              onClick={() => void onGoogle()}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M21.6 12.23c0-.74-.07-1.45-.19-2.13H12v4.03h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.99-4.3 2.99-7.42Z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 22c2.7 0 4.96-.9 6.62-2.35l-3.23-2.5c-.9.6-2.04.96-3.39.96-2.6 0-4.81-1.76-5.6-4.12H3.06v2.58A10 10 0 0 0 12 22Z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M6.4 13.99A6 6 0 0 1 6.08 12c0-.69.12-1.36.32-1.99V7.43H3.06A10 10 0 0 0 2 12c0 1.62.39 3.14 1.06 4.57l3.34-2.58Z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 2.97 14.7 2 12 2 7.94 2 4.44 4.33 3.06 7.43l3.34 2.58C7.19 7.72 9.4 5.96 12 5.96Z"
-                />
-              </svg>
-              {busy ? 'Гүүгл рүү...' : 'Gmail-ээр нэвтрэх'}
-            </button>
+            {/* switch tab */}
+            <p className="auth-switch">
+              {tab === 'login' ? (
+                <>
+                  Акаунт байхгүй юу?{' '}
+                  <button
+                    type="button"
+                    className="auth-switch-btn"
+                    onClick={() => {
+                      setTab('register')
+                      setError(null)
+                    }}
+                  >
+                    Бүртгүүлэх
+                  </button>
+                </>
+              ) : (
+                <>
+                  Бүртгэлтэй юу?{' '}
+                  <button
+                    type="button"
+                    className="auth-switch-btn"
+                    onClick={() => {
+                      setTab('login')
+                      setError(null)
+                    }}
+                  >
+                    Нэвтрэх
+                  </button>
+                </>
+              )}
+            </p>
           </>
         )}
 
-        <Link to="/" className="section-link" style={{ marginTop: '1.5rem', display: 'inline-block' }}>
+        <Link to="/" className="auth-back-link">
           ← Нүүр рүү
         </Link>
       </div>

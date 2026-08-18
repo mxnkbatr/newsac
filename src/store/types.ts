@@ -363,6 +363,15 @@ export type NbaMamba = {
   takeaway: string
 }
 
+/** NBA нүүр — текст + арын зураг Admin-аас */
+export type NbaHub = {
+  kicker: string
+  title: string
+  subtitle: string
+  heroImage: string
+  featuredId?: string
+}
+
 export type NbaSacfunVideo = {
   id: string
   youtubeId: string
@@ -395,6 +404,7 @@ export type AppData = {
   nbaSacfun: NbaSacfunBit[]
   nbaSacfunVideos: NbaSacfunVideo[]
   nbaMamba: NbaMamba
+  nbaHub: NbaHub
   /** Монголын сагсан бөмбөгийн Дээд лиг — ерөнхий мэдээнээс тусдаа */
   deedLigNews: NbaStory[]
   lastSacfunYoutubeSync?: string

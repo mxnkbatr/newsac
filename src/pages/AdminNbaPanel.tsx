@@ -15,6 +15,7 @@ import { IMG } from './adminFields'
 import {
   linesOf,
   nbaFaFields,
+  nbaHubFields,
   nbaMambaFields,
   nbaQuizFields,
   nbaSacfunFields,
@@ -111,6 +112,39 @@ export function AdminNbaPanel({
 
       {sub === 'hub' && (
         <div className="admin-nba-hub">
+          <button
+            type="button"
+            className="admin-nba-card"
+            onClick={() => {
+              const h = d.nbaHub
+              openEditor(
+                'NBA нүүр засах',
+                nbaHubFields,
+                {
+                  kicker: h?.kicker || 'Newsac · Basketball',
+                  title: h?.title || 'NBA',
+                  subtitle: h?.subtitle || 'Доорх filter-оос хэсгээ сонгоод орно.',
+                  heroImage: h?.heroImage || '',
+                  featuredId: h?.featuredId || '',
+                },
+                (v) => {
+                  const snapshot = store.setNbaHub({
+                    kicker: String(v.kicker).trim() || 'Newsac · Basketball',
+                    title: String(v.title).trim() || 'NBA',
+                    subtitle: String(v.subtitle).trim(),
+                    heroImage: String(v.heroImage).trim() || IMG.news,
+                    featuredId: String(v.featuredId || '').trim(),
+                  })
+                  void saveAndSync('NBA нүүр хадгалагдлаа', snapshot)
+                },
+                'Арын зураг + гарчиг',
+              )
+            }}
+          >
+            <strong>Нүүр · арын зураг</strong>
+            <span>{d.nbaHub?.title || 'NBA'}</span>
+            <em>Засах →</em>
+          </button>
           <button type="button" className="admin-nba-card" onClick={() => setSub('updates')}>
             <strong>Сүүлийн мэдээлэл</strong>
             <span>{d.nbaUpdates.length} нийтлэл</span>

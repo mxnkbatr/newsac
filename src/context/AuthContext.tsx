@@ -9,6 +9,7 @@ import {
 } from 'react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from '../lib/supabase'
+import { markSpinPending } from '../lib/spinCampaign'
 import type { MembershipTier } from '../store/types'
 
 export type Gender = 'male' | 'female'
@@ -51,6 +52,7 @@ type AuthContextValue = {
   ) => Promise<RegisterResult>
   verifySignupCode: (email: string, code: string) => Promise<string | null>
   resendSignupCode: (email: string) => Promise<string | null>
+  signUp: (email: string, password: string) => Promise<string | null>
   login: (email: string, password: string) => Promise<string | null>
   signInWithGoogle: (demo?: AuthDemographics) => Promise<string | null>
   saveDemographics: (demo: AuthDemographics) => Promise<string | null>
@@ -247,7 +249,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null)
       return
     }
-    setUser(su ? mapUser(su) : null)
+    if (su) {
+      const mapped = mapUser(su)
+      setUser(mapped)
+      const created = new Date(su.created_at).getTime()
+      const isFresh = Date.now() - created < 15 * 60 * 1000
+      const welcomeKey = `newsac_spin_welcome_${su.id}`
+      if (
+        isFresh &&
+        isProfileComplete(getProfile(su.id)) &&
+        !sessionStorage.getItem(welcomeKey)
+      ) {
+        markSpinPending()
+        sessionStorage.setItem(welcomeKey, '1')
+      }
+      return
+    }
+    setUser(null)
   }, [])
 
   useEffect(() => {
@@ -347,6 +365,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.user && !data.session) {
           return { status: 'verify', email }
         }
+        markSpinPending()
         return { status: 'ok' }
       },
       async verifySignupCode(emailRaw, codeRaw) {
@@ -380,6 +399,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           options: { emailRedirectTo: `${window.location.origin}/auth` },
         })
         if (error) return error.message
+        return null
+      },
+      async signUp(emailRaw, password) {
+        if (!supabaseConfigured) return 'Supabase тохируулаагүй байна (.env.local).'
+        const email = emailRaw.trim().toLowerCase()
+        if (!isGmail(email)) return 'Зөвхөн Gmail хаяг (@gmail.com) ашиглана уу.'
+        if (password.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.'
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/auth` },
+        })
+        if (error) return error.message
+        if (data.user && !data.session) {
+          return 'Имэйл хаяг руу баталгаажуулах код илгээлээ. Шалгана уу.'
+        }
+        if (data.user) markSpinPending()
         return null
       },
       async login(emailRaw, password) {
@@ -424,6 +461,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
         if (error) return error.message
         refreshFromProfile(user.id, user.name, user.email, user.joinedAt)
+        markSpinPending()
         return null
       },
       async logout() {

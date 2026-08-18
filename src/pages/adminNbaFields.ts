@@ -86,6 +86,29 @@ export const nbaMambaFields: FieldDef[] = [
   { key: 'takeaway', label: 'Takeaway', type: 'textarea', required: true },
 ]
 
+export const nbaHubFields: FieldDef[] = [
+  { key: 'kicker', label: 'Kicker', required: true, placeholder: 'Newsac · Basketball' },
+  { key: 'title', label: 'Гарчиг', required: true, placeholder: 'NBA' },
+  {
+    key: 'subtitle',
+    label: 'Тайлбар',
+    type: 'textarea',
+    required: true,
+  },
+  {
+    key: 'heroImage',
+    label: 'Арын зураг',
+    type: 'image',
+    required: true,
+    placeholder: 'Photos-оос сонгоно',
+  },
+  {
+    key: 'featuredId',
+    label: 'Онцлох мэдээний ID (хоосон = эхний нийтлэл)',
+    placeholder: 'nba-u-...',
+  },
+]
+
 export function linesOf(value: unknown) {
   return String(value || '')
     .split(/\n+/)

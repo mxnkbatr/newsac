@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import {
   FACEBOOK_PAGE_NAME,
@@ -104,16 +104,25 @@ export function NbaPage() {
   const nbaUpdates = data.nbaUpdates
   const freeAgents = data.nbaFreeAgents
   const nbaQuiz = data.nbaQuiz
-  const featured = nbaUpdates[0]
+  const hub = data.nbaHub
+  const featured =
+    (hub?.featuredId && nbaUpdates.find((u) => u.id === hub.featuredId)) || nbaUpdates[0]
 
   return (
     <div className="nba-page">
-      <header className="nba-hero">
+      <header
+        className="nba-hero"
+        style={
+          hub?.heroImage
+            ? ({ '--nba-hero-image': `url("${hub.heroImage}")` } as CSSProperties)
+            : undefined
+        }
+      >
         <div className="container nba-hero-grid">
           <div>
-            <div className="section-kicker">Newsac · Basketball</div>
-            <h1>NBA</h1>
-            <p>Доорх filter-оос хэсгээ сонгоод орно.</p>
+            <div className="section-kicker">{hub?.kicker || 'Newsac · Basketball'}</div>
+            <h1>{hub?.title || 'NBA'}</h1>
+            <p>{hub?.subtitle || 'Доорх filter-оос хэсгээ сонгоод орно.'}</p>
             <NbaPageFilter />
           </div>
           {featured && (

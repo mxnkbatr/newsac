@@ -7,6 +7,11 @@ import type { DailyDrop } from '../store/types'
 import { youtubeThumb } from '../lib/youtube'
 import './Home.css'
 
+function formatReaders(count: number) {
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
+  return String(count)
+}
+
 function dropHref(drop: DailyDrop) {
   if (drop.kind === 'video' && (drop.youtubeId || drop.targetId)) {
     const v = drop.youtubeId || drop.targetId
@@ -106,10 +111,14 @@ function TodayStrip() {
 
 function AppCommandCenter() {
   const { user, isMember } = useAuth()
-  const { data } = useStore()
+  const { data, analyticsSummary } = useStore()
   const stories = [...(data.homeStories || [])]
     .filter((s) => s.active)
+    .filter((s) => !/reels?/i.test(s.label) && !/reels?/i.test(s.status))
+    .filter((s) => !/шууд/i.test(s.label) && !/live/i.test(s.status))
     .sort((a, b) => a.order - b.order)
+  const topNews = analyticsSummary().newsClicks[0]
+  const viralCount = Math.max(topNews?.clicks || 0, 24)
 
   return (
     <section className="app-command">
@@ -133,9 +142,16 @@ function AppCommandCenter() {
           <div className="story-chip tone-live story-chip-ig" aria-hidden="true">
             <span className="story-ring">
               <img src="/logo.png" alt="" />
-              <i>IG</i>
+              <i>HOT</i>
             </span>
-            <strong>Instagram</strong>
+            <strong>Breaking</strong>
+          </div>
+          <div className="story-chip tone-ticket" aria-hidden="true">
+            <span className="story-ring">
+              <img src="/logo.png" alt="" />
+              <i>{formatReaders(viralCount * 100)}</i>
+            </span>
+            <strong>Viral</strong>
           </div>
           {stories.map((story) => {
             const thumb =
@@ -167,13 +183,15 @@ function AppCommandCenter() {
 
 export function Home() {
   const { user, reactTo } = useAuth()
-  const { data, track } = useStore()
+  const { data, track, analyticsSummary } = useStore()
   const news = data.news
   const videos = data.videos
   const rappers = data.rappers
   const rankings = data.rankings
   const deedLigNews = data.deedLigNews || []
   const deedLead = deedLigNews[0]
+  const topNewsClicks = analyticsSummary().newsClicks.reduce((sum, item) => sum + item.clicks, 0)
+  const liveReaders = Math.max(2400, 1800 + topNewsClicks * 14)
 
   const hotNews = (() => {
     const byId = new Map(news.map((n) => [n.id, n]))
@@ -218,6 +236,10 @@ export function Home() {
           <h1 className="reveal in reveal-delay-1">
             Монголын <em>хип-хоп</em> зах зээл
           </h1>
+          <div className="news-hook reveal in reveal-delay-1">
+            <span className="news-hook-dot" aria-hidden="true" />
+            <strong>{formatReaders(liveReaders)} хүмүүс уншиж байна</strong>
+          </div>
           <p className="reveal in reveal-delay-2">
             Мэдээ, шинжилгээ, рэпперийн түүх — нэг дор, халуун.
           </p>

@@ -575,6 +575,14 @@ export function createSeed(): AppData {
     nbaSacfun: [...sacfunBits],
     nbaSacfunVideos: [],
     nbaMamba: { ...mambaMentality, story: [...mambaMentality.story], points: mambaMentality.points.map((p) => ({ ...p })) },
+    nbaHub: {
+      kicker: 'Newsac · Basketball',
+      title: 'NBA',
+      subtitle: 'Доорх filter-оос хэсгээ сонгоод орно.',
+      heroImage:
+        'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80',
+      featuredId: '',
+    },
     deedLigNews: [],
     homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
     about: {

@@ -38,6 +38,7 @@ import type {
   NewsComment,
   NbaFreeAgent,
   NbaHot,
+  NbaHub,
   NbaMamba,
   NbaQuizQ,
   NbaSacfunBit,
@@ -140,6 +141,7 @@ type StoreValue = {
   upsertNbaSacfunVideo: (item: NbaSacfunVideo) => AppData
   deleteNbaSacfunVideo: (id: string) => AppData
   setNbaMamba: (page: NbaMamba) => AppData
+  setNbaHub: (hub: NbaHub) => AppData
   syncSacfunYoutube: () => Promise<number>
   linkRapperOwner: (
     rapperId: string,
@@ -333,6 +335,7 @@ function loadData(): AppData {
       nbaSacfun: mergeNbaContent(undefined, parsed.nbaSacfun, seed.nbaSacfun, tombs),
       nbaSacfunVideos: Array.isArray(parsed.nbaSacfunVideos) ? parsed.nbaSacfunVideos : [],
       nbaMamba: mergeNbaMamba(undefined, parsed.nbaMamba, seed.nbaMamba),
+      nbaHub: { ...seed.nbaHub, ...(parsed.nbaHub || {}) },
       lastSacfunYoutubeSync: parsed.lastSacfunYoutubeSync,
       deedLigNews: rejectTombs(
         Array.isArray(parsed.deedLigNews) ? parsed.deedLigNews : seed.deedLigNews,
@@ -468,6 +471,11 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
           ? local.nbaSacfunVideos
           : seed.nbaSacfunVideos || [],
     nbaMamba: mergeNbaMamba(remote.nbaMamba, local.nbaMamba, seed.nbaMamba),
+    nbaHub: {
+      ...seed.nbaHub,
+      ...(local.nbaHub || {}),
+      ...(remote.nbaHub || {}),
+    },
     lastSacfunYoutubeSync:
       remote.lastSacfunYoutubeSync || local.lastSacfunYoutubeSync,
     homeHotNewsIds: rejectTombs(
@@ -1445,6 +1453,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       setNbaMamba(page) {
         return patch((prev) => ({ ...prev, nbaMamba: page }))
+      },
+      setNbaHub(hub) {
+        return patch((prev) => ({ ...prev, nbaHub: hub }))
       },
       linkRapperOwner(rapperId, ownerEmail, ownerUserId) {
         const email = ownerEmail.trim().toLowerCase()
