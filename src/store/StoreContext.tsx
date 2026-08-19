@@ -230,9 +230,23 @@ function mergeNbaContent<T extends { id: string }>(
     (items || []).filter((item) => !NBA_LEGACY_IDS.has(item.id) && !tombs?.has(item.id))
   const seedClean = drop(seed)
   const byId = new Map<string, T>()
+  const put = (item: T) => {
+    const prev = byId.get(item.id)
+    if (!prev) {
+      byId.set(item.id, item)
+      return
+    }
+    const next = { ...prev, ...item } as Record<string, unknown>
+    const incoming = item as Record<string, unknown>
+    const base = prev as Record<string, unknown>
+    for (const key of ['image', 'height']) {
+      if (!incoming[key] && base[key]) next[key] = base[key]
+    }
+    byId.set(item.id, next as T)
+  }
   for (const item of seedClean) byId.set(item.id, item)
-  for (const item of drop(local)) byId.set(item.id, item)
-  for (const item of drop(remote)) byId.set(item.id, item)
+  for (const item of drop(local)) put(item)
+  for (const item of drop(remote)) put(item)
   const seedIds = seedClean.map((item) => item.id)
   const extraIds = [...byId.keys()].filter((id) => !seedIds.includes(id))
   return [...seedIds, ...extraIds].map((id) => byId.get(id)!).filter(Boolean)

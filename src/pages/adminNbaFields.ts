@@ -22,13 +22,23 @@ export const nbaUpdateFields: FieldDef[] = [
 ]
 
 export const nbaFaFields: FieldDef[] = [
+  {
+    key: 'image',
+    label: 'Зураг (3:4)',
+    type: 'image',
+    required: true,
+    cropAspect: 3 / 4,
+    previewAspect: '3 / 4',
+    placeholder: 'Утаснаас сонгоод 3:4-өөр тайрна',
+  },
   { key: 'name', label: 'Нэр', required: true },
   { key: 'rank', label: 'Rank', type: 'number', half: true, required: true },
-  { key: 'position', label: 'Position', half: true },
+  { key: 'position', label: 'Байрлал', half: true },
+  { key: 'age', label: 'Нас', half: true },
+  { key: 'height', label: 'Өндөр', half: true, placeholder: '206 см' },
   { key: 'lastTeam', label: 'Өмнөх баг', half: true },
   { key: 'newTeam', label: 'Шинэ баг', half: true },
-  { key: 'age', label: 'Нас', half: true },
-  { key: 'fit', label: 'Best fit', half: true },
+  { key: 'fit', label: 'Best fit' },
   { key: 'note', label: 'Товч', type: 'textarea', required: true },
   {
     key: 'detail',

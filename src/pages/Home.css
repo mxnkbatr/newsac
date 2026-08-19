@@ -501,21 +501,34 @@
   line-height: 0.9;
 }
 
-.hero-handle {
+.hero-pillars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.28rem 0.38rem;
   font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--red);
   width: fit-content;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s, color 0.2s;
 }
 
-.hero-handle:hover {
+.hero-pillars a {
+  color: inherit;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.hero-pillars a:hover {
   color: var(--red-hot);
   border-color: var(--red);
+}
+
+.hero-pillars span {
+  color: rgba(227, 27, 35, 0.45);
+  font-weight: 600;
 }
 
 .hero h1 {
@@ -605,10 +618,30 @@
   background: rgba(7, 7, 7, 0.45);
 }
 
+.news-hook-inline {
+  margin: 0 0 0.85rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .news-hook strong {
   font-size: 0.74rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.news-hook-inline strong {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: var(--ink-faint);
+}
+
+.news-hook-inline .news-hook-dot {
+  width: 6px;
+  height: 6px;
 }
 
 .news-hook-dot {
@@ -835,32 +868,23 @@
 
 .home-show-lock {
   position: absolute;
-  top: 0.65rem;
-  right: 0.65rem;
+  top: 50%;
+  left: 50%;
   z-index: 2;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 4.25rem;
+  height: 4.25rem;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.72);
-  border: 1px solid rgba(244, 242, 238, 0.2);
   color: #fff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-}
-
-.home-show-card.is-locked::after {
-  content: 'LOCKED';
-  position: absolute;
-  left: 0.65rem;
-  top: 0.7rem;
-  z-index: 2;
-  font-family: var(--font-display);
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
-  color: #fff;
-  background: rgba(227, 27, 35, 0.92);
-  padding: 0.28rem 0.45rem;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.28), transparent 45%),
+    linear-gradient(145deg, rgba(227, 27, 35, 0.98), rgba(70, 6, 10, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 0 0 8px rgba(227, 27, 35, 0.14),
+    0 16px 36px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
 }
 
 .home-show-card > div:last-child {
@@ -1329,9 +1353,10 @@
     font-size: clamp(1.85rem, 10vw, 2.4rem);
   }
 
-  .hero-handle {
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
+  .hero-pillars {
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+    gap: 0.2rem 0.32rem;
   }
 
   .hero h1 {

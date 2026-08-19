@@ -1,9 +1,11 @@
 import {
   useEffect,
   useState,
+  type CSSProperties,
   type FormEvent,
   type ReactNode,
 } from 'react'
+import { ImageCropper } from '../components/ImageCropper'
 import { uploadPublicImage } from '../lib/mediaUpload'
 import { supabaseConfigured } from '../lib/supabase'
 
@@ -24,6 +26,9 @@ export type FieldDef = {
   options?: { value: string; label: string }[]
   half?: boolean
   required?: boolean
+  /** width / height, e.g. 3/4 for portraits */
+  cropAspect?: number
+  previewAspect?: string
 }
 
 export type ToastState = { text: string; error?: boolean } | null
@@ -154,6 +159,8 @@ function ImageField({
       onChange={(url) => onChange(url)}
       placeholder={def.placeholder}
       required={def.required}
+      cropAspect={def.cropAspect}
+      previewAspect={def.previewAspect}
     />
   )
 }
@@ -165,6 +172,8 @@ export function PhotoPicker({
   onChange,
   placeholder,
   required,
+  cropAspect,
+  previewAspect,
 }: {
   id: string
   label: string
@@ -172,12 +181,14 @@ export function PhotoPicker({
   onChange: (url: string) => void
   placeholder?: string
   required?: boolean
+  cropAspect?: number
+  previewAspect?: string
 }) {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
 
-  const pick = (file: File | undefined) => {
-    if (!file) return
+  const upload = (file: File) => {
     setBusy(true)
     setErr(null)
     void resolveImageFile(file)
@@ -188,6 +199,24 @@ export function PhotoPicker({
       .finally(() => setBusy(false))
   }
 
+  const pick = (file: File | undefined) => {
+    if (!file) return
+    if (cropAspect) {
+      setCropSrc(URL.createObjectURL(file))
+      return
+    }
+    upload(file)
+  }
+
+  const closeCrop = () => {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+  }
+
+  const previewStyle: CSSProperties | undefined = previewAspect
+    ? { aspectRatio: previewAspect, maxWidth: previewAspect === '3 / 4' ? 220 : undefined }
+    : undefined
+
   return (
     <div className="admin-field admin-field-image">
       <span className="admin-field-label">
@@ -195,11 +224,13 @@ export function PhotoPicker({
         {required ? ' *' : ''}
       </span>
       {value ? (
-        <div className="admin-image-preview">
+        <div className="admin-image-preview" style={previewStyle}>
           <img src={value} alt="" />
         </div>
       ) : (
-        <div className="admin-image-preview is-empty">Photos</div>
+        <div className="admin-image-preview is-empty" style={previewStyle}>
+          Photos
+        </div>
       )}
       <div className="admin-image-actions">
         <label className={`admin-image-pick${busy ? ' is-busy' : ''}`}>
@@ -213,7 +244,7 @@ export function PhotoPicker({
               e.target.value = ''
             }}
           />
-          {busy ? 'Илгээж байна…' : 'Photos-оос сонгох'}
+          {busy ? 'Илгээж байна…' : cropAspect ? 'Photos-оос сонгоод тайрах' : 'Photos-оос сонгох'}
         </label>
         <label className={`admin-image-pick is-camera${busy ? ' is-busy' : ''}`}>
           <input
@@ -230,6 +261,9 @@ export function PhotoPicker({
           Камер
         </label>
       </div>
+      {cropAspect ? (
+        <p className="admin-field-hint">Босоо 3:4 хүрээнд чирж, томруулаад тайрна. Бүх хөрөг ижил хэмжээтэй.</p>
+      ) : null}
       {err ? <p className="admin-field-error">{err}</p> : null}
       <details className="admin-image-url">
         <summary>эсвэл холбоос / URL</summary>
@@ -241,6 +275,17 @@ export function PhotoPicker({
           onChange={(e) => onChange(e.target.value)}
         />
       </details>
+      {cropSrc && cropAspect ? (
+        <ImageCropper
+          src={cropSrc}
+          aspect={cropAspect}
+          onCancel={closeCrop}
+          onConfirm={(file) => {
+            closeCrop()
+            upload(file)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

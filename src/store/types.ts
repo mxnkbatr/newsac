@@ -334,6 +334,8 @@ export type NbaFreeAgent = {
   lastTeam: string
   newTeam: string
   age: string
+  height: string
+  image: string
   note: string
   detail: string[]
   fit: string
