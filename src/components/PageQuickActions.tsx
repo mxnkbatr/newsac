@@ -70,9 +70,9 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
   {
     match: (p) => p.startsWith('/deed-lig'),
     actions: [
-      { to: '/deed-lig', label: 'Лиг', icon: 'ДЛ' },
+      { to: '/deed-lig', label: 'Мэдээ', icon: 'М' },
+      { to: '/deed-lig/clubs', label: 'Клуб', icon: 'К' },
       { to: '/nba', label: 'NBA', icon: 'NB' },
-      { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
   {

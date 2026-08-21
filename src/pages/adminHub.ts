@@ -51,8 +51,9 @@ export function buildHubStages(data: AppData): HubStage[] {
     artistSoon: true,
     passSoon: true,
   }
-  const domesticNews = data.news.filter((n) => n.region !== 'foreign').length
+  const domesticNews = data.news.filter((n) => n.region !== 'foreign' && n.region !== 'yellow').length
   const foreignNews = data.news.filter((n) => n.region === 'foreign').length
+  const yellowNews = data.news.filter((n) => n.region === 'yellow').length
   const domesticRap = data.rappers.filter((r) => r.region !== 'foreign').length
   const foreignRap = data.rappers.filter((r) => r.region === 'foreign').length
 
@@ -60,7 +61,7 @@ export function buildHubStages(data: AppData): HubStage[] {
     {
       step: 1,
       title: 'Мэдээ · Мэдээлэл',
-      desc: 'Дотоод / гадаад мэдээ — хамгийн түрүүнд',
+      desc: 'Дотоод / гадаад / шар мэдээ — хамгийн түрүүнд',
       items: [
         {
           id: 'news',
@@ -68,7 +69,7 @@ export function buildHubStages(data: AppData): HubStage[] {
           page: '/news',
           count: data.news.length,
           ready: true,
-          note: `Дотоод ${domesticNews} · Гадаад ${foreignNews}`,
+          note: `Дотоод ${domesticNews} · Гадаад ${foreignNews} · Шар ${yellowNews}`,
         },
         {
           id: 'news',
@@ -97,11 +98,11 @@ export function buildHubStages(data: AppData): HubStage[] {
         },
         {
           id: 'deedLig',
-          label: 'Дээд Лиг мэдээ',
+          label: 'Дээд Лиг',
           page: '/deed-lig',
-          count: data.deedLigNews?.length || 0,
+          count: (data.deedLigNews?.length || 0) + (data.deedLigClubs?.length || 0),
           ready: true,
-          note: 'Ерөнхий мэдээнээс тусдаа',
+          note: 'Мэдээлэл + клубууд',
         },
       ],
     },

@@ -1,13 +1,16 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
 import { MelbetBanner } from '../components/MelbetBanner'
+import { ArticleBlocks } from '../components/ArticleBlocks'
+import { ShareButton } from '../components/ShareButton'
 import type { NewsRegion } from '../store/types'
+import { newsRegionLabel, resolveNewsRegion } from '../lib/newsRegion'
 import './Pages.css'
 
 function newsRegion(item: { region?: NewsRegion }) {
-  return item.region === 'foreign' ? 'foreign' : 'domestic'
+  return resolveNewsRegion(item)
 }
 
 export function NewsPage() {
@@ -22,6 +25,7 @@ export function NewsPage() {
 
   const domesticCount = data.news.filter((n) => newsRegion(n) === 'domestic').length
   const foreignCount = data.news.filter((n) => newsRegion(n) === 'foreign').length
+  const yellowCount = data.news.filter((n) => newsRegion(n) === 'yellow').length
 
   return (
     <div>
@@ -29,7 +33,7 @@ export function NewsPage() {
         <div className="container">
           <div className="section-kicker">Мэдээ · Мэдээлэл</div>
           <h1>Мэдээ</h1>
-          <p>Дотоод болон гадаад хип-хоп зах зээлийн мэдээ, шинжилгээ.</p>
+          <p>Дотоод, гадаад болон шар мэдээ — нэг дороос.</p>
           <div className="news-region-tabs" role="tablist" aria-label="Мэдээний төрөл">
             <button
               type="button"
@@ -51,6 +55,16 @@ export function NewsPage() {
               Гадаад мэдээ
               <span>{foreignCount}</span>
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'yellow'}
+              className={tab === 'yellow' ? 'active' : ''}
+              onClick={() => setTab('yellow')}
+            >
+              Шар мэдээ
+              <span>{yellowCount}</span>
+            </button>
           </div>
         </div>
       </header>
@@ -61,32 +75,41 @@ export function NewsPage() {
             <p className="empty-note">
               {tab === 'domestic'
                 ? 'Одоогоор дотоод мэдээ байхгүй.'
-                : 'Одоогоор гадаад мэдээ байхгүй.'}
+                : tab === 'foreign'
+                  ? 'Одоогоор гадаад мэдээ байхгүй.'
+                  : 'Одоогоор шар мэдээ байхгүй.'}
             </p>
           )}
           {filtered.map((item) => (
-            <Link
-              key={item.id}
-              to={`/news/${item.id}`}
-              className="news-row"
-              onClick={() => track('news_click', item.id)}
-            >
-              <div className="news-row-img">
-                <img src={item.image} alt="" loading="lazy" />
-              </div>
-              <div>
-                <span className="meta">
-                  {newsRegion(item) === 'foreign' ? 'Гадаад' : 'Дотоод'} · {item.category} ·{' '}
-                  {item.date} · {item.readMin} мин
-                  {item.membersOnly ? ' · MEMBER' : ''}
-                </span>
-                <h2>{item.title}</h2>
-                <p>{item.excerpt}</p>
-                {item.membersOnly && !isMember && (
-                  <span className="meta">Зөвхөн member</span>
-                )}
-              </div>
-            </Link>
+            <div key={item.id} className="share-card">
+              <Link
+                to={`/news/${item.id}`}
+                className="news-row"
+                onClick={() => track('news_click', item.id)}
+              >
+                <div className="news-row-img">
+                  <img src={item.image} alt="" loading="lazy" />
+                </div>
+                <div>
+                  <span className="meta">
+                    {newsRegionLabel(newsRegion(item))} · {item.category} ·{' '}
+                    {item.date} · {item.readMin} мин
+                    {item.membersOnly ? ' · MEMBER' : ''}
+                  </span>
+                  <h2>{item.title}</h2>
+                  <p>{item.excerpt}</p>
+                  {item.membersOnly && !isMember && (
+                    <span className="meta">Зөвхөн member</span>
+                  )}
+                </div>
+              </Link>
+              <ShareButton
+                variant="icon"
+                title={item.title}
+                text={item.excerpt}
+                path={`/news/${item.id}`}
+              />
+            </div>
           ))}
           <MelbetBanner />
         </div>
@@ -102,6 +125,14 @@ export function NewsDetailPage() {
   const [text, setText] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const item = data.news.find((n) => n.id === id)
+
+  useEffect(() => {
+    if (!item) return
+    document.title = `${item.title} · Newsac`
+    return () => {
+      document.title = 'Newsac'
+    }
+  }, [item])
 
   if (!item) {
     return (
@@ -158,10 +189,13 @@ export function NewsDetailPage() {
       <header className="page-hero">
         <div className="container detail-head">
           <div className="section-kicker">
-            {item.region === 'foreign' ? 'Гадаад' : 'Дотоод'} · {item.category} · {item.date}
+            {newsRegionLabel(item.region)} · {item.category} · {item.date}
           </div>
           <h1>{item.title}</h1>
           <p>{item.excerpt}</p>
+          <div className="detail-share">
+            <ShareButton title={item.title} text={item.excerpt} path={`/news/${item.id}`} />
+          </div>
         </div>
       </header>
       <div className="container detail-layout">
@@ -172,13 +206,10 @@ export function NewsDetailPage() {
           onLoad={() => track('news_click', item.id)}
         />
         <div className="detail-body">
-          {(item.body?.trim() || item.excerpt || '')
-            .split(/\n\n+/)
-            .map((para) => para.trim())
-            .filter(Boolean)
-            .map((para, i) => (
-              <p key={`${i}-${para.slice(0, 24)}`}>{para}</p>
-            ))}
+          <ArticleBlocks
+            text={item.body?.trim() || item.excerpt || ''}
+            midSrc={item.midImage}
+          />
           {!item.body?.trim() && !item.excerpt?.trim() ? (
             <p className="detail-empty">Энэ мэдээнд текст оруулаагүй байна.</p>
           ) : null}

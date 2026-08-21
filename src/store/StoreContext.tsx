@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { createSeed, envAdminEmails, isAdminCredential, isAdminEmail } from './seed'
+import { createSeed, envAdminEmails, envDeedLigEditorEmails, isAdminCredential, isAdminEmail } from './seed'
 import { normalizeYouTubeId, parseYouTubeId, youtubeThumb } from '../lib/youtube'
 import type {
   AboutPage,
@@ -44,6 +44,7 @@ import type {
   NbaSacfunBit,
   NbaSacfunVideo,
   NbaStory,
+  DeedLigClub,
 } from './types'
 import { YOUTUBE_CHANNEL_URL } from '../data/brand'
 import {
@@ -69,6 +70,8 @@ type StoreValue = {
   addAdminEmail: (email: string) => string | null
   removeAdminEmail: (email: string) => void
   isEmailAdmin: (email: string) => boolean
+  isDeedLigEditor: (email: string) => boolean
+  canOpenCms: (email: string) => boolean
   track: (type: AnalyticsEvent['type'], targetId: string, amount?: number) => void
   addToCart: (productId: string, qty?: number) => void
   setCartQty: (productId: string, qty: number) => void
@@ -130,6 +133,8 @@ type StoreValue = {
   deleteNbaUpdate: (id: string) => AppData
   upsertDeedLigNews: (item: NbaStory) => AppData
   deleteDeedLigNews: (id: string) => AppData
+  upsertDeedLigClub: (item: DeedLigClub) => AppData
+  deleteDeedLigClub: (id: string) => AppData
   upsertNbaHot: (item: NbaHot) => void
   deleteNbaHot: (id: string) => void
   upsertNbaFreeAgent: (item: NbaFreeAgent) => AppData
@@ -158,7 +163,7 @@ type StoreValue = {
     cover?: string
   }) => Livestream | string
   endArtistLive: (livestreamId: string) => void
-  pushCloud: (override?: AppData) => Promise<void>
+  pushCloud: (override?: AppData, opts?: { scope?: 'full' | 'deedLig' }) => Promise<void>
   pullCloud: () => Promise<'empty' | 'ok'>
   analyticsSummary: () => {
     newsClicks: { id: string; title: string; clicks: number }[]
@@ -355,6 +360,7 @@ function loadData(): AppData {
         Array.isArray(parsed.deedLigNews) ? parsed.deedLigNews : seed.deedLigNews,
         tombs,
       ),
+      deedLigClubs: mergeNbaContent(undefined, parsed.deedLigClubs, seed.deedLigClubs, tombs),
       homeHotNewsIds: rejectTombs(
         (
           Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
@@ -371,6 +377,13 @@ function loadData(): AppData {
         new Set([
           ...(parsed.adminEmails || []).map((e) => e.toLowerCase()),
           ...seed.adminEmails.map((e) => e.toLowerCase()),
+        ]),
+      ),
+      deedLigEditorEmails: Array.from(
+        new Set([
+          ...(parsed.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
+          ...seed.deedLigEditorEmails.map((e) => e.toLowerCase()),
+          ...envDeedLigEditorEmails(),
         ]),
       ),
       orders: parsed.orders || [],
@@ -466,6 +479,12 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
       published,
       tombs,
     ),
+    deedLigClubs: mergeNbaContent(
+      remote.deedLigClubs,
+      local.deedLigClubs,
+      seed.deedLigClubs,
+      tombs,
+    ),
     nbaHotNews: [],
     nbaFreeAgents: mergeNbaContent(
       remote.nbaFreeAgents,
@@ -512,6 +531,14 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
         ...(local.adminEmails || []).map((e) => e.toLowerCase()),
         ...seed.adminEmails.map((e) => e.toLowerCase()),
         ...envAdminEmails(),
+      ]),
+    ),
+    deedLigEditorEmails: Array.from(
+      new Set([
+        ...(remote.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
+        ...(local.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
+        ...(seed.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
+        ...envDeedLigEditorEmails(),
       ]),
     ),
     orders: remote.orders || local.orders || [],
@@ -678,6 +705,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ]),
         )
         return isAdminEmail(email, list)
+      },
+      isDeedLigEditor(email) {
+        const list = Array.from(
+          new Set([
+            ...(data.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
+            ...envDeedLigEditorEmails(),
+          ]),
+        )
+        return isAdminEmail(email, list)
+      },
+      canOpenCms(email) {
+        const admins = Array.from(
+          new Set([
+            ...data.adminEmails.map((e) => e.toLowerCase()),
+            ...envAdminEmails(),
+          ]),
+        )
+        const editors = Array.from(
+          new Set([
+            ...(data.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
+            ...envDeedLigEditorEmails(),
+          ]),
+        )
+        return isAdminEmail(email, admins) || isAdminEmail(email, editors)
       },
       track,
       addToCart(productId, qty = 1) {
@@ -1367,6 +1418,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },
+      upsertDeedLigClub(item) {
+        return patch((prev) => {
+          const list = prev.deedLigClubs || []
+          const i = list.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const deedLigClubs = [...list]
+            deedLigClubs[i] = item
+            return { ...prev, deedLigClubs }
+          }
+          return { ...prev, deedLigClubs: [...list, item] }
+        })
+      },
+      deleteDeedLigClub(id) {
+        return patch((prev) => ({
+          ...prev,
+          deedLigClubs: (prev.deedLigClubs || []).filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
+      },
       upsertNbaHot(item) {
         patch((prev) => {
           const i = prev.nbaHotNews.findIndex((n) => n.id === item.id)
@@ -1551,8 +1621,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ),
         }))
       },
-      async pushCloud(override?: AppData) {
-        const payload = override ?? dataRef.current
+      async pushCloud(override?: AppData, opts?: { scope?: 'full' | 'deedLig' }) {
+        let payload = override ?? dataRef.current
+        if (opts?.scope === 'deedLig') {
+          const remote = await pullAppSnapshot()
+          if (!remote || !Object.keys(remote).length) {
+            throw new Error('Cloud хоосон байна. Бүтэн admin эхлээд push хийнэ үү.')
+          }
+          payload = {
+            ...applyRemoteSnapshot(remote, dataRef.current),
+            deedLigNews: payload.deedLigNews,
+            deedLigClubs: payload.deedLigClubs,
+            cmsTombstones: addTombstones(remote.cmsTombstones, payload.cmsTombstones || []),
+          }
+        }
         const size = JSON.stringify(payload).length
         if (size > 900_000) {
           throw new Error(

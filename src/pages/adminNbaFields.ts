@@ -9,15 +9,23 @@ export const nbaUpdateFields: FieldDef[] = [
     required: true,
     placeholder: 'Photos-оос сонгоно',
   },
+  {
+    key: 'midImage',
+    label: 'Дунд зураг',
+    type: 'image',
+    placeholder: 'Мэдээний текст дунд гарна',
+  },
   { key: 'tag', label: 'Tag (Trade, Injury...)', half: true, required: true },
   { key: 'when', label: 'Хэзээ', half: true, placeholder: '2 цагийн өмнө' },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
   { key: 'blurb', label: 'Товч', type: 'textarea', required: true },
   {
     key: 'body',
-    label: 'Бүрэн текст (мөр бүр = 1 догол)',
-    type: 'textarea',
+    label: 'Бүрэн текст',
+    type: 'article',
     required: true,
+    placeholder:
+      'Мэдээний бүтэн агуулга. Хоосон мөрөөр догол төлнө. Дунд нь зураг оруулах бол доорх Photos-оос сонго.',
   },
 ]
 
@@ -125,3 +133,15 @@ export function linesOf(value: unknown) {
     .map((s) => s.trim())
     .filter(Boolean)
 }
+
+export const deedLigClubFields: FieldDef[] = [
+  {
+    key: 'image',
+    label: 'Лого / зураг',
+    type: 'image',
+    placeholder: 'Photos-оос сонгоно',
+  },
+  { key: 'name', label: 'Клубын нэр', required: true },
+  { key: 'city', label: 'Хот', half: true, required: true },
+  { key: 'rank', label: 'Дараалал', type: 'number', half: true, required: true },
+]

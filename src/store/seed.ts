@@ -19,6 +19,9 @@ export const DEFAULT_ADMIN_EMAILS = [
   'tsbatbaatar99@gmail.com',
 ] as const
 
+/** Дээд Лиг л удирдах staff — бүтэн admin биш */
+export const DEFAULT_DEED_LIG_EDITORS = ['khishigtbolorerdene@gmail.com'] as const
+
 export function normalizePhone(value: string) {
   return value.replace(/\D/g, '')
 }
@@ -46,6 +49,10 @@ export function isAdminCredential(value: string) {
 export function isAdminEmail(email: string, list: string[]) {
   const e = email.trim().toLowerCase()
   return Boolean(e) && list.map((x) => x.toLowerCase()).includes(e)
+}
+
+export function envDeedLigEditorEmails(): string[] {
+  return DEFAULT_DEED_LIG_EDITORS.map((e) => e.toLowerCase())
 }
 
 export function createSeed(): AppData {
@@ -578,12 +585,24 @@ export function createSeed(): AppData {
     nbaHub: {
       kicker: 'Newsac · Basketball',
       title: 'NBA',
-      subtitle: 'Доорх filter-оос хэсгээ сонгоод орно.',
+      subtitle: '',
       heroImage:
         'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80',
       featuredId: '',
     },
     deedLigNews: [],
+    deedLigClubs: [
+      { id: 'deed-club-knights', name: 'BCH Найтс', city: 'Улаанбаатар', image: '', rank: 1 },
+      { id: 'deed-club-khuleguud', name: 'Хасын Хүлэгүүд', city: 'Улаанбаатар', image: '', rank: 2 },
+      { id: 'deed-club-apes', name: 'SG Эйпс', city: 'Улаанбаатар', image: '', rank: 3 },
+      { id: 'deed-club-miners', name: 'Омни Эрдэнэт Майнерс', city: 'Эрдэнэт', image: '', rank: 4 },
+      { id: 'deed-club-bodons', name: 'Сэлэнгэ Бодонс', city: 'Сэлэнгэ', image: '', rank: 5 },
+      { id: 'deed-club-shonkhoruud', name: 'Хаан Шонхорууд', city: 'Ховд', image: '', rank: 6 },
+      { id: 'deed-club-darkhan', name: 'Дархан Юнайтед', city: 'Дархан', image: '', rank: 7 },
+      { id: 'deed-club-brothers', name: 'Завхан Бродерс', city: 'Завхан', image: '', rank: 8 },
+      { id: 'deed-club-mongolians', name: 'Монголианс', city: 'Улаанбаатар', image: '', rank: 9 },
+      { id: 'deed-club-metal', name: 'Бишрэлт Металл', city: 'Улаанбаатар', image: '', rank: 10 },
+    ],
     homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
     about: {
       name: 'Цэндийн Батбаатар',
@@ -599,8 +618,11 @@ export function createSeed(): AppData {
       cypherSoon: true,
       artistSoon: true,
       passSoon: true,
+      homeReadersCount: 2400,
+      homeReadersLabel: '2.4K хүмүүс уншиж байна',
     },
     adminEmails: envAdminEmails(),
+    deedLigEditorEmails: envDeedLigEditorEmails(),
     orders: [],
     ticketOrders: [],
     subscribers: [],

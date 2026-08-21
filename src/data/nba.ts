@@ -7,6 +7,7 @@ export type NbaStory = {
   when: string
   readMin: number
   image: string
+  midImage?: string
 }
 
 export type FreeAgent = {

@@ -3,6 +3,7 @@ import { YOUTUBE_CHANNEL_URL } from '../data/brand'
 import { useAuth } from '../context/AuthContext'
 import { useStore } from '../store/StoreContext'
 import { NewsletterBox, PollWidget, SponsorSlot } from '../components/Widgets'
+import { readersLine, resolveReadersCount } from '../lib/readersLabel'
 import type { DailyDrop } from '../store/types'
 import { youtubeThumb } from '../lib/youtube'
 import './Home.css'
@@ -183,14 +184,13 @@ function AppCommandCenter() {
 
 export function Home() {
   const { user, reactTo } = useAuth()
-  const { data, track, analyticsSummary } = useStore()
+  const { data, track } = useStore()
   const news = data.news
   const videos = data.videos
   const rankings = data.rankings
   const deedLigNews = data.deedLigNews || []
   const deedLead = deedLigNews[0]
-  const topNewsClicks = analyticsSummary().newsClicks.reduce((sum, item) => sum + item.clicks, 0)
-  const liveReaders = Math.max(2400, 1800 + topNewsClicks * 14)
+  const readersLabel = readersLine(resolveReadersCount(data.siteFlags))
 
   const hotNews = (() => {
     const byId = new Map(news.map((n) => [n.id, n]))
@@ -227,8 +227,6 @@ export function Home() {
                 <Link to="/deed-lig">Дээд Лиг</Link>
                 <span aria-hidden="true">/</span>
                 <Link to="/news">Hip-Hop</Link>
-                <span aria-hidden="true">/</span>
-                <Link to="/news">Entertainment</Link>
               </nav>
             </div>
           </div>
@@ -305,7 +303,7 @@ export function Home() {
 
           <div className="news-hook news-hook-inline reveal">
             <span className="news-hook-dot" aria-hidden="true" />
-            <strong>{formatReaders(liveReaders)} хүмүүс уншиж байна</strong>
+            <strong>{readersLabel}</strong>
           </div>
 
           <div className="news-feature reveal reveal-delay-1">
@@ -344,7 +342,7 @@ export function Home() {
             </Link>
           </div>
           <Link
-            to={deedLead ? `/deed-lig/${deedLead.id}` : '/deed-lig'}
+            to={deedLead ? `/deed-lig/updates/${deedLead.id}` : '/deed-lig'}
             className="home-deed reveal reveal-delay-1"
           >
             <div>

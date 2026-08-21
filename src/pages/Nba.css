@@ -1198,6 +1198,10 @@
     padding: 0.9rem;
   }
 
+  .nba-list-card-plain {
+    grid-template-columns: 2.5rem 1fr;
+  }
+
   .nba-fa-card {
     grid-template-columns: 96px 1fr;
   }

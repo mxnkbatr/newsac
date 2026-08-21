@@ -123,7 +123,7 @@ export function AdminNbaPanel({
                 {
                   kicker: h?.kicker || 'Newsac · Basketball',
                   title: h?.title || 'NBA',
-                  subtitle: h?.subtitle || 'Доорх filter-оос хэсгээ сонгоод орно.',
+                  subtitle: h?.subtitle || '',
                   heroImage: h?.heroImage || '',
                   featuredId: h?.featuredId || '',
                 },
@@ -196,6 +196,7 @@ export function AdminNbaPanel({
                 when: 'саяхан',
                 readMin: 3,
                 image: '',
+                midImage: '',
                 blurb: '',
                 body: '',
               },
@@ -207,6 +208,7 @@ export function AdminNbaPanel({
                   when: String(v.when).trim(),
                   readMin: Number(v.readMin) || 3,
                   image: String(v.image).trim() || IMG.news,
+                  midImage: String(v.midImage || '').trim(),
                   blurb: String(v.blurb).trim(),
                   body: linesOf(v.body),
                 }
@@ -221,7 +223,7 @@ export function AdminNbaPanel({
             openEditor(
               'NBA мэдээлэл засах',
               nbaUpdateFields,
-              { ...n, body: n.body.join('\n') },
+              { ...n, body: n.body.join('\n\n') },
               (v) => {
                 const snapshot = store.upsertNbaUpdate({
                   ...n,
@@ -230,6 +232,7 @@ export function AdminNbaPanel({
                   when: String(v.when).trim(),
                   readMin: Number(v.readMin) || 3,
                   image: String(v.image).trim() || n.image,
+                  midImage: String(v.midImage || '').trim(),
                   blurb: String(v.blurb).trim(),
                   body: linesOf(v.body),
                 })

@@ -5,14 +5,14 @@ import { useStore } from '../store/StoreContext'
 /** Gmail admin жагсаалтад байвал admin session автоматаар идэвхжүүлнэ. */
 export function AdminSessionSync() {
   const { user } = useAuth()
-  const { isAdmin, isEmailAdmin, grantAdmin } = useStore()
+  const { isAdmin, canOpenCms, grantAdmin } = useStore()
 
   useEffect(() => {
     if (!user?.email) return
-    if (isEmailAdmin(user.email) && !isAdmin) {
+    if (canOpenCms(user.email) && !isAdmin) {
       grantAdmin()
     }
-  }, [user?.email, isAdmin, isEmailAdmin, grantAdmin])
+  }, [user?.email, isAdmin, canOpenCms, grantAdmin])
 
   return null
 }

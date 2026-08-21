@@ -17,13 +17,20 @@ export const newsFields: FieldDef[] = [
     required: true,
     placeholder: 'Photos-оос сонгоно',
   },
+  {
+    key: 'midImage',
+    label: 'Дунд зураг',
+    type: 'image',
+    placeholder: 'Мэдээний текст дунд гарна',
+  },
   { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
   {
     key: 'body',
     label: 'Бүрэн текст',
-    type: 'textarea',
+    type: 'article',
     required: true,
-    placeholder: 'Мэдээний бүтэн агуулга. Хоосон үлдээвэл дэлгэрэнгүй хуудас хоосон харагдана.',
+    placeholder:
+      'Мэдээний бүтэн агуулга. Хоосон мөрөөр догол төлнө. Дунд нь зураг оруулах бол доорх Photos-оос сонго.',
   },
   {
     key: 'region',
@@ -33,6 +40,7 @@ export const newsFields: FieldDef[] = [
     options: [
       { value: 'domestic', label: 'Дотоод мэдээ' },
       { value: 'foreign', label: 'Гадаад мэдээ' },
+      { value: 'yellow', label: 'Шар мэдээ' },
     ],
   },
   { key: 'category', label: 'Ангилал', half: true },

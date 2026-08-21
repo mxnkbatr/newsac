@@ -32,7 +32,7 @@ export function ProfilePage() {
     updateProfileBasics,
     updatePassword,
   } = useAuth()
-  const { data, isEmailAdmin } = useStore()
+  const { data, isEmailAdmin, isDeedLigEditor, canOpenCms } = useStore()
   const { playEpisode } = usePlayer()
   const [offline, setOffline] = useState<OfflineMeta[]>(() => listOfflineMeta())
   const [profileName, setProfileName] = useState('')
@@ -56,7 +56,8 @@ export function ProfilePage() {
   if (!user) return <Navigate to="/auth" replace />
   if (!profileComplete) return <Navigate to="/auth" replace />
 
-  const canOpenAdmin = isEmailAdmin(user.email)
+  const canOpenAdmin = canOpenCms(user.email)
+  const isDeedOnly = isDeedLigEditor(user.email) && !isEmailAdmin(user.email)
   const favs = data.rappers.filter((r) => user.favorites.includes(r.id))
   const reacted = data.videos.filter((v) => user.reactions[v.id])
   const gender = genderLabel(user.gender)
@@ -174,7 +175,11 @@ export function ProfilePage() {
             <span className={`prof-chip prof-chip-tier ${isMember ? 'on' : ''}`}>
               {memberLabel}
             </span>
-            {canOpenAdmin ? <span className="prof-chip prof-chip-admin">Admin</span> : null}
+            {canOpenAdmin ? (
+              <span className="prof-chip prof-chip-admin">
+                {isDeedOnly ? 'Дээд Лиг' : 'Admin'}
+              </span>
+            ) : null}
           </div>
           {(memberUntil || joined) && (
             <p className="prof-meta">
@@ -440,8 +445,8 @@ export function ProfilePage() {
               <Link to="/admin" className="prof-menu-item prof-menu-item-admin">
                 <span className="prof-menu-icon admin" aria-hidden="true" />
                 <span className="prof-menu-text">
-                  <strong>Admin panel</strong>
-                  <em>Контент · CMS · тохиргоо</em>
+                  <strong>{isDeedOnly ? 'Дээд Лиг удирдлага' : 'Admin panel'}</strong>
+                  <em>{isDeedOnly ? 'Мэдээлэл · клубууд' : 'Контент · CMS · тохиргоо'}</em>
                 </span>
                 <span className="prof-chevron" aria-hidden="true">
                   ›

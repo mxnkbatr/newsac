@@ -1,0 +1,149 @@
+.share-card {
+  position: relative;
+}
+
+.share-card > a {
+  padding-right: 3.1rem;
+}
+
+.share-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.share-wrap.is-icon {
+  position: absolute;
+  top: 0.15rem;
+  right: 0;
+  z-index: 2;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 42px;
+  padding: 0 0.95rem;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.share-btn:hover {
+  border-color: var(--ink);
+  background: rgba(244, 242, 238, 0.04);
+}
+
+.share-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line-strong);
+  background: rgba(7, 7, 7, 0.72);
+  color: var(--ink);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.share-icon:hover,
+.share-wrap.is-open .share-icon {
+  border-color: var(--red);
+  color: #fff;
+  background: var(--red);
+}
+
+.share-copied,
+.share-tip {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-dim);
+}
+
+.share-tip {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  white-space: nowrap;
+  padding: 0.28rem 0.5rem;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+}
+
+.share-sheet {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 8;
+  min-width: 198px;
+  padding: 0.35rem;
+  background: #141414;
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.share-wrap.is-icon .share-sheet {
+  left: auto;
+  right: 0;
+}
+
+.share-sheet-lead {
+  margin: 0;
+  padding: 0.45rem 0.65rem 0.35rem;
+  color: var(--ink-dim);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.share-sheet-row {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 650;
+  padding: 0.7rem 0.7rem;
+  cursor: pointer;
+}
+
+.share-sheet-row:hover {
+  background: rgba(244, 242, 238, 0.06);
+}
+
+.detail-share {
+  margin-top: 1.05rem;
+}
+
+.nba-article-inner .detail-share,
+.deed-article-inner .detail-share {
+  margin: 0.15rem 0 1.25rem;
+}
+
+@media (max-width: 960px) {
+  .share-wrap.is-icon {
+    top: 0.55rem;
+    right: 0.55rem;
+  }
+
+  .share-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+}

@@ -7,6 +7,8 @@ import {
   SACFUN_YOUTUBE_URL,
 } from '../data/brand'
 import { SponsorSlot } from '../components/Widgets'
+import { ArticleBlocks } from '../components/ArticleBlocks'
+import { ShareButton } from '../components/ShareButton'
 import { useStore } from '../store/StoreContext'
 import { youtubeEmbedSrc, youtubeThumb } from '../lib/youtube'
 import './Pages.css'
@@ -132,7 +134,6 @@ export function NbaPage() {
           <div>
             <div className="section-kicker">{hub?.kicker || 'Newsac · Basketball'}</div>
             <h1>{hub?.title || 'NBA'}</h1>
-            <p>{hub?.subtitle || 'Доорх filter-оос хэсгээ сонгоод орно.'}</p>
             <NbaPageFilter />
           </div>
           {featured && (
@@ -207,16 +208,24 @@ export function NbaUpdatesPage() {
       <section className="nba-section">
         <div className="container nba-list">
           {nbaUpdates.map((u) => (
-            <Link key={u.id} to={`/nba/updates/${u.id}`} className="nba-list-card">
-              <img src={u.image} alt="" loading="lazy" />
-              <div>
-                <span className="nba-update-tag">
-                  {u.tag} · {u.readMin} мин · {u.when}
-                </span>
-                <h2>{u.title}</h2>
-                <p>{u.blurb}</p>
-              </div>
-            </Link>
+            <div key={u.id} className="share-card">
+              <Link to={`/nba/updates/${u.id}`} className="nba-list-card">
+                <img src={u.image} alt="" loading="lazy" />
+                <div>
+                  <span className="nba-update-tag">
+                    {u.tag} · {u.readMin} мин · {u.when}
+                  </span>
+                  <h2>{u.title}</h2>
+                  <p>{u.blurb}</p>
+                </div>
+              </Link>
+              <ShareButton
+                variant="icon"
+                title={u.title}
+                text={u.blurb}
+                path={`/nba/updates/${u.id}`}
+              />
+            </div>
           ))}
         </div>
       </section>
@@ -250,10 +259,15 @@ export function NbaUpdateDetailPage() {
           </span>
           <h1>{item.title}</h1>
           <p className="nba-article-lead">{item.blurb}</p>
+          <div className="detail-share">
+            <ShareButton
+              title={item.title}
+              text={item.blurb}
+              path={`/nba/updates/${item.id}`}
+            />
+          </div>
           <div className="nba-article-body">
-            {item.body.map((p) => (
-              <p key={p.slice(0, 28)}>{p}</p>
-            ))}
+            <ArticleBlocks lines={item.body} midSrc={item.midImage} />
           </div>
           <a href={FACEBOOK_PAGE_URL} className="nba-inline-yt" target="_blank" rel="noreferrer">
             Facebook page · {FACEBOOK_PAGE_NAME} →

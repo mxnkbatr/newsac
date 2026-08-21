@@ -1,101 +1,156 @@
 import { useEffect } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { SponsorSlot } from '../components/Widgets'
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
+import { ArticleBlocks } from '../components/ArticleBlocks'
+import { ShareButton } from '../components/ShareButton'
 import { useStore } from '../store/StoreContext'
 import './Pages.css'
-import './DeedLig.css'
+import './Nba.css'
 
-const clubs = [
-  { id: 'knights', name: 'BCH Найтс', city: 'Улаанбаатар' },
-  { id: 'khuleguud', name: 'Хасын Хүлэгүүд', city: 'Улаанбаатар' },
-  { id: 'apes', name: 'SG Эйпс', city: 'Улаанбаатар' },
-  { id: 'miners', name: 'Омни Эрдэнэт Майнерс', city: 'Эрдэнэт' },
-  { id: 'bodons', name: 'Сэлэнгэ Бодонс', city: 'Сэлэнгэ' },
-  { id: 'shonkhoruud', name: 'Хаан Шонхорууд', city: 'Ховд' },
-  { id: 'darkhan', name: 'Дархан Юнайтед', city: 'Дархан' },
-  { id: 'brothers', name: 'Завхан Бродерс', city: 'Завхан' },
-  { id: 'mongolians', name: 'Монголианс', city: 'Улаанбаатар' },
-  { id: 'metal', name: 'Бишрэлт Металл', city: 'Улаанбаатар' },
+const deedFilters = [
+  {
+    to: '/deed-lig',
+    label: 'Мэдээлэл',
+    match: (p: string) => p === '/deed-lig' || p.startsWith('/deed-lig/updates'),
+  },
+  {
+    to: '/deed-lig/clubs',
+    label: 'Клубууд',
+    match: (p: string) => p.startsWith('/deed-lig/clubs'),
+  },
 ]
 
-export function DeedLigPage() {
-  const { data } = useStore()
-  const news = data.deedLigNews || []
-  const featured = news[0]
-
+function useDeedTitle(title: string) {
   useEffect(() => {
-    document.title = 'Дээд Лиг · Newsac'
+    document.title = `${title} · Newsac`
     return () => {
       document.title = 'Newsac'
     }
-  }, [])
+  }, [title])
+}
+
+function DeedPageFilter({ sticky = false }: { sticky?: boolean }) {
+  const { pathname } = useLocation()
 
   return (
-    <div className="deed-lig-page">
-      <header className="deed-hero">
-        <div className="container">
-          <div className="section-kicker">Newsac · Basketball</div>
-          <h1>Дээд Лиг</h1>
-          <p>
-            Монголын сагсан бөмбөгийн Үндэсний Дээд лиг. Мэдээ, клуб, тоглолт — ерөнхий мэдээнээс
-            тусдаа энд.
-          </p>
-        </div>
-      </header>
+    <nav className={`nba-filter${sticky ? ' sticky' : ''}`} aria-label="Дээд Лиг хэсэг сонгох">
+      <div className="nba-filter-rail">
+        {deedFilters.map((f) => {
+          const active = f.match(pathname)
+          return (
+            <Link
+              key={f.to}
+              to={f.to}
+              className={`nba-filter-chip${active ? ' active' : ''}`}
+              aria-current={active ? 'page' : undefined}
+            >
+              {f.label}
+            </Link>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
 
-      <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <div className="section-kicker">Мэдээлэл</div>
-              <h2 className="section-title">Дээд Лигийн мэдээ</h2>
-            </div>
-            <span className="deed-count">{news.length} нийтлэл</span>
-          </div>
+function DeedSubHead({
+  kicker,
+  title,
+  desc,
+}: {
+  kicker: string
+  title: string
+  desc: string
+}) {
+  return (
+    <header className="nba-subhero">
+      <div className="container">
+        <DeedPageFilter sticky />
+        <div className="section-kicker">{kicker}</div>
+        <h1>{title}</h1>
+        <p>{desc}</p>
+      </div>
+    </header>
+  )
+}
 
-          {featured ? (
-            <div className="deed-news">
-              {news.map((u) => (
-                <Link key={u.id} to={`/deed-lig/${u.id}`} className="deed-news-card">
+export function DeedLigPage() {
+  useDeedTitle('Дээд Лиг мэдээлэл')
+  const { data } = useStore()
+  const news = data.deedLigNews || []
+
+  return (
+    <div className="nba-page">
+      <DeedSubHead
+        kicker="Дээд Лиг"
+        title="Мэдээ мэдээлэл"
+        desc="Нийтлэл дээр дарж бүрэн уншина."
+      />
+      <section className="nba-section">
+        <div className="container nba-list">
+          {news.length === 0 ? (
+            <p className="empty-note">Дээд Лигийн мэдээлэл тун удахгүй энд гарна.</p>
+          ) : (
+            news.map((u) => (
+              <div key={u.id} className="share-card">
+                <Link to={`/deed-lig/updates/${u.id}`} className="nba-list-card">
                   <img src={u.image} alt="" loading="lazy" />
                   <div>
-                    <span>
+                    <span className="nba-update-tag">
                       {u.tag} · {u.readMin} мин · {u.when}
                     </span>
-                    <h3>{u.title}</h3>
+                    <h2>{u.title}</h2>
                     <p>{u.blurb}</p>
                   </div>
                 </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="deed-empty">Дээд Лигийн мэдээлэл тун удахгүй энд гарна.</p>
+                <ShareButton
+                  variant="icon"
+                  title={u.title}
+                  text={u.blurb}
+                  path={`/deed-lig/updates/${u.id}`}
+                />
+              </div>
+            ))
           )}
         </div>
       </section>
+    </div>
+  )
+}
 
-      <section className="section section-alt">
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <div className="section-kicker">Клубууд</div>
-              <h2 className="section-title">Дээд Лигийн нэрс</h2>
-            </div>
-          </div>
-          <div className="deed-clubs">
-            {clubs.map((c) => (
-              <article key={c.id} className="deed-club">
-                <strong>{c.name}</strong>
-                <span>{c.city}</span>
+export function DeedLigClubsPage() {
+  useDeedTitle('Дээд Лиг клубууд')
+  const { data } = useStore()
+  const clubs = [...(data.deedLigClubs || [])].sort((a, b) => a.rank - b.rank)
+
+  return (
+    <div className="nba-page">
+      <DeedSubHead
+        kicker="Дээд Лиг"
+        title="Клубууд"
+        desc="Үндэсний Дээд лигийн клубууд — хотоор."
+      />
+      <section className="nba-section">
+        <div className="container nba-list">
+          {clubs.length === 0 ? (
+            <p className="empty-note">Клуб нэмэгдээгүй байна.</p>
+          ) : (
+            clubs.map((c) => (
+              <article
+                key={c.id}
+                className={`nba-list-card${c.image ? '' : ' nba-list-card-plain'}`}
+              >
+                {c.image ? (
+                  <img src={c.image} alt="" loading="lazy" />
+                ) : (
+                  <span className="nba-update-tag">{String(c.rank).padStart(2, '0')}</span>
+                )}
+                <div>
+                  <h2>{c.name}</h2>
+                  <p>{c.city}</p>
+                </div>
               </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <SponsorSlot slot="nba" alwaysShow />
+            ))
+          )}
         </div>
       </section>
     </div>
@@ -106,40 +161,49 @@ export function DeedLigDetailPage() {
   const { id } = useParams()
   const { data } = useStore()
   const item = (data.deedLigNews || []).find((u) => u.id === id)
-
-  useEffect(() => {
-    document.title = item ? `${item.title} · Дээд Лиг` : 'Дээд Лиг · Newsac'
-    return () => {
-      document.title = 'Newsac'
-    }
-  }, [item])
+  useDeedTitle(item?.title || 'Дээд Лиг')
 
   if (!item) {
     return <Navigate to="/deed-lig" replace />
   }
 
   return (
-    <div className="deed-lig-page">
-      <article className="deed-article">
-        <div className="container deed-article-inner">
-          <Link to="/deed-lig" className="deed-back">
-            ← Дээд Лиг
+    <div className="nba-page">
+      <article className="nba-article">
+        <div className="container nba-article-inner">
+          <Link to="/deed-lig" className="nba-back">
+            ← Мэдээлэл
           </Link>
-          <div className="deed-article-cover">
+          <DeedPageFilter />
+          <div className="nba-article-cover">
             <img src={item.image} alt="" />
           </div>
-          <span>
+          <span className="nba-update-tag">
             {item.tag} · {item.readMin} мин · {item.when}
           </span>
           <h1>{item.title}</h1>
-          <p className="deed-article-lead">{item.blurb}</p>
-          <div className="deed-article-body">
-            {item.body.map((p) => (
-              <p key={p.slice(0, 32)}>{p}</p>
-            ))}
+          <p className="nba-article-lead">{item.blurb}</p>
+          <div className="detail-share">
+            <ShareButton
+              title={item.title}
+              text={item.blurb}
+              path={`/deed-lig/updates/${item.id}`}
+            />
+          </div>
+          <div className="nba-article-body">
+            <ArticleBlocks lines={item.body} midSrc={item.midImage} />
           </div>
         </div>
       </article>
     </div>
   )
+}
+
+/** Хуучин /deed-lig/:id холбоосыг шинэ зам руу */
+export function DeedLigLegacyRedirect() {
+  const { id } = useParams()
+  const { data } = useStore()
+  const exists = (data.deedLigNews || []).some((u) => u.id === id)
+  if (exists && id) return <Navigate to={`/deed-lig/updates/${id}`} replace />
+  return <Navigate to="/deed-lig" replace />
 }
