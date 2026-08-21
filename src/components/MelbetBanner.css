@@ -33,8 +33,8 @@
 .melbet-ad-logo {
   display: grid;
   place-items: center;
-  width: 78px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
 }
 
@@ -42,7 +42,6 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: left center;
   display: block;
 }
 
@@ -89,8 +88,8 @@
   }
 
   .melbet-ad-logo {
-    width: 110px;
-    height: 52px;
+    width: 64px;
+    height: 64px;
   }
 
   .melbet-ad-line {
