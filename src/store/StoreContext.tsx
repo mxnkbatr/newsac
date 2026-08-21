@@ -382,7 +382,7 @@ function loadData(): AppData {
       deedLigEditorEmails: Array.from(
         new Set([
           ...(parsed.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
-          ...seed.deedLigEditorEmails.map((e) => e.toLowerCase()),
+          ...(seed.deedLigEditorEmails || []).map((e) => e.toLowerCase()),
           ...envDeedLigEditorEmails(),
         ]),
       ),
