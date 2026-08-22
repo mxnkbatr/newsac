@@ -114,7 +114,6 @@ export function Home() {
   const { data, track, analyticsSummary } = useStore()
   const news = data.news
   const videos = data.videos
-  const rappers = data.rappers
   const rankings = data.rankings
   const nbaHub = data.nbaHub
   const nbaFeatured =
@@ -365,34 +364,6 @@ export function Home() {
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <div className="section-head reveal">
-            <div>
-              <div className="section-kicker">Түүх</div>
-              <h2 className="section-title">Рэпперүүдийн замнал</h2>
-            </div>
-            <Link to="/rappers" className="section-link">
-              Бүх профил →
-            </Link>
-          </div>
-
-          <div className="rapper-strip reveal reveal-delay-1">
-            {rappers.map((r) => (
-              <Link key={r.id} to={`/rappers/${r.id}`} className="rapper-chip">
-                <img src={r.image} alt="" loading="lazy" />
-                <div>
-                  <strong>{r.name}</strong>
-                  <span>
-                    {r.city} · {r.streams}
-                  </span>
-                </div>
-              </Link>
             ))}
           </div>
         </div>
