@@ -7,7 +7,7 @@ export type NewsComment = {
   createdAt: string
 }
 
-export type NewsRegion = 'domestic' | 'foreign'
+export type NewsRegion = 'domestic' | 'foreign' | 'kpop' | 'yellow'
 
 export type NewsItem = {
   id: string
@@ -18,7 +18,7 @@ export type NewsItem = {
   date: string
   readMin: number
   image: string
-  /** Дотоод / Гадаад мэдээ */
+  /** Дотоод / Гадаад / K-pop / Шар мэдээ */
   region?: NewsRegion
   membersOnly?: boolean
   comments?: NewsComment[]
@@ -357,6 +357,9 @@ export type NbaFreeAgent = {
   lastTeam: string
   newTeam: string
   age: string
+  height: string
+  weight: string
+  image: string
   note: string
   detail: string[]
   fit: string

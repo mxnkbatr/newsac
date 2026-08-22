@@ -251,7 +251,7 @@ export function AdminNbaPanel({
       {sub === 'fa' && (
         <EntityList
           title="Free Agency"
-          description="/nba/free-agency · нэр, баг, гэрээ — засаад Cloud руу илгээнэ"
+          description="/nba/free-agency · 3:4 хөрөг, нэр, нас, өндөр, жин, байрлал"
           search={search}
           onSearch={setSearch}
           items={[...d.nbaFreeAgents]
@@ -272,6 +272,9 @@ export function AdminNbaPanel({
                 lastTeam: '',
                 newTeam: '',
                 age: '',
+                height: '',
+                weight: '',
+                image: '',
                 fit: '',
                 note: '',
                 detail: '',
@@ -285,6 +288,9 @@ export function AdminNbaPanel({
                   lastTeam: String(v.lastTeam).trim(),
                   newTeam: String(v.newTeam).trim() || String(v.lastTeam).trim(),
                   age: String(v.age).trim(),
+                  height: String(v.height).trim(),
+                  weight: String(v.weight).trim(),
+                  image: String(v.image).trim(),
                   fit: String(v.fit).trim(),
                   note: String(v.note).trim(),
                   detail: linesOf(v.detail),
@@ -310,6 +316,9 @@ export function AdminNbaPanel({
                   lastTeam: String(v.lastTeam).trim(),
                   newTeam: String(v.newTeam).trim() || String(v.lastTeam).trim(),
                   age: String(v.age).trim(),
+                  height: String(v.height).trim(),
+                  weight: String(v.weight).trim(),
+                  image: String(v.image).trim(),
                   fit: String(v.fit).trim(),
                   note: String(v.note).trim(),
                   detail: linesOf(v.detail),

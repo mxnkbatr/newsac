@@ -48,6 +48,7 @@ import {
 import { buildHubStages, type AdminTab } from './adminHub'
 import { AdminNbaPanel, type NbaSub } from './AdminNbaPanel'
 import { AdminDeedLigPanel } from './AdminDeedLigPanel'
+import { newsRegionLabel, parseNewsRegion, resolveNewsRegion } from '../lib/newsRegion'
 import './Admin.css'
 
 type Tab = AdminTab
@@ -129,7 +130,9 @@ export function AdminPage() {
   const [password, setPassword] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('news')
-  const [newsRegion, setNewsRegion] = useState<'all' | 'domestic' | 'foreign'>('all')
+  const [newsRegion, setNewsRegion] = useState<
+    'all' | 'domestic' | 'foreign' | 'kpop' | 'yellow'
+  >('all')
   const [nbaSub, setNbaSub] = useState<NbaSub>('hub')
   const [search, setSearch] = useState('')
   const [toast, setToast] = useState<ToastState>(null)
@@ -577,6 +580,8 @@ export function AdminPage() {
                     { id: 'all', label: 'Бүгд' },
                     { id: 'domestic', label: 'Дотоод' },
                     { id: 'foreign', label: 'Гадаад' },
+                    { id: 'kpop', label: 'K-pop' },
+                    { id: 'yellow', label: 'Шар' },
                   ] as const
                 ).map((r) => (
                   <button
@@ -591,11 +596,7 @@ export function AdminPage() {
                     <i>
                       {r.id === 'all'
                         ? store.data.news.length
-                        : store.data.news.filter((n) =>
-                            r.id === 'foreign'
-                              ? n.region === 'foreign'
-                              : n.region !== 'foreign',
-                          ).length}
+                        : store.data.news.filter((n) => resolveNewsRegion(n) === r.id).length}
                     </i>
                   </button>
                 ))}
@@ -655,16 +656,12 @@ export function AdminPage() {
               onSearch={setSearch}
               items={store.data.news
                 .filter((n) =>
-                  newsRegion === 'all'
-                    ? true
-                    : newsRegion === 'foreign'
-                      ? n.region === 'foreign'
-                      : n.region !== 'foreign',
+                  newsRegion === 'all' ? true : resolveNewsRegion(n) === newsRegion,
                 )
                 .map((n) => ({
                 id: n.id,
                 label: n.title,
-                meta: `${n.region === 'foreign' ? 'Гадаад' : 'Дотоод'} · ${n.category} · ${n.date}${
+                meta: `${newsRegionLabel(n.region)} · ${n.category} · ${n.date}${
                   (store.data.homeHotNewsIds || []).includes(n.id) ? ' · HOT' : ''
                 }`,
               }))}
@@ -676,8 +673,13 @@ export function AdminPage() {
                     title: '',
                     excerpt: '',
                     body: '',
-                    region: 'domestic',
-                    category: 'Мэдээ',
+                    region: newsRegion === 'all' ? 'domestic' : newsRegion,
+                    category:
+                      newsRegion === 'kpop'
+                        ? 'K-pop'
+                        : newsRegion === 'yellow'
+                          ? 'Gossip'
+                          : 'Мэдээ',
                     date: todayDot(),
                     readMin: 3,
                     image: '',
@@ -699,7 +701,7 @@ export function AdminPage() {
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
                       body,
-                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
+                      region: parseNewsRegion(v.region),
                       category: String(v.category || 'Мэдээ'),
                       date: String(v.date || todayDot()),
                       readMin: Number(v.readMin) || 3,
@@ -720,7 +722,7 @@ export function AdminPage() {
                   newsFields,
                   {
                     ...newsEdit,
-                    region: n.region === 'foreign' ? 'foreign' : 'domestic',
+                    region: resolveNewsRegion(n),
                     membersOnly: Boolean(n.membersOnly),
                   },
                   (v) => {
@@ -739,7 +741,7 @@ export function AdminPage() {
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
                       body,
-                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
+                      region: parseNewsRegion(v.region),
                       category: String(v.category),
                       date: String(v.date),
                       readMin: Number(v.readMin) || 3,

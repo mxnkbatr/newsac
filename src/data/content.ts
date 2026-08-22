@@ -7,8 +7,8 @@ export type NewsItem = {
   date: string
   readMin: number
   image: string
-  /** domestic = дотоод, foreign = гадаад */
-  region?: 'domestic' | 'foreign'
+  /** domestic = дотоод, foreign = гадаад, kpop = K-pop, yellow = шар */
+  region?: 'domestic' | 'foreign' | 'kpop' | 'yellow'
 }
 
 export type VideoItem = {
@@ -135,6 +135,40 @@ export const news: NewsItem[] = [
     region: 'foreign',
     image:
       'https://images.unsplash.com/photo-1598387993281-cecf8b11a1c5?auto=format&fit=crop&w=1400&q=80',
+  },
+  {
+    id: 'kpop-comeback-tea',
+    title: 'Comeback өмнөх «tea»: ямар мэдээ итгэх вэ?',
+    excerpt:
+      'K-pop мэдээний урсгалд юу баталгаатай, юу зөвхөн цууриа вэ — уншигчид анхаарах ёстой цэгүүд.',
+    body: `Шинэ comeback ойртох бүрд X, Instagram, Telegram дээр мэдээ хурдан тардаг. Ихэнх нь эх сурвалжгүй, зарим нь PR-ийн intentional leak байдаг.
+
+Newsac дээрх K-pop мэдээ нь: баталгаатай эх сурвалж, context, «цуурхал vs баримт» ялгааг тод харуулахыг зорьдог.
+
+Дараагийн нийтлэлүүдэд agency schedule, chart, collab-ийг нэг дор тоймлох болно.`,
+    category: 'K-pop',
+    date: '2026.08.20',
+    readMin: 3,
+    region: 'kpop',
+    image:
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&q=80',
+  },
+  {
+    id: 'kpop-dating-rumor',
+    title: 'Dating rumor: фэнүүд юуг мэдэх ёстой вэ?',
+    excerpt:
+      'Артист dating цуурхал гарсан үед яаж унших, яаж хуваалцах — товч гарын авлага.',
+    body: `Dating rumor ихэнхдээ paparazzi кадр эсвэл anonymous account-аас эхэлдэг. Нэг screenshot бүх түүхийг батлахгүй.
+
+Шар мэдээ уншихдаа: эх сурвалж, огноо, agency хариу, өмнөх ижил цуурхлын түүх — эдгээрийг шалга. Newsac зөвхөн нийтийн ярианы context өгч, хувь хүний амьдралыг доромжлохгүй.
+
+Хэрэв та энэ төрлийн мэдээ нэмэх/засах бол Admin → Мэдээ → Шар мэдээ.`,
+    category: 'Gossip',
+    date: '2026.08.18',
+    readMin: 2,
+    region: 'yellow',
+    image:
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1400&q=80',
   },
 ]
 

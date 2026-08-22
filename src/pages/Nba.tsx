@@ -43,6 +43,16 @@ function useNbaTitle(title: string) {
   }, [title])
 }
 
+function playerInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
+
 function NbaPageFilter({ sticky = false }: { sticky?: boolean }) {
   const { pathname } = useLocation()
 
@@ -312,12 +322,15 @@ export function NbaFreeAgencyPage() {
       <section className="nba-section">
         <div className="container nba-list">
           {freeAgents.map((fa) => (
-            <Link
-              key={fa.id}
-              to={`/nba/free-agency/${fa.id}`}
-              className="nba-list-card nba-list-card-plain"
-            >
-              <span className="nba-fa-rank">{String(fa.rank).padStart(2, '0')}</span>
+            <Link key={fa.id} to={`/nba/free-agency/${fa.id}`} className="nba-list-card nba-fa-card">
+              <span className="nba-fa-thumb">
+                {fa.image ? (
+                  <img src={fa.image} alt="" />
+                ) : (
+                  <span className="nba-fa-thumb-fallback">{playerInitials(fa.name)}</span>
+                )}
+                <span className="nba-fa-rank">{String(fa.rank).padStart(2, '0')}</span>
+              </span>
               <div>
                 <h2>{fa.name}</h2>
                 <div className="nba-fa-meta">
@@ -327,6 +340,7 @@ export function NbaFreeAgencyPage() {
                     {fa.newTeam && fa.newTeam !== fa.lastTeam ? ` → ${fa.newTeam}` : ''}
                   </span>
                   <span>{fa.age} нас</span>
+                  {fa.height ? <span>{fa.height}</span> : null}
                 </div>
                 <p>{fa.note}</p>
               </div>
@@ -346,6 +360,14 @@ export function NbaFreeAgencyDetailPage() {
 
   if (!item) return <Navigate to="/nba/free-agency" replace />
 
+  const facts = [
+    { label: 'Нэр', value: item.name },
+    { label: 'Нас', value: item.age ? `${item.age} нас` : '—' },
+    { label: 'Өндөр', value: item.height || '—' },
+    { label: 'Жин', value: item.weight || '—' },
+    { label: 'Байрлал', value: item.position || '—' },
+  ]
+
   return (
     <div className="nba-page">
       <article className="nba-article">
@@ -354,10 +376,24 @@ export function NbaFreeAgencyDetailPage() {
           <Link to="/nba/free-agency" className="nba-crumb">
             ← Free Agency
           </Link>
-          <span className="nba-update-tag">
-            #{item.rank} · {item.position} · {item.age} нас
-          </span>
-          <h1>{item.name}</h1>
+          <span className="nba-update-tag">#{item.rank}</span>
+          <div className="nba-fa-profile">
+            <div className="nba-fa-portrait">
+              {item.image ? (
+                <img src={item.image} alt={item.name} />
+              ) : (
+                <span className="nba-fa-thumb-fallback">{playerInitials(item.name)}</span>
+              )}
+            </div>
+            <dl className="nba-fa-facts">
+              {facts.map((row) => (
+                <div key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
           <p className="nba-article-lead">{item.note}</p>
           <div className="nba-article-body">
             {item.detail.map((p) => (

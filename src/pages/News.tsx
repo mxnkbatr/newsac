@@ -5,11 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import { MelbetBanner } from '../components/MelbetBanner'
 import { ShareButton } from '../components/ShareButton'
 import type { NewsRegion } from '../store/types'
+import { newsRegionLabel, resolveNewsRegion } from '../lib/newsRegion'
 import './Pages.css'
-
-function newsRegion(item: { region?: NewsRegion }) {
-  return item.region === 'foreign' ? 'foreign' : 'domestic'
-}
 
 export function NewsPage() {
   const { data, track } = useStore()
@@ -17,12 +14,14 @@ export function NewsPage() {
   const [tab, setTab] = useState<NewsRegion>('domestic')
 
   const filtered = useMemo(
-    () => data.news.filter((item) => newsRegion(item) === tab),
+    () => data.news.filter((item) => resolveNewsRegion(item) === tab),
     [data.news, tab],
   )
 
-  const domesticCount = data.news.filter((n) => newsRegion(n) === 'domestic').length
-  const foreignCount = data.news.filter((n) => newsRegion(n) === 'foreign').length
+  const domesticCount = data.news.filter((n) => resolveNewsRegion(n) === 'domestic').length
+  const foreignCount = data.news.filter((n) => resolveNewsRegion(n) === 'foreign').length
+  const kpopCount = data.news.filter((n) => resolveNewsRegion(n) === 'kpop').length
+  const yellowCount = data.news.filter((n) => resolveNewsRegion(n) === 'yellow').length
 
   return (
     <div>
@@ -30,7 +29,7 @@ export function NewsPage() {
         <div className="container">
           <div className="section-kicker">Мэдээ · Мэдээлэл</div>
           <h1>Мэдээ</h1>
-          <p>Дотоод болон гадаад entertainment мэдээ, шинжилгээ.</p>
+          <p>Дотоод, гадаад, K-pop болон шар мэдээ — нэг дороос.</p>
           <div className="news-region-tabs" role="tablist" aria-label="Мэдээний төрөл">
             <button
               type="button"
@@ -52,6 +51,26 @@ export function NewsPage() {
               Гадаад мэдээ
               <span>{foreignCount}</span>
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'kpop'}
+              className={tab === 'kpop' ? 'active' : ''}
+              onClick={() => setTab('kpop')}
+            >
+              K-pop
+              <span>{kpopCount}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'yellow'}
+              className={tab === 'yellow' ? 'active' : ''}
+              onClick={() => setTab('yellow')}
+            >
+              Шар мэдээ
+              <span>{yellowCount}</span>
+            </button>
           </div>
         </div>
       </header>
@@ -62,7 +81,11 @@ export function NewsPage() {
             <p className="empty-note">
               {tab === 'domestic'
                 ? 'Одоогоор дотоод мэдээ байхгүй.'
-                : 'Одоогоор гадаад мэдээ байхгүй.'}
+                : tab === 'foreign'
+                  ? 'Одоогоор гадаад мэдээ байхгүй.'
+                  : tab === 'kpop'
+                    ? 'Одоогоор K-pop мэдээ байхгүй.'
+                    : 'Одоогоор шар мэдээ байхгүй.'}
             </p>
           )}
           {filtered.map((item) => (
@@ -77,8 +100,8 @@ export function NewsPage() {
               </div>
               <div>
                 <span className="meta">
-                  {newsRegion(item) === 'foreign' ? 'Гадаад' : 'Дотоод'} · {item.category} ·{' '}
-                  {item.date} · {item.readMin} мин
+                  {newsRegionLabel(resolveNewsRegion(item))} · {item.category} · {item.date} ·{' '}
+                  {item.readMin} мин
                   {item.membersOnly ? ' · MEMBER' : ''}
                 </span>
                 <h2>{item.title}</h2>
@@ -165,7 +188,7 @@ export function NewsDetailPage() {
       <header className="page-hero">
         <div className="container detail-head">
           <div className="section-kicker">
-            {item.region === 'foreign' ? 'Гадаад' : 'Дотоод'} · {item.category} · {item.date}
+            {newsRegionLabel(resolveNewsRegion(item))} · {item.category} · {item.date}
           </div>
           <h1>{item.title}</h1>
           <p>{item.excerpt}</p>

@@ -1,4 +1,5 @@
 import type { AppData } from '../store/types'
+import { resolveNewsRegion } from '../lib/newsRegion'
 
 export type AdminTab =
   | 'hub'
@@ -51,8 +52,10 @@ export function buildHubStages(data: AppData): HubStage[] {
     artistSoon: true,
     passSoon: true,
   }
-  const domesticNews = data.news.filter((n) => n.region !== 'foreign').length
-  const foreignNews = data.news.filter((n) => n.region === 'foreign').length
+  const domesticNews = data.news.filter((n) => resolveNewsRegion(n) === 'domestic').length
+  const foreignNews = data.news.filter((n) => resolveNewsRegion(n) === 'foreign').length
+  const kpopNews = data.news.filter((n) => resolveNewsRegion(n) === 'kpop').length
+  const yellowNews = data.news.filter((n) => resolveNewsRegion(n) === 'yellow').length
   const domesticRap = data.rappers.filter((r) => r.region !== 'foreign').length
   const foreignRap = data.rappers.filter((r) => r.region === 'foreign').length
 
@@ -60,7 +63,7 @@ export function buildHubStages(data: AppData): HubStage[] {
     {
       step: 1,
       title: 'Мэдээ · Мэдээлэл',
-      desc: 'Дотоод / гадаад мэдээ — хамгийн түрүүнд',
+      desc: 'Дотоод / гадаад / K-pop / шар — хамгийн түрүүнд',
       items: [
         {
           id: 'news',
@@ -68,7 +71,7 @@ export function buildHubStages(data: AppData): HubStage[] {
           page: '/news',
           count: data.news.length,
           ready: true,
-          note: `Дотоод ${domesticNews} · Гадаад ${foreignNews}`,
+          note: `Дотоод ${domesticNews} · Гадаад ${foreignNews} · K-pop ${kpopNews} · Шар ${yellowNews}`,
         },
         {
           id: 'news',

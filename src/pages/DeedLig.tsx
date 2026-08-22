@@ -15,7 +15,7 @@ const deedFilters = [
   },
   {
     to: '/deed-lig/clubs',
-    label: 'Клубууд',
+    label: 'Багууд',
     match: (p: string) => p.startsWith('/deed-lig/clubs'),
   },
 ]
@@ -141,7 +141,7 @@ export function DeedLigPage() {
               <span>{news.length} нийтлэл</span>
             </p>
             <p>
-              <Link to="/deed-lig/clubs">Клубууд</Link>
+              <Link to="/deed-lig/clubs">Багууд</Link>
               <span>{clubs.length} нэр</span>
             </p>
           </div>
@@ -239,7 +239,7 @@ export function DeedLigUpdateDetailPage() {
 }
 
 export function DeedLigClubsPage() {
-  useDeedTitle('Дээд Лиг клубууд')
+  useDeedTitle('Дээд Лиг багууд')
   const { data } = useStore()
   const clubs = data.deedLigClubs || []
   const players = data.deedLigPlayers || []
@@ -247,9 +247,9 @@ export function DeedLigClubsPage() {
   return (
     <div className="nba-page deed-lig-page">
       <DeedSubHead
-        kicker="Clubs"
-        title="Дээд Лигийн нэрс"
-        desc="Клуб дээр дарж тоглогчдын мэдээлэл үзнэ."
+        kicker="Teams"
+        title="Багууд"
+        desc="Баг дээр дарж тоглогчдын мэдээлэл үзнэ."
       />
       <section className="nba-section">
         <div className="container">
@@ -270,7 +270,7 @@ export function DeedLigClubsPage() {
               })}
             </div>
           ) : (
-            <p className="deed-empty">Клубын мэдээлэл тун удахгүй.</p>
+            <p className="deed-empty">Багийн мэдээлэл тун удахгүй.</p>
           )}
         </div>
       </section>
@@ -283,7 +283,7 @@ export function DeedLigClubDetailPage() {
   const { data } = useStore()
   const club = (data.deedLigClubs || []).find((c) => c.id === id)
   const roster = (data.deedLigPlayers || []).filter((p) => p.clubId === id)
-  useDeedTitle(club?.name || 'Клуб')
+  useDeedTitle(club?.name || 'Баг')
 
   if (!club) {
     return <Navigate to="/deed-lig/clubs" replace />
@@ -296,7 +296,7 @@ export function DeedLigClubDetailPage() {
           <DeedBack />
           <DeedPageFilter sticky />
           <Link to="/deed-lig/clubs" className="nba-crumb">
-            ← Клубууд
+            ← Багууд
           </Link>
           <div className="section-kicker">{club.city}</div>
           <h1>{club.name}</h1>

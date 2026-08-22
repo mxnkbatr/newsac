@@ -71,7 +71,7 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     match: (p) => p.startsWith('/deed-lig'),
     actions: [
       { to: '/deed-lig/updates', label: 'Update', icon: 'U' },
-      { to: '/deed-lig/clubs', label: 'Клуб', icon: 'К' },
+      { to: '/deed-lig/clubs', label: 'Баг', icon: 'Б' },
       { to: '/nba/updates', label: 'NBA', icon: 'NB' },
     ],
   },

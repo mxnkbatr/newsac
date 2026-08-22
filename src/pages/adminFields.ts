@@ -33,9 +33,11 @@ export const newsFields: FieldDef[] = [
     options: [
       { value: 'domestic', label: 'Дотоод мэдээ' },
       { value: 'foreign', label: 'Гадаад мэдээ' },
+      { value: 'kpop', label: 'K-pop мэдээ' },
+      { value: 'yellow', label: 'Шар мэдээ' },
     ],
   },
-  { key: 'category', label: 'Ангилал', half: true },
+  { key: 'category', label: 'Ангилал', half: true, placeholder: 'K-pop / Gossip' },
   { key: 'date', label: 'Огноо', half: true, placeholder: '2026.08.06' },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
   { key: 'membersOnly', label: 'Members only', type: 'checkbox' },

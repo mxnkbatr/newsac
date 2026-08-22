@@ -17,6 +17,9 @@ export type FreeAgent = {
   lastTeam: string
   newTeam: string
   age: string
+  height: string
+  weight: string
+  image: string
   note: string
   detail: string[]
   fit: string
@@ -205,6 +208,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Los Angeles Lakers',
     newTeam: 'Philadelphia 76ers',
     age: '41',
+    height: '206 см',
+    weight: '113 кг',
+    image:
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&h=800&q=80',
     note: '2 жил / $8 сая · veteran min. «My last decision.»',
     detail: [
       'Карьерын онооны аварга, 4 удаагийн MVP 24 дэх улирал руугаа орж байна. Lakers-ээс салсны дараа тэтгэвэрт гарах хувилбар байсан.',
@@ -220,6 +227,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Los Angeles Lakers',
     newTeam: 'Los Angeles Lakers',
     age: '28',
+    height: '196 см',
+    weight: '93 кг',
+    image:
+      'https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=600&h=800&q=80',
     note: '4 жилийн max · ~$185 сая. Luka-гийн хажууд түгжигдлээ.',
     detail: [
       'Player option-оо тавиад Lakers дээр max гарын үсэг зурав. Brooklyn, Detroit зэрэг багууд max түвшинд явна гэсэн яриа байсан.',
@@ -235,6 +246,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Utah Jazz',
     newTeam: 'Los Angeles Lakers',
     age: '25',
+    height: '218 см',
+    weight: '111 кг',
+    image:
+      'https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?auto=format&fit=crop&w=600&h=800&q=80',
     note: 'Sign-and-trade · 4 жил / ~$130 сая. Rim + lob.',
     detail: [
       'Jazz-аас Lakers руу sign-and-trade. Modern center: drop coverage, lob threat, вертикаль spacing.',
@@ -250,6 +265,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Washington Wizards',
     newTeam: 'Washington Wizards',
     age: '27',
+    height: '185 см',
+    weight: '74 кг',
+    image:
+      'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=600&h=800&q=80',
     note: '4 жил / $213 сая. Wizards түүнийг нүүр царайгаараа үлдээв.',
     detail: [
       'Хагас талбайн pick-and-roll engine. Deep range, live dribble pass. Defense асуулттай хэвээр.',
@@ -265,6 +284,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Oklahoma City Thunder',
     newTeam: 'Oklahoma City Thunder',
     age: '28',
+    height: '213 см',
+    weight: '113 кг',
+    image:
+      'https://images.unsplash.com/photo-1608245449230-4ac190afb580?auto=format&fit=crop&w=600&h=800&q=80',
     note: '3 жил / $75 сая. Чемпионы «quiet» big.',
     detail: [
       'Short-roll passing, screen IQ, paint deterrence. Highlight биш — winning basketball.',
@@ -280,6 +303,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Miami Heat',
     newTeam: 'Chicago Bulls',
     age: '33',
+    height: '193 см',
+    weight: '98 кг',
+    image:
+      'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=600&h=800&q=80',
     note: '2 жил / ~$44 сая. Instant offense.',
     detail: [
       'Catch-and-shoot + isolation scoring. Heat-д playoff shot-making-ээ харуулсан.',
@@ -295,6 +322,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'Los Angeles Clippers',
     newTeam: 'Detroit Pistons',
     age: '28',
+    height: '206 см',
+    weight: '103 кг',
+    image:
+      'https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=600&h=800&q=80',
     note: '3 жил / $51 сая. Athleticism + roll gravity.',
     detail: [
       'Above-the-rim roll man, dunk gravity, зарим оройд stretch. Pistons-ийн young core-той athletic frontcourt.',
@@ -310,6 +341,10 @@ export const freeAgents: FreeAgent[] = [
     lastTeam: 'New York Knicks',
     newTeam: 'Boston Celtics',
     age: '28',
+    height: '213 см',
+    weight: '109 кг',
+    image:
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&h=800&q=80',
     note: '3 жил / ~$47 сая. Rim + glass. Brown-ийн дараах paint.',
     detail: [
       'Elite offensive rebounder, rim runner, drop coverage. Injury history анхаарах ёстой.',

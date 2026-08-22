@@ -1104,6 +1104,90 @@
   align-items: start;
 }
 
+.nba-fa-card {
+  grid-template-columns: 78px 1fr;
+  align-items: stretch;
+}
+
+.nba-fa-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+}
+
+.nba-fa-thumb img,
+.nba-fa-portrait img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+  object-fit: cover;
+  display: block;
+}
+
+.nba-fa-thumb .nba-fa-rank {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  font-size: 0.72rem;
+  background: rgba(7, 7, 7, 0.78);
+  padding: 0.12rem 0.28rem;
+}
+
+.nba-fa-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.nba-fa-profile {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+  margin: 1rem 0 1.25rem;
+  align-items: start;
+}
+
+.nba-fa-portrait {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}
+
+.nba-fa-facts {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.nba-fa-facts > div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.nba-fa-facts dt {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.nba-fa-facts dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
 .nba-article {
   padding: 1.5rem 0 3rem;
 }
@@ -1154,6 +1238,15 @@
   .nba-list-card {
     grid-template-columns: 160px minmax(0, 1fr) auto;
     padding: 0.9rem;
+  }
+
+  .nba-fa-card {
+    grid-template-columns: 96px 1fr;
+  }
+
+  .nba-fa-profile {
+    grid-template-columns: 168px 1fr;
+    gap: 1.35rem;
   }
 
   .nba-list-card h2 {
