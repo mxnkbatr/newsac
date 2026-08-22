@@ -487,10 +487,12 @@
 .hero-logo {
   width: 64px;
   height: 64px;
-  object-fit: cover;
+  object-fit: contain;
   flex-shrink: 0;
+  background: transparent;
+  border-radius: 28%;
   animation: logo-pop 3.2s var(--ease) infinite;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .hero-brand-text {
@@ -1369,7 +1371,8 @@
   .hero-logo {
     width: 42px;
     height: 42px;
-    border-radius: 11px;
+    border-radius: 28%;
+    background: transparent;
   }
 
   .hero-word {

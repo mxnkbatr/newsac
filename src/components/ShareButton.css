@@ -20,6 +20,10 @@
   z-index: 2;
 }
 
+.share-wrap.is-icon .share-sheet {
+  z-index: 30;
+}
+
 .share-btn {
   display: inline-flex;
   align-items: center;

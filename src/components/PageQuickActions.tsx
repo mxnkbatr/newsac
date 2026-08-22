@@ -108,7 +108,7 @@ const fallback: QuickAction[] = [
   { to: '/shop', label: 'Shop', icon: '◈' },
 ]
 
-const HIDDEN = ['/admin', '/reels', '/shorts']
+const HIDDEN = ['/admin', '/reels', '/shorts', '/nba', '/deed-lig']
 
 function actionsFor(path: string) {
   if (HIDDEN.some((h) => path.startsWith(h))) return []
@@ -135,6 +135,15 @@ export function PageQuickActions() {
     const id = window.requestAnimationFrame(() => setBuilt(true))
     return () => window.cancelAnimationFrame(id)
   }, [pathname])
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (actions.length) root.dataset.pageQuick = '1'
+    else delete root.dataset.pageQuick
+    return () => {
+      delete root.dataset.pageQuick
+    }
+  }, [actions.length])
 
   useEffect(() => {
     let lastY = window.scrollY

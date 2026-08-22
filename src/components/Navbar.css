@@ -29,8 +29,10 @@
 .nav-logo {
   width: 36px;
   height: 36px;
-  object-fit: cover;
+  object-fit: contain;
   flex-shrink: 0;
+  background: transparent;
+  border-radius: 28%;
 }
 
 .nav-word {

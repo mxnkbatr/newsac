@@ -64,7 +64,8 @@
   .nav-logo {
     width: 28px;
     height: 28px;
-    border-radius: 7px;
+    border-radius: 28%;
+    background: transparent;
   }
 
   .nav-word {
@@ -220,7 +221,8 @@
   .hero-logo {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 28%;
+    background: transparent;
   }
 
   .hero-word {
