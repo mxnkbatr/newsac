@@ -24,12 +24,11 @@ import { ShortsPage } from './pages/Shorts'
 import { ReelsPage } from './pages/Reels'
 import { PodcastsPage } from './pages/Podcasts'
 import { LivePage } from './pages/Live'
-import { DeedLigPage, DeedLigDetailPage } from './pages/DeedLig'
+import { DeedLigUpdatesPage, DeedLigUpdateDetailPage, DeedLigClubsPage, DeedLigClubDetailPage, DeedLigLegacyDetailRedirect } from './pages/DeedLig'
 import { WallPage } from './pages/Wall'
 import { ArtistStudioPage } from './pages/ArtistStudio'
 import { BattlePage } from './pages/Battle'
 import {
-  NbaPage,
   NbaUpdatesPage,
   NbaUpdateDetailPage,
   NbaMambaPage,
@@ -76,12 +75,16 @@ export default function App() {
                 <Route path="tickets" element={<TicketsPage />} />
                 <Route path="podcasts" element={<PodcastsPage />} />
                 <Route path="live" element={<LivePage />} />
-                <Route path="deed-lig" element={<DeedLigPage />} />
-                <Route path="deed-lig/:id" element={<DeedLigDetailPage />} />
+                <Route path="deed-lig" element={<Navigate to="/deed-lig/updates" replace />} />
+                <Route path="deed-lig/updates" element={<DeedLigUpdatesPage />} />
+                <Route path="deed-lig/updates/:id" element={<DeedLigUpdateDetailPage />} />
+                <Route path="deed-lig/clubs" element={<DeedLigClubsPage />} />
+                <Route path="deed-lig/clubs/:id" element={<DeedLigClubDetailPage />} />
+                <Route path="deed-lig/:id" element={<DeedLigLegacyDetailRedirect />} />
                 <Route path="wall" element={<WallPage />} />
                 <Route path="music" element={<Navigate to="/" replace />} />
                 <Route path="battle" element={<BattlePage />} />
-                <Route path="nba" element={<NbaPage />} />
+                <Route path="nba" element={<Navigate to="/nba/updates" replace />} />
                 <Route path="nba/updates" element={<NbaUpdatesPage />} />
                 <Route path="nba/updates/:id" element={<NbaUpdateDetailPage />} />
                 <Route path="nba/hot" element={<Navigate to="/nba" replace />} />

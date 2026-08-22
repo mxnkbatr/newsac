@@ -30,6 +30,37 @@
   line-height: 1.45;
 }
 
+.admin-editor-only .admin-top strong {
+  color: #e67a22;
+}
+
+.admin-editor-body {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 0.85rem 1rem 3rem;
+}
+
+.admin-editor-body .admin-nba.is-compact > .admin-seg {
+  margin-top: 0;
+  margin-bottom: 0.85rem;
+}
+
+.admin-editor-body .admin-nba.is-compact .admin-panel-head h2 {
+  font-size: 1.15rem;
+}
+
+.admin-seg-exit {
+  margin-left: auto;
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--ink-faint) !important;
+  box-shadow: none !important;
+}
+
+.admin-seg-exit:hover {
+  color: var(--ink) !important;
+}
+
 .admin-login-card form {
   display: grid;
   gap: 0.75rem;

@@ -165,13 +165,6 @@ export function Home() {
           <h1 className="reveal in reveal-delay-1">
             Монголын <em>entertainment</em> зах зээл
           </h1>
-          <div className="news-hook reveal in reveal-delay-1">
-            <span className="news-hook-dot" aria-hidden="true" />
-            <strong>{formatReaders(liveReaders)} хүмүүс уншиж байна</strong>
-          </div>
-          <p className="reveal in reveal-delay-2">
-            Спорт, K-pop, хип-хоп — мэдээ, бичлэг, шинжилгээ нэг дор.
-          </p>
 
           <div className="hero-cta reveal in reveal-delay-3">
             <Link to="/videos" className="btn btn-primary hero-btn-main fx-press">
@@ -232,6 +225,11 @@ export function Home() {
             </Link>
           </div>
 
+          <div className="news-hook news-hook-inline reveal">
+            <span className="news-hook-dot" aria-hidden="true" />
+            <strong>{formatReaders(liveReaders)} хүмүүс уншиж байна</strong>
+          </div>
+
           <div className="news-feature reveal reveal-delay-1">
             {hotNews.map((item, i) => (
               <Link
@@ -263,12 +261,12 @@ export function Home() {
               <div className="section-kicker">{nbaHub?.kicker || 'Basketball'}</div>
               <h2 className="section-title">{nbaHub?.title || 'NBA'}</h2>
             </div>
-            <Link to="/nba" className="section-link">
+            <Link to="/nba/updates" className="section-link">
               Бүгдийг үзэх →
             </Link>
           </div>
           <Link
-            to={nbaFeatured ? `/nba/updates/${nbaFeatured.id}` : '/nba'}
+            to={nbaFeatured ? `/nba/updates/${nbaFeatured.id}` : '/nba/updates'}
             className="home-nba reveal reveal-delay-1"
           >
             <div>

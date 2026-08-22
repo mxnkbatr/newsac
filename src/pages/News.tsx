@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
 import { MelbetBanner } from '../components/MelbetBanner'
+import { ShareButton } from '../components/ShareButton'
 import type { NewsRegion } from '../store/types'
 import './Pages.css'
 
@@ -86,6 +87,12 @@ export function NewsPage() {
                   <span className="meta">Зөвхөн member</span>
                 )}
               </div>
+              <ShareButton
+                variant="icon"
+                path={`/news/${item.id}`}
+                title={item.title}
+                text={item.excerpt}
+              />
             </Link>
           ))}
           <MelbetBanner />
@@ -162,6 +169,13 @@ export function NewsDetailPage() {
           </div>
           <h1>{item.title}</h1>
           <p>{item.excerpt}</p>
+          <div className="detail-share">
+            <ShareButton
+              path={`/news/${item.id}`}
+              title={item.title}
+              text={item.excerpt}
+            />
+          </div>
         </div>
       </header>
       <div className="container detail-layout">

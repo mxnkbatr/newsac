@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { createSeed, envAdminEmails, isAdminCredential, isAdminEmail } from './seed'
+import { createSeed, envAdminEmails, isAdminCredential, isAdminEmail, isDeedLigEditorEmail } from './seed'
 import { normalizeYouTubeId, parseYouTubeId, youtubeThumb } from '../lib/youtube'
 import type {
   AboutPage,
@@ -44,6 +44,8 @@ import type {
   NbaSacfunBit,
   NbaSacfunVideo,
   NbaStory,
+  DeedLigClub,
+  DeedLigPlayer,
 } from './types'
 import { YOUTUBE_CHANNEL_URL } from '../data/brand'
 import {
@@ -69,6 +71,8 @@ type StoreValue = {
   addAdminEmail: (email: string) => string | null
   removeAdminEmail: (email: string) => void
   isEmailAdmin: (email: string) => boolean
+  isDeedLigEditor: (email: string) => boolean
+  canAccessCms: (email: string) => boolean
   track: (type: AnalyticsEvent['type'], targetId: string, amount?: number) => void
   addToCart: (productId: string, qty?: number) => void
   setCartQty: (productId: string, qty: number) => void
@@ -130,6 +134,10 @@ type StoreValue = {
   deleteNbaUpdate: (id: string) => AppData
   upsertDeedLigNews: (item: NbaStory) => AppData
   deleteDeedLigNews: (id: string) => AppData
+  upsertDeedLigClub: (item: DeedLigClub) => AppData
+  deleteDeedLigClub: (id: string) => AppData
+  upsertDeedLigPlayer: (item: DeedLigPlayer) => AppData
+  deleteDeedLigPlayer: (id: string) => AppData
   upsertNbaHot: (item: NbaHot) => void
   deleteNbaHot: (id: string) => void
   upsertNbaFreeAgent: (item: NbaFreeAgent) => AppData
@@ -341,6 +349,16 @@ function loadData(): AppData {
         Array.isArray(parsed.deedLigNews) ? parsed.deedLigNews : seed.deedLigNews,
         tombs,
       ),
+      deedLigClubs: rejectTombs(
+        Array.isArray(parsed.deedLigClubs) && parsed.deedLigClubs.length
+          ? parsed.deedLigClubs
+          : seed.deedLigClubs,
+        tombs,
+      ),
+      deedLigPlayers: rejectTombs(
+        Array.isArray(parsed.deedLigPlayers) ? parsed.deedLigPlayers : seed.deedLigPlayers,
+        tombs,
+      ),
       homeHotNewsIds: rejectTombs(
         (
           Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
@@ -449,6 +467,20 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
       remote.deedLigNews,
       local.deedLigNews || [],
       seed.deedLigNews,
+      published,
+      tombs,
+    ),
+    deedLigClubs: mergePublishedList(
+      remote.deedLigClubs,
+      local.deedLigClubs || [],
+      seed.deedLigClubs,
+      published,
+      tombs,
+    ),
+    deedLigPlayers: mergePublishedList(
+      remote.deedLigPlayers,
+      local.deedLigPlayers || [],
+      seed.deedLigPlayers,
       published,
       tombs,
     ),
@@ -664,6 +696,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ]),
         )
         return isAdminEmail(email, list)
+      },
+      isDeedLigEditor(email) {
+        return isDeedLigEditorEmail(email)
+      },
+      canAccessCms(email) {
+        const list = Array.from(
+          new Set([
+            ...data.adminEmails.map((e) => e.toLowerCase()),
+            ...envAdminEmails(),
+          ]),
+        )
+        return isAdminEmail(email, list) || isDeedLigEditorEmail(email)
       },
       track,
       addToCart(productId, qty = 1) {
@@ -1353,6 +1397,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },
+      upsertDeedLigClub(item) {
+        return patch((prev) => {
+          const list = prev.deedLigClubs || []
+          const i = list.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const deedLigClubs = [...list]
+            deedLigClubs[i] = item
+            return { ...prev, deedLigClubs }
+          }
+          return { ...prev, deedLigClubs: [item, ...list] }
+        })
+      },
+      deleteDeedLigClub(id) {
+        return patch((prev) => ({
+          ...prev,
+          deedLigClubs: (prev.deedLigClubs || []).filter((n) => n.id !== id),
+          deedLigPlayers: (prev.deedLigPlayers || []).filter((p) => p.clubId !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
+      },
+      upsertDeedLigPlayer(item) {
+        return patch((prev) => {
+          const list = prev.deedLigPlayers || []
+          const i = list.findIndex((n) => n.id === item.id)
+          if (i >= 0) {
+            const deedLigPlayers = [...list]
+            deedLigPlayers[i] = item
+            return { ...prev, deedLigPlayers }
+          }
+          return { ...prev, deedLigPlayers: [item, ...list] }
+        })
+      },
+      deleteDeedLigPlayer(id) {
+        return patch((prev) => ({
+          ...prev,
+          deedLigPlayers: (prev.deedLigPlayers || []).filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
+      },
       upsertNbaHot(item) {
         patch((prev) => {
           const i = prev.nbaHotNews.findIndex((n) => n.id === item.id)
@@ -1612,5 +1695,5 @@ export function useStore() {
 }
 
 export { YOUTUBE_CHANNEL_URL }
-export { ADMIN_PASSWORD, ADMIN_PHONES } from './seed'
-export { isAdminEmail } from './seed'
+export { ADMIN_PASSWORD, ADMIN_PHONES, DEED_LIG_EDITOR_EMAILS } from './seed'
+export { isAdminEmail, isDeedLigEditorEmail } from './seed'

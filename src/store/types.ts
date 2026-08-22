@@ -315,6 +315,29 @@ export type NbaStory = {
   image: string
 }
 
+export type DeedLigClub = {
+  id: string
+  name: string
+  city: string
+  arena?: string
+  founded?: string
+  image?: string
+  blurb?: string
+}
+
+export type DeedLigPlayer = {
+  id: string
+  clubId: string
+  name: string
+  number: string
+  position: string
+  height: string
+  age: string
+  hometown?: string
+  image?: string
+  note?: string
+}
+
 export type NbaHot = {
   id: string
   rank: number
@@ -407,6 +430,8 @@ export type AppData = {
   nbaHub: NbaHub
   /** Монголын сагсан бөмбөгийн Дээд лиг — ерөнхий мэдээнээс тусдаа */
   deedLigNews: NbaStory[]
+  deedLigClubs: DeedLigClub[]
+  deedLigPlayers: DeedLigPlayer[]
   lastSacfunYoutubeSync?: string
   /** Нүүр дээрх халуун 3 мэдээний ID (дараалал чухал) */
   homeHotNewsIds: string[]

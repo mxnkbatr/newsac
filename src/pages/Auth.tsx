@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth, readAuthError, type Gender } from '../context/AuthContext'
+import { useStore } from '../store/StoreContext'
 import './Pages.css'
 
 type Tab = 'login' | 'register'
@@ -27,6 +28,7 @@ export function AuthPage() {
     saveDemographics,
     signInWithGoogle,
   } = useAuth()
+  const { isDeedLigEditor, isAdmin, grantAdmin } = useStore()
   const [tab, setTab] = useState<Tab>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -39,6 +41,14 @@ export function AuthPage() {
   const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  const goDeedLigAdmin =
+    !loading && Boolean(user && profileComplete && isDeedLigEditor(user.email))
+
+  useEffect(() => {
+    if (goDeedLigAdmin && !isAdmin) grantAdmin()
+  }, [goDeedLigAdmin, isAdmin, grantAdmin])
+
+  if (goDeedLigAdmin) return <Navigate to="/admin" replace />
   if (!loading && user && profileComplete) return <Navigate to="/profile" replace />
 
   function parseDemo() {

@@ -503,8 +503,8 @@
 .hero-word {
   font-family: var(--font-brand);
   font-size: clamp(2.4rem, 8vw, 4.4rem);
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-weight: 900;
+  letter-spacing: -0.02em;
   line-height: 0.9;
 }
 
@@ -622,10 +622,30 @@
   background: rgba(7, 7, 7, 0.45);
 }
 
+.news-hook-inline {
+  margin: 0 0 0.85rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .news-hook strong {
   font-size: 0.74rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.news-hook-inline strong {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: var(--ink-faint);
+}
+
+.news-hook-inline .news-hook-dot {
+  width: 6px;
+  height: 6px;
 }
 
 .news-hook-dot {

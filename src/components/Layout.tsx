@@ -32,7 +32,7 @@ const dock = [
     ),
   },
   {
-    to: '/nba',
+    to: '/nba/updates',
     label: 'NBA',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -41,7 +41,7 @@ const dock = [
     ),
   },
   {
-    to: '/deed-lig',
+    to: '/deed-lig/updates',
     label: 'Дээд Лиг',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -97,7 +97,12 @@ export function Layout() {
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) => (isActive ? 'dock-item active' : 'dock-item')}
+            className={({ isActive }) => {
+              const sectionActive =
+                (item.to.startsWith('/nba') && pathname.startsWith('/nba')) ||
+                (item.to.startsWith('/deed-lig') && pathname.startsWith('/deed-lig'))
+              return isActive || sectionActive ? 'dock-item active' : 'dock-item'
+            }}
             style={{ ['--i' as string]: i }}
             onClick={buzz}
           >

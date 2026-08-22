@@ -88,7 +88,7 @@ export function buildHubStages(data: AppData): HubStage[] {
         {
           id: 'nba',
           label: 'NBA төв',
-          page: '/nba',
+          page: '/nba/updates',
           count:
             (data.nbaUpdates?.length || 0) +
             (data.nbaFreeAgents?.length || 0),
@@ -97,11 +97,14 @@ export function buildHubStages(data: AppData): HubStage[] {
         },
         {
           id: 'deedLig',
-          label: 'Дээд Лиг мэдээ',
-          page: '/deed-lig',
-          count: data.deedLigNews?.length || 0,
+          label: 'Дээд Лиг',
+          page: '/deed-lig/updates',
+          count:
+            (data.deedLigNews?.length || 0) +
+            (data.deedLigClubs?.length || 0) +
+            (data.deedLigPlayers?.length || 0),
           ready: true,
-          note: 'Ерөнхий мэдээнээс тусдаа',
+          note: 'Мэдээ · клуб · тоглогч',
         },
       ],
     },

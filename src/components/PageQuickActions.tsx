@@ -14,8 +14,8 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     actions: [
       { to: '/news', label: 'Мэдээ', icon: 'N' },
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
-      { to: '/nba', label: 'NBA', icon: 'NB' },
-      { to: '/deed-lig', label: 'Дээд Лиг', icon: 'ДЛ' },
+      { to: '/nba/updates', label: 'NBA', icon: 'NB' },
+      { to: '/deed-lig/updates', label: 'Дээд Лиг', icon: 'ДЛ' },
       { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
@@ -23,14 +23,14 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     match: (p) => p.startsWith('/news'),
     actions: [
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
-      { to: '/live', label: 'Live', icon: '●' },
-      { to: '/nba', label: 'NBA', icon: 'NB' },
+      { to: '/podcasts', label: 'Podcast', icon: 'P' },
+      { to: '/nba/updates', label: 'NBA', icon: 'NB' },
     ],
   },
   {
     match: (p) => p.startsWith('/videos') || p.startsWith('/posts'),
     actions: [
-      { to: '/live', label: 'Live', icon: '●' },
+      { to: '/podcasts', label: 'Podcast', icon: 'P' },
       { to: '/news', label: 'Мэдээ', icon: 'N' },
       { to: '/shop', label: 'Shop', icon: '◈' },
     ],
@@ -46,7 +46,7 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
   {
     match: (p) => p.startsWith('/tickets'),
     actions: [
-      { to: '/live', label: 'Live', icon: '●' },
+      { to: '/podcasts', label: 'Podcast', icon: 'P' },
       { to: '/shop', label: 'Shop', icon: '◈' },
       { to: '/news', label: 'Мэдээ', icon: 'N' },
     ],
@@ -62,17 +62,17 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
   {
     match: (p) => p.startsWith('/rappers') || p.startsWith('/rankings'),
     actions: [
-      { to: '/live', label: 'Live', icon: '●' },
+      { to: '/podcasts', label: 'Podcast', icon: 'P' },
       { to: '/videos', label: 'Бичлэг', icon: '▶' },
-      { to: '/nba', label: 'NBA', icon: 'NB' },
+      { to: '/nba/updates', label: 'NBA', icon: 'NB' },
     ],
   },
   {
     match: (p) => p.startsWith('/deed-lig'),
     actions: [
-      { to: '/deed-lig', label: 'Лиг', icon: 'ДЛ' },
-      { to: '/nba', label: 'NBA', icon: 'NB' },
-      { to: '/shop', label: 'Shop', icon: '◈' },
+      { to: '/deed-lig/updates', label: 'Update', icon: 'U' },
+      { to: '/deed-lig/clubs', label: 'Клуб', icon: 'К' },
+      { to: '/nba/updates', label: 'NBA', icon: 'NB' },
     ],
   },
   {
@@ -86,8 +86,8 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
   {
     match: (p) => p.startsWith('/podcasts') || p.startsWith('/wall'),
     actions: [
+      { to: '/podcasts', label: 'Podcast', icon: 'P' },
       { to: '/news', label: 'Мэдээ', icon: 'N' },
-      { to: '/live', label: 'Live', icon: '●' },
       { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
@@ -104,7 +104,7 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
 const fallback: QuickAction[] = [
   { to: '/news', label: 'Мэдээ', icon: 'N' },
   { to: '/videos', label: 'Бичлэг', icon: '▶' },
-  { to: '/live', label: 'Live', icon: '●' },
+  { to: '/podcasts', label: 'Podcast', icon: 'P' },
   { to: '/shop', label: 'Shop', icon: '◈' },
 ]
 

@@ -1,5 +1,6 @@
 import type { AppData } from './types'
 import { news, videos, rappers, rankings } from '../data/content'
+import { seedDeedLigClubs, seedDeedLigPlayers } from '../data/deedLig'
 import {
   freeAgents,
   mambaMentality,
@@ -17,6 +18,11 @@ export const ADMIN_PHONES = ['99918122', '90939291'] as const
 export const DEFAULT_ADMIN_EMAILS = [
   'd.monkh2007@gmail.com',
   'tsbatbaatar99@gmail.com',
+] as const
+
+/** Зөвхөн Дээд Лиг мэдээ засах эрхтэй editor Gmail-ууд */
+export const DEED_LIG_EDITOR_EMAILS = [
+  'khishigtbolorerdene@gmail.com',
 ] as const
 
 export function normalizePhone(value: string) {
@@ -46,6 +52,11 @@ export function isAdminCredential(value: string) {
 export function isAdminEmail(email: string, list: string[]) {
   const e = email.trim().toLowerCase()
   return Boolean(e) && list.map((x) => x.toLowerCase()).includes(e)
+}
+
+export function isDeedLigEditorEmail(email: string) {
+  const e = email.trim().toLowerCase()
+  return Boolean(e) && (DEED_LIG_EDITOR_EMAILS as readonly string[]).includes(e)
 }
 
 export function createSeed(): AppData {
@@ -584,6 +595,8 @@ export function createSeed(): AppData {
       featuredId: '',
     },
     deedLigNews: [],
+    deedLigClubs: seedDeedLigClubs.map((c) => ({ ...c })),
+    deedLigPlayers: seedDeedLigPlayers.map((p) => ({ ...p })),
     homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
     about: {
       name: 'Цэндийн Батбаатар',

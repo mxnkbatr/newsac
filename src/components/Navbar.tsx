@@ -6,19 +6,19 @@ import './Navbar.css'
 const links = [
   { to: '/news', label: 'Мэдээ' },
   { to: '/videos', label: 'Бичлэг' },
-  { to: '/nba', label: 'NBA' },
-  { to: '/deed-lig', label: 'Дээд Лиг' },
+  { to: '/nba/updates', label: 'NBA' },
+  { to: '/deed-lig/updates', label: 'Дээд Лиг' },
   { to: '/shop', label: 'Shop' },
 ]
 
 const mobileMoreLinks = [
   { to: '/news', label: 'Мэдээ', icon: 'N' },
   { to: '/videos', label: 'Бичлэг', icon: '▶' },
-  { to: '/nba', label: 'NBA', icon: 'NB' },
-  { to: '/deed-lig', label: 'Дээд Лиг', icon: 'ДЛ' },
-  { to: '/live', label: 'Live', icon: '●' },
+  { to: '/nba/updates', label: 'NBA', icon: 'NB' },
+  { to: '/deed-lig/updates', label: 'Дээд Лиг', icon: 'ДЛ' },
   { to: '/shop', label: 'Shop', icon: '◈' },
   { to: '/tickets', label: 'Тасалбар', icon: 'T' },
+  { to: '/podcasts', label: 'Podcast', icon: 'P' },
   { to: '/about', label: 'Бидний тухай', icon: 'ℹ' },
   { to: '/contact', label: 'Холбоо барих', icon: '@' },
   { to: '/partnership', label: 'Хамтран ажиллах', icon: '↔' },

@@ -1023,6 +1023,7 @@
 }
 
 .nba-list-card {
+  position: relative;
   display: grid;
   grid-template-columns: 110px 1fr;
   gap: 0.9rem;
@@ -1032,6 +1033,15 @@
   text-decoration: none;
   color: inherit;
   transition: border-color 0.15s;
+}
+
+.nba-list-card > div:last-of-type {
+  padding-right: 2.5rem;
+}
+
+.nba-list-card .share-wrap.is-icon {
+  top: 0.55rem;
+  right: 0.55rem;
 }
 
 .nba-list-card:hover {

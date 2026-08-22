@@ -1,6 +1,6 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { useStore, ADMIN_PHONES } from '../store/StoreContext'
+import { useStore, ADMIN_PHONES, DEED_LIG_EDITOR_EMAILS } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
 import type {
   Battle,
@@ -151,7 +151,10 @@ export function AdminPage() {
 
   const summary = useMemo(() => store.analyticsSummary(), [store.data])
   const hubStages = useMemo(() => buildHubStages(store.data), [store.data])
-  const canEnterWithGoogle = Boolean(user && store.isEmailAdmin(user.email))
+  const canEnterWithGoogle = Boolean(user && store.canAccessCms(user.email))
+  const isDeedLigOnly = Boolean(
+    user?.email && store.isDeedLigEditor(user.email) && !store.isEmailAdmin(user.email),
+  )
   const flags = store.data.siteFlags || {
     ticketsClassified: true,
     shopSoon: true,
@@ -170,6 +173,10 @@ export function AdminPage() {
     setSearch('')
     if (tab === 'about') setAboutDraft(store.data.about)
   }, [tab, store.data.about])
+
+  useEffect(() => {
+    if (isDeedLigOnly && tab !== 'deedLig') setTab('deedLig')
+  }, [isDeedLigOnly, tab])
 
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
@@ -211,7 +218,7 @@ export function AdminPage() {
                   className="btn btn-primary btn-block"
                   onClick={() => store.grantAdmin()}
                 >
-                  Admin нээх
+                  {isDeedLigOnly ? 'Дээд Лиг editor нээх' : 'Admin нээх'}
                 </button>
               ) : (
                 <p className="admin-hint">
@@ -269,22 +276,37 @@ export function AdminPage() {
   }
 
   return (
-    <div className="admin">
-      <header className="admin-top">
-        <div>
-          <strong>Newsac Admin</strong>
-          <span>{user?.email || 'Код session'} · CMS</span>
-        </div>
-        <div className="admin-top-actions">
-          <Link to="/" className="btn btn-ghost">
-            Сайт
-          </Link>
-          <button type="button" className="btn btn-ghost" onClick={store.adminLogout}>
-            Гарах
-          </button>
-        </div>
-      </header>
+    <div className={`admin${isDeedLigOnly ? ' admin-editor-only' : ''}`}>
+      {!isDeedLigOnly ? (
+        <header className="admin-top">
+          <div>
+            <strong>Newsac Admin</strong>
+            <span>{user?.email || 'Код session'} · CMS</span>
+          </div>
+          <div className="admin-top-actions">
+            <Link to="/" className="btn btn-ghost">
+              Сайт
+            </Link>
+            <button type="button" className="btn btn-ghost" onClick={store.adminLogout}>
+              Гарах
+            </button>
+          </div>
+        </header>
+      ) : null}
 
+      {isDeedLigOnly ? (
+        <div className="admin-body admin-editor-body">
+          <AdminDeedLigPanel
+            compact
+            search={search}
+            setSearch={setSearch}
+            openEditor={openEditor}
+            askDelete={askDelete}
+            saveAndSync={saveAndSync}
+            onExit={store.adminLogout}
+          />
+        </div>
+      ) : (
       <div className="admin-layout">
         <nav className="admin-nav" aria-label="Admin sections">
           {NAV_GROUPS.map((group) => (
@@ -2107,10 +2129,14 @@ export function AdminPage() {
             <div className="staff-box">
               <h3>Staff Gmail</h3>
               <p>
-                Эдгээр Gmail-ээр нэвтрэхэд Admin panel нээгдэнэ. Одоо:{' '}
+                Эдгээр Gmail-ээр нэвтрэхэд бүрэн Admin panel нээгдэнэ. Одоо:{' '}
                 {store.data.adminEmails.length
                   ? store.data.adminEmails.join(', ')
                   : 'хоосон'}
+              </p>
+              <p className="admin-hint" style={{ marginTop: '0.75rem' }}>
+                Дээд Лиг editor (зөвхөн /deed-lig мэдээ):{' '}
+                {DEED_LIG_EDITOR_EMAILS.join(', ')}
               </p>
               <form
                 className="staff-form"
@@ -2304,6 +2330,7 @@ export function AdminPage() {
           )}
         </div>
       </div>
+      )}
 
       {editor && (
         <EditorModal

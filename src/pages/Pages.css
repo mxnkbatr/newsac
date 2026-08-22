@@ -41,12 +41,22 @@
 }
 
 .news-row {
+  position: relative;
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 1.35rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--line);
   transition: opacity 0.2s;
+}
+
+.news-row .share-wrap.is-icon {
+  top: 0;
+  right: 0;
+}
+
+.news-row > div:nth-child(2) {
+  padding-right: 2.75rem;
 }
 
 .news-row:hover {
@@ -1322,6 +1332,15 @@
     border-bottom: 0;
     border-radius: 14px;
     background: #101114;
+  }
+
+  .news-row .share-wrap.is-icon {
+    top: 0.55rem;
+    right: 0.55rem;
+  }
+
+  .news-row > div:nth-child(2) {
+    padding-right: 2.4rem;
   }
 
   .news-list {

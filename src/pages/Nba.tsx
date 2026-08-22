@@ -7,17 +7,17 @@ import {
   SACFUN_YOUTUBE_URL,
 } from '../data/brand'
 import { SponsorSlot } from '../components/Widgets'
+import { ShareButton } from '../components/ShareButton'
 import { useStore } from '../store/StoreContext'
 import { youtubeEmbedSrc, youtubeThumb } from '../lib/youtube'
 import './Pages.css'
 import './Nba.css'
 
 const nbaFilters = [
-  { to: '/nba', label: 'Нүүр', match: (p: string) => p === '/nba' },
   {
     to: '/nba/updates',
     label: 'Мэдээлэл',
-    match: (p: string) => p.startsWith('/nba/updates'),
+    match: (p: string) => p === '/nba' || p.startsWith('/nba/updates'),
   },
   { to: '/nba/mamba', label: 'Mamba', match: (p: string) => p.startsWith('/nba/mamba') },
   {
@@ -69,7 +69,7 @@ function NbaPageFilter({ sticky = false }: { sticky?: boolean }) {
 
 function NbaBack() {
   return (
-    <Link to="/nba" className="nba-back">
+    <Link to="/nba/updates" className="nba-back">
       ← NBA
     </Link>
   )
@@ -206,6 +206,12 @@ export function NbaUpdatesPage() {
                 <h2>{u.title}</h2>
                 <p>{u.blurb}</p>
               </div>
+              <ShareButton
+                variant="icon"
+                path={`/nba/updates/${u.id}`}
+                title={u.title}
+                text={u.blurb}
+              />
             </Link>
           ))}
         </div>
@@ -239,6 +245,13 @@ export function NbaUpdateDetailPage() {
             {item.tag} · {item.readMin} мин · {item.when}
           </span>
           <h1>{item.title}</h1>
+          <div className="detail-share">
+            <ShareButton
+              path={`/nba/updates/${item.id}`}
+              title={item.title}
+              text={item.blurb}
+            />
+          </div>
           <p className="nba-article-lead">{item.blurb}</p>
           <div className="nba-article-body">
             {item.body.map((p) => (
