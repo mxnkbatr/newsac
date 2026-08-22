@@ -338,6 +338,22 @@ export type DeedLigPlayer = {
   note?: string
 }
 
+export type DeedLigFreeAgent = {
+  id: string
+  rank: number
+  name: string
+  position: string
+  lastTeam: string
+  newTeam: string
+  age: string
+  height: string
+  weight: string
+  image: string
+  note: string
+  detail: string[]
+  fit: string
+}
+
 export type NbaHot = {
   id: string
   rank: number
@@ -435,6 +451,7 @@ export type AppData = {
   deedLigNews: NbaStory[]
   deedLigClubs: DeedLigClub[]
   deedLigPlayers: DeedLigPlayer[]
+  deedLigFreeAgents: DeedLigFreeAgent[]
   lastSacfunYoutubeSync?: string
   /** Нүүр дээрх халуун 3 мэдээний ID (дараалал чухал) */
   homeHotNewsIds: string[]

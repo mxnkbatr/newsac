@@ -1,6 +1,6 @@
 import type { AppData } from './types'
 import { news, videos, rappers, rankings } from '../data/content'
-import { seedDeedLigClubs, seedDeedLigPlayers } from '../data/deedLig'
+import { seedDeedLigClubs, seedDeedLigFreeAgents, seedDeedLigPlayers } from '../data/deedLig'
 import {
   freeAgents,
   mambaMentality,
@@ -597,6 +597,7 @@ export function createSeed(): AppData {
     deedLigNews: [],
     deedLigClubs: seedDeedLigClubs.map((c) => ({ ...c })),
     deedLigPlayers: seedDeedLigPlayers.map((p) => ({ ...p })),
+    deedLigFreeAgents: seedDeedLigFreeAgents.map((fa) => ({ ...fa })),
     homeHotNewsIds: seededNews.slice(0, 3).map((n) => n.id),
     about: {
       name: 'Цэндийн Батбаатар',

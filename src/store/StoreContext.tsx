@@ -45,6 +45,7 @@ import type {
   NbaSacfunVideo,
   NbaStory,
   DeedLigClub,
+  DeedLigFreeAgent,
   DeedLigPlayer,
 } from './types'
 import { YOUTUBE_CHANNEL_URL } from '../data/brand'
@@ -138,6 +139,8 @@ type StoreValue = {
   deleteDeedLigClub: (id: string) => AppData
   upsertDeedLigPlayer: (item: DeedLigPlayer) => AppData
   deleteDeedLigPlayer: (id: string) => AppData
+  upsertDeedLigFreeAgent: (item: DeedLigFreeAgent) => AppData
+  deleteDeedLigFreeAgent: (id: string) => AppData
   upsertNbaHot: (item: NbaHot) => void
   deleteNbaHot: (id: string) => void
   upsertNbaFreeAgent: (item: NbaFreeAgent) => AppData
@@ -376,6 +379,18 @@ function loadData(): AppData {
         Array.isArray(parsed.deedLigPlayers) ? parsed.deedLigPlayers : seed.deedLigPlayers,
         tombs,
       ),
+      deedLigFreeAgents: mergeNbaContent(
+        undefined,
+        parsed.deedLigFreeAgents,
+        seed.deedLigFreeAgents,
+        tombs,
+      ).map((fa) => ({
+        ...fa,
+        newTeam: fa.newTeam || '',
+        height: fa.height || '',
+        weight: fa.weight || '',
+        image: fa.image || '',
+      })),
       homeHotNewsIds: rejectTombs(
         (
           Array.isArray(parsed.homeHotNewsIds) && parsed.homeHotNewsIds.length
@@ -501,6 +516,18 @@ function applyRemoteSnapshot(remote: AppData, local: AppData): AppData {
       published,
       tombs,
     ),
+    deedLigFreeAgents: mergeNbaContent(
+      remote.deedLigFreeAgents,
+      local.deedLigFreeAgents,
+      seed.deedLigFreeAgents,
+      tombs,
+    ).map((fa) => ({
+      ...fa,
+      newTeam: fa.newTeam || '',
+      height: fa.height || '',
+      weight: fa.weight || '',
+      image: fa.image || '',
+    })),
     nbaHotNews: [],
     nbaFreeAgents: mergeNbaContent(
       remote.nbaFreeAgents,
@@ -1453,6 +1480,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return patch((prev) => ({
           ...prev,
           deedLigPlayers: (prev.deedLigPlayers || []).filter((n) => n.id !== id),
+          cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
+        }))
+      },
+      upsertDeedLigFreeAgent(item) {
+        return patch((prev) => {
+          const next = {
+            ...item,
+            newTeam: item.newTeam || '',
+          }
+          const list = prev.deedLigFreeAgents || []
+          const i = list.findIndex((n) => n.id === next.id)
+          if (i >= 0) {
+            const deedLigFreeAgents = [...list]
+            deedLigFreeAgents[i] = next
+            return { ...prev, deedLigFreeAgents }
+          }
+          return { ...prev, deedLigFreeAgents: [next, ...list] }
+        })
+      },
+      deleteDeedLigFreeAgent(id) {
+        return patch((prev) => ({
+          ...prev,
+          deedLigFreeAgents: (prev.deedLigFreeAgents || []).filter((n) => n.id !== id),
           cmsTombstones: addTombstones(prev.cmsTombstones, [id]),
         }))
       },

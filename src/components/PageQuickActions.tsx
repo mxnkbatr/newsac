@@ -72,6 +72,7 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     actions: [
       { to: '/deed-lig/updates', label: 'Update', icon: 'U' },
       { to: '/deed-lig/clubs', label: 'Баг', icon: 'Б' },
+      { to: '/deed-lig/free-agency', label: 'FA', icon: 'FA' },
       { to: '/nba/updates', label: 'NBA', icon: 'NB' },
     ],
   },

@@ -1,4 +1,4 @@
-import type { DeedLigClub, DeedLigPlayer } from '../store/types'
+import type { DeedLigClub, DeedLigFreeAgent, DeedLigPlayer } from '../store/types'
 
 export const seedDeedLigClubs: DeedLigClub[] = [
   { id: 'knights', name: 'BCH Найтс', city: 'Улаанбаатар', arena: 'UG Arena' },
@@ -14,3 +14,42 @@ export const seedDeedLigClubs: DeedLigClub[] = [
 ]
 
 export const seedDeedLigPlayers: DeedLigPlayer[] = []
+
+export const seedDeedLigFreeAgents: DeedLigFreeAgent[] = [
+  {
+    id: 'dl-fa-1',
+    rank: 1,
+    name: 'Б. Болд',
+    position: 'PG',
+    lastTeam: 'Хасын Хүлэгүүд',
+    newTeam: '',
+    age: '27',
+    height: '188 см',
+    weight: '82 кг',
+    image: '',
+    note: 'Гэрээ дууссан · playmaking + midrange',
+    detail: [
+      'Лигийн шилдэг playmaker-үүдийн нэг. PnR, late-clock shot-making.',
+      'Багууд secondary creator хайж байгаа бол тэргүүн мөрөнд.',
+    ],
+    fit: 'Найтс / Эйпс — on-ball creation',
+  },
+  {
+    id: 'dl-fa-2',
+    rank: 2,
+    name: 'Т. Төмөр',
+    position: 'C',
+    lastTeam: 'Омни Эрдэнэт Майнерс',
+    newTeam: '',
+    age: '29',
+    height: '208 см',
+    weight: '105 кг',
+    image: '',
+    note: 'Rim protection · rebounding',
+    detail: [
+      'Paint deterrence, offensive glass. Minutes тогтвортой байсан.',
+      'Frontcourt size хэрэгтэй багуудад богино гэрээгээр ч тохирно.',
+    ],
+    fit: 'Бодонс / Металл — paint + glass',
+  },
+]

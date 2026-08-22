@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { AppData, DeedLigClub, DeedLigPlayer, NbaStory } from '../store/types'
+import type { AppData, DeedLigClub, DeedLigFreeAgent, DeedLigPlayer, NbaStory } from '../store/types'
 import { useStore } from '../store/StoreContext'
 import { IMG } from './adminFields'
-import { linesOf, nbaUpdateFields } from './adminNbaFields'
+import { linesOf, nbaFaFields, nbaUpdateFields } from './adminNbaFields'
 import { EntityList, type FieldDef } from './adminUi'
 
 type OpenEditor = (
@@ -25,7 +25,7 @@ type Props = {
   onExit?: () => void
 }
 
-type Sub = 'news' | 'clubs' | 'players'
+type Sub = 'news' | 'clubs' | 'players' | 'fa'
 
 const newsFields: FieldDef[] = nbaUpdateFields.map((f) =>
   f.key === 'tag'
@@ -67,6 +67,7 @@ export function AdminDeedLigPanel({
   const news = store.data.deedLigNews || []
   const clubs = store.data.deedLigClubs || []
   const players = store.data.deedLigPlayers || []
+  const freeAgents = store.data.deedLigFreeAgents || []
 
   const playerFields: FieldDef[] = [
     {
@@ -87,7 +88,7 @@ export function AdminDeedLigPanel({
         <div className="admin-panel-head">
           <div>
             <h2>Дээд Лиг</h2>
-            <p>Мэдээ · клуб · тоглогч (өндөр, нас, байрлал) — /deed-lig дээр гарна</p>
+            <p>Мэдээ · баг · тоглогч · Free Agency — /deed-lig дээр гарна</p>
           </div>
           <Link to="/deed-lig" className="btn btn-ghost">
             /deed-lig үзэх
@@ -99,8 +100,9 @@ export function AdminDeedLigPanel({
         {(
           [
             { id: 'news', label: 'Мэдээ' },
-            { id: 'clubs', label: 'Клубууд' },
+            { id: 'clubs', label: 'Багууд' },
             { id: 'players', label: 'Тоглогчид' },
+            { id: 'fa', label: 'Free Agency' },
           ] as const
         ).map((t) => (
           <button
@@ -365,6 +367,96 @@ export function AdminDeedLigPanel({
             const p = players.find((x) => x.id === id)
             askDelete(p?.name || 'тоглогч', async () => {
               const snapshot = store.deleteDeedLigPlayer(id)
+              await saveAndSync('Устгагдлаа', snapshot)
+            })
+          }}
+        />
+      )}
+
+      {sub === 'fa' && (
+        <EntityList
+          title="Free Agency"
+          description="/deed-lig/free-agency · 3:4 хөрөг, нэр, нас, өндөр, жин"
+          search={search}
+          onSearch={setSearch}
+          items={[...freeAgents]
+            .sort((a, b) => a.rank - b.rank)
+            .map((n) => ({
+              id: n.id,
+              label: n.name,
+              meta: `#${n.rank} · ${n.position} · ${n.lastTeam}${n.newTeam ? ` → ${n.newTeam}` : ''}`,
+            }))}
+          onCreate={() =>
+            openEditor(
+              'Шинэ Free Agent',
+              nbaFaFields,
+              {
+                name: '',
+                rank: freeAgents.length + 1,
+                position: 'G',
+                lastTeam: '',
+                newTeam: '',
+                age: '',
+                height: '',
+                weight: '',
+                image: '',
+                fit: '',
+                note: '',
+                detail: '',
+              },
+              (v) => {
+                const item: DeedLigFreeAgent = {
+                  id: crypto.randomUUID(),
+                  name: String(v.name).trim(),
+                  rank: Number(v.rank) || 1,
+                  position: String(v.position).trim(),
+                  lastTeam: String(v.lastTeam).trim(),
+                  newTeam: String(v.newTeam).trim(),
+                  age: String(v.age).trim(),
+                  height: String(v.height).trim(),
+                  weight: String(v.weight).trim(),
+                  image: String(v.image).trim(),
+                  fit: String(v.fit).trim(),
+                  note: String(v.note).trim(),
+                  detail: linesOf(v.detail),
+                }
+                const snapshot = store.upsertDeedLigFreeAgent(item)
+                void saveAndSync('FA нэмэгдлээ', snapshot)
+              },
+            )
+          }
+          onEdit={(id) => {
+            const n = freeAgents.find((x) => x.id === id)
+            if (!n) return
+            openEditor(
+              'FA засах',
+              nbaFaFields,
+              { ...n, detail: n.detail.join('\n') },
+              (v) => {
+                const snapshot = store.upsertDeedLigFreeAgent({
+                  ...n,
+                  name: String(v.name).trim(),
+                  rank: Number(v.rank) || n.rank,
+                  position: String(v.position).trim(),
+                  lastTeam: String(v.lastTeam).trim(),
+                  newTeam: String(v.newTeam).trim(),
+                  age: String(v.age).trim(),
+                  height: String(v.height).trim(),
+                  weight: String(v.weight).trim(),
+                  image: String(v.image).trim(),
+                  fit: String(v.fit).trim(),
+                  note: String(v.note).trim(),
+                  detail: linesOf(v.detail),
+                })
+                void saveAndSync('Хадгалагдлаа', snapshot)
+              },
+              n.name,
+            )
+          }}
+          onDelete={(id) => {
+            const n = freeAgents.find((x) => x.id === id)
+            askDelete(n?.name || 'FA', async () => {
+              const snapshot = store.deleteDeedLigFreeAgent(id)
               await saveAndSync('Устгагдлаа', snapshot)
             })
           }}

@@ -24,7 +24,7 @@ import { ShortsPage } from './pages/Shorts'
 import { ReelsPage } from './pages/Reels'
 import { PodcastsPage } from './pages/Podcasts'
 import { LivePage } from './pages/Live'
-import { DeedLigUpdatesPage, DeedLigUpdateDetailPage, DeedLigClubsPage, DeedLigClubDetailPage, DeedLigLegacyDetailRedirect } from './pages/DeedLig'
+import { DeedLigUpdatesPage, DeedLigUpdateDetailPage, DeedLigClubsPage, DeedLigClubDetailPage, DeedLigFreeAgencyPage, DeedLigFreeAgencyDetailPage, DeedLigLegacyDetailRedirect } from './pages/DeedLig'
 import { WallPage } from './pages/Wall'
 import { ArtistStudioPage } from './pages/ArtistStudio'
 import { BattlePage } from './pages/Battle'
@@ -80,6 +80,8 @@ export default function App() {
                 <Route path="deed-lig/updates/:id" element={<DeedLigUpdateDetailPage />} />
                 <Route path="deed-lig/clubs" element={<DeedLigClubsPage />} />
                 <Route path="deed-lig/clubs/:id" element={<DeedLigClubDetailPage />} />
+                <Route path="deed-lig/free-agency" element={<DeedLigFreeAgencyPage />} />
+                <Route path="deed-lig/free-agency/:id" element={<DeedLigFreeAgencyDetailPage />} />
                 <Route path="deed-lig/:id" element={<DeedLigLegacyDetailRedirect />} />
                 <Route path="wall" element={<WallPage />} />
                 <Route path="music" element={<Navigate to="/" replace />} />

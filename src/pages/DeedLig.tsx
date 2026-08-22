@@ -18,6 +18,11 @@ const deedFilters = [
     label: 'Багууд',
     match: (p: string) => p.startsWith('/deed-lig/clubs'),
   },
+  {
+    to: '/deed-lig/free-agency',
+    label: 'Free Agency',
+    match: (p: string) => p.startsWith('/deed-lig/free-agency'),
+  },
 ]
 
 function useDeedTitle(title: string) {
@@ -27,6 +32,16 @@ function useDeedTitle(title: string) {
       document.title = 'Newsac'
     }
   }, [title])
+}
+
+function playerInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
 }
 
 function DeedPageFilter({ sticky = false }: { sticky?: boolean }) {
@@ -89,6 +104,7 @@ export function DeedLigPage() {
   const { data } = useStore()
   const news = data.deedLigNews || []
   const clubs = data.deedLigClubs || []
+  const freeAgents = data.deedLigFreeAgents || []
   const featured = news[0]
 
   return (
@@ -143,6 +159,10 @@ export function DeedLigPage() {
             <p>
               <Link to="/deed-lig/clubs">Багууд</Link>
               <span>{clubs.length} нэр</span>
+            </p>
+            <p>
+              <Link to="/deed-lig/free-agency">Free Agency</Link>
+              <span>{freeAgents.length} нэр</span>
             </p>
           </div>
           <SponsorSlot slot="nba" alwaysShow />
@@ -357,8 +377,127 @@ export function DeedLigClubDetailPage() {
 /** Хуучин /deed-lig/:id холбоосыг шинэ замаар чиглүүлнэ */
 export function DeedLigLegacyDetailRedirect() {
   const { id } = useParams()
-  if (!id || id === 'updates' || id === 'clubs') {
+  if (!id || id === 'updates' || id === 'clubs' || id === 'free-agency') {
     return <Navigate to="/deed-lig" replace />
   }
   return <Navigate to={`/deed-lig/updates/${id}`} replace />
+}
+
+export function DeedLigFreeAgencyPage() {
+  useDeedTitle('Дээд Лиг Free Agency')
+  const { data } = useStore()
+  const freeAgents = [...(data.deedLigFreeAgents || [])].sort((a, b) => a.rank - b.rank)
+
+  return (
+    <div className="nba-page deed-lig-page">
+      <DeedSubHead
+        kicker="Market"
+        title="Free Agency"
+        desc="Гэрээ дууссан / шилжилтийн тоглогчид — нэр дээр дарж дэлгэрэнгүй үзнэ."
+      />
+      <section className="nba-section">
+        <div className="container nba-list">
+          {freeAgents.length ? (
+            freeAgents.map((fa) => (
+              <Link
+                key={fa.id}
+                to={`/deed-lig/free-agency/${fa.id}`}
+                className="nba-list-card nba-fa-card"
+              >
+                <span className="nba-fa-thumb">
+                  {fa.image ? (
+                    <img src={fa.image} alt="" />
+                  ) : (
+                    <span className="nba-fa-thumb-fallback">{playerInitials(fa.name)}</span>
+                  )}
+                  <span className="nba-fa-rank">{String(fa.rank).padStart(2, '0')}</span>
+                </span>
+                <div>
+                  <h2>{fa.name}</h2>
+                  <div className="nba-fa-meta">
+                    <span>{fa.position}</span>
+                    <span>
+                      {fa.lastTeam}
+                      {fa.newTeam && fa.newTeam !== fa.lastTeam ? ` → ${fa.newTeam}` : ''}
+                    </span>
+                    {fa.age ? <span>{fa.age} нас</span> : null}
+                    {fa.height ? <span>{fa.height}</span> : null}
+                  </div>
+                  <p>{fa.note}</p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p className="deed-empty">Free Agency мэдээлэл тун удахгүй.</p>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export function DeedLigFreeAgencyDetailPage() {
+  const { id } = useParams()
+  const { data } = useStore()
+  const item = (data.deedLigFreeAgents || []).find((fa) => fa.id === id)
+  useDeedTitle(item?.name || 'Free Agency')
+
+  if (!item) return <Navigate to="/deed-lig/free-agency" replace />
+
+  const facts = [
+    { label: 'Нэр', value: item.name },
+    { label: 'Нас', value: item.age ? `${item.age} нас` : '—' },
+    { label: 'Өндөр', value: item.height || '—' },
+    { label: 'Жин', value: item.weight || '—' },
+    { label: 'Байрлал', value: item.position || '—' },
+  ]
+
+  return (
+    <div className="nba-page deed-lig-page">
+      <article className="nba-article">
+        <div className="container nba-article-inner">
+          <DeedBack />
+          <DeedPageFilter sticky />
+          <Link to="/deed-lig/free-agency" className="nba-crumb">
+            ← Free Agency
+          </Link>
+          <span className="nba-update-tag">#{item.rank}</span>
+          <div className="nba-fa-profile">
+            <div className="nba-fa-portrait">
+              {item.image ? (
+                <img src={item.image} alt={item.name} />
+              ) : (
+                <span className="nba-fa-thumb-fallback">{playerInitials(item.name)}</span>
+              )}
+            </div>
+            <dl className="nba-fa-facts">
+              {facts.map((row) => (
+                <div key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <p className="nba-article-lead">{item.note}</p>
+          <div className="nba-article-body">
+            {item.detail.map((p) => (
+              <p key={p.slice(0, 24)}>{p}</p>
+            ))}
+            <p>
+              <strong>Өмнөх баг:</strong> {item.lastTeam}
+            </p>
+            <p>
+              <strong>Шинэ баг:</strong> {item.newTeam || '—'}
+            </p>
+            {item.fit ? (
+              <p>
+                <strong>Best fit:</strong> {item.fit}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </article>
+    </div>
+  )
 }
