@@ -133,6 +133,15 @@ export function NewsDetailPage() {
   const [err, setErr] = useState<string | null>(null)
   const item = data.news.find((n) => n.id === id)
 
+  const related = useMemo(() => {
+    if (!item) return []
+    const region = resolveNewsRegion(item)
+    const rest = data.news.filter((n) => n.id !== item.id)
+    const same = rest.filter((n) => resolveNewsRegion(n) === region)
+    const other = rest.filter((n) => resolveNewsRegion(n) !== region)
+    return [...same, ...other].slice(0, 4)
+  }, [data.news, item])
+
   if (!item) {
     return (
       <div className="page-hero">
@@ -306,6 +315,39 @@ export function NewsDetailPage() {
             ))}
           </ul>
         </section>
+
+        {related.length > 0 ? (
+          <section className="news-related" aria-label="Бусад мэдээлэл">
+            <div className="news-related-head">
+              <h2>Бусад мэдээлэл</h2>
+              <Link to="/news" className="section-link">
+                Бүгдийг үзэх →
+              </Link>
+            </div>
+            <div className="news-related-list">
+              {related.map((n) => (
+                <Link
+                  key={n.id}
+                  to={`/news/${n.id}`}
+                  className="news-related-card"
+                  onClick={() => track('news_click', n.id)}
+                >
+                  <div className="news-related-img">
+                    <img src={n.image} alt="" loading="lazy" />
+                  </div>
+                  <div>
+                    <span className="meta">
+                      {newsRegionLabel(resolveNewsRegion(n))} · {n.category} · {n.date} ·{' '}
+                      {n.readMin} мин
+                    </span>
+                    <h3>{n.title}</h3>
+                    <p>{n.excerpt}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </article>
   )
