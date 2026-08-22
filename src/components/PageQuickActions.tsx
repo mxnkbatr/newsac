@@ -32,15 +32,15 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     actions: [
       { to: '/live', label: 'Live', icon: '●' },
       { to: '/news', label: 'Мэдээ', icon: 'N' },
-      { to: '/shorts', label: 'Cypher', icon: '⚡' },
+      { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
   {
     match: (p) => p.startsWith('/shop') || p.startsWith('/membership'),
     actions: [
       { to: '/tickets', label: 'Тасалбар', icon: 'T' },
-      { to: '/membership', label: 'Fan Pass', icon: '★' },
-      { to: '/artist', label: 'Artist', icon: 'AP' },
+      { to: '/shop', label: 'Shop', icon: '◈' },
+      { to: '/about', label: 'About', icon: 'ℹ' },
     ],
   },
   {
@@ -48,7 +48,7 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
     actions: [
       { to: '/live', label: 'Live', icon: '●' },
       { to: '/shop', label: 'Shop', icon: '◈' },
-      { to: '/membership', label: 'Fan Pass', icon: '★' },
+      { to: '/news', label: 'Мэдээ', icon: 'N' },
     ],
   },
   {
@@ -70,9 +70,9 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
   {
     match: (p) => p.startsWith('/deed-lig'),
     actions: [
-      { to: '/deed-lig', label: 'Мэдээ', icon: 'М' },
-      { to: '/deed-lig/clubs', label: 'Клуб', icon: 'К' },
+      { to: '/deed-lig', label: 'Лиг', icon: 'ДЛ' },
       { to: '/nba', label: 'NBA', icon: 'NB' },
+      { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
   {
@@ -86,16 +86,16 @@ const byRoute: { match: (path: string) => boolean; actions: QuickAction[] }[] = 
   {
     match: (p) => p.startsWith('/podcasts') || p.startsWith('/wall'),
     actions: [
-      { to: '/podcasts', label: 'Podcast', icon: 'P' },
       { to: '/news', label: 'Мэдээ', icon: 'N' },
       { to: '/live', label: 'Live', icon: '●' },
+      { to: '/shop', label: 'Shop', icon: '◈' },
     ],
   },
   {
     match: (p) => p.startsWith('/profile') || p.startsWith('/auth'),
     actions: [
-      { to: '/membership', label: 'Fan Pass', icon: '★' },
       { to: '/shop', label: 'Shop', icon: '◈' },
+      { to: '/tickets', label: 'Тасалбар', icon: 'T' },
       { to: '/about', label: 'About', icon: 'ℹ' },
     ],
   },

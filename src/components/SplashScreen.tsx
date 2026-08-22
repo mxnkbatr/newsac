@@ -38,7 +38,7 @@ export function SplashScreen() {
       <div className="splash-mark">
         <img src="/logo.png" alt="" className="splash-logo" />
         <strong className="splash-domain">newsac.mn</strong>
-        <span className="splash-tag">Hip-hop market culture</span>
+        <span className="splash-tag">Entertainment · News · Culture</span>
       </div>
       <div className="splash-beam" />
       <p className="splash-credit">Developed by Munkhbaatar Dorjsuren</p>

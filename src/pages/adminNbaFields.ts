@@ -9,44 +9,26 @@ export const nbaUpdateFields: FieldDef[] = [
     required: true,
     placeholder: 'Photos-оос сонгоно',
   },
-  {
-    key: 'midImage',
-    label: 'Дунд зураг',
-    type: 'image',
-    placeholder: 'Мэдээний текст дунд гарна',
-  },
   { key: 'tag', label: 'Tag (Trade, Injury...)', half: true, required: true },
   { key: 'when', label: 'Хэзээ', half: true, placeholder: '2 цагийн өмнө' },
   { key: 'readMin', label: 'Унших мин', type: 'number', half: true },
   { key: 'blurb', label: 'Товч', type: 'textarea', required: true },
   {
     key: 'body',
-    label: 'Бүрэн текст',
-    type: 'article',
+    label: 'Бүрэн текст (мөр бүр = 1 догол)',
+    type: 'textarea',
     required: true,
-    placeholder:
-      'Мэдээний бүтэн агуулга. Хоосон мөрөөр догол төлнө. Дунд нь зураг оруулах бол доорх Photos-оос сонго.',
   },
 ]
 
 export const nbaFaFields: FieldDef[] = [
-  {
-    key: 'image',
-    label: 'Зураг (3:4)',
-    type: 'image',
-    required: true,
-    cropAspect: 3 / 4,
-    previewAspect: '3 / 4',
-    placeholder: 'Утаснаас сонгоод 3:4-өөр тайрна',
-  },
   { key: 'name', label: 'Нэр', required: true },
   { key: 'rank', label: 'Rank', type: 'number', half: true, required: true },
-  { key: 'position', label: 'Байрлал', half: true },
-  { key: 'age', label: 'Нас', half: true },
-  { key: 'height', label: 'Өндөр', half: true, placeholder: '206 см' },
+  { key: 'position', label: 'Position', half: true },
   { key: 'lastTeam', label: 'Өмнөх баг', half: true },
   { key: 'newTeam', label: 'Шинэ баг', half: true },
-  { key: 'fit', label: 'Best fit' },
+  { key: 'age', label: 'Нас', half: true },
+  { key: 'fit', label: 'Best fit', half: true },
   { key: 'note', label: 'Товч', type: 'textarea', required: true },
   {
     key: 'detail',
@@ -133,15 +115,3 @@ export function linesOf(value: unknown) {
     .map((s) => s.trim())
     .filter(Boolean)
 }
-
-export const deedLigClubFields: FieldDef[] = [
-  {
-    key: 'image',
-    label: 'Лого / зураг',
-    type: 'image',
-    placeholder: 'Photos-оос сонгоно',
-  },
-  { key: 'name', label: 'Клубын нэр', required: true },
-  { key: 'city', label: 'Хот', half: true, required: true },
-  { key: 'rank', label: 'Дараалал', type: 'number', half: true, required: true },
-]

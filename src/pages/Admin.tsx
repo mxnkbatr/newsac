@@ -2,8 +2,6 @@ import { Link, Navigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useStore, ADMIN_PHONES } from '../store/StoreContext'
 import { useAuth } from '../context/AuthContext'
-import { newsRegionLabel, parseNewsRegion, resolveNewsRegion } from '../lib/newsRegion'
-import { readersLine, resolveReadersCount } from '../lib/readersLabel'
 import type {
   Battle,
   DailyDrop,
@@ -62,48 +60,6 @@ function ytFrom(value: unknown) {
 function ytThumbOr(value: unknown, fallback: string) {
   const id = parseYouTubeId(String(value || ''))
   return id ? youtubeThumb(id) : fallback
-}
-
-function HomeReadersEditor({
-  count,
-  onSave,
-}: {
-  count: number
-  onSave: (n: number) => void
-}) {
-  const [value, setValue] = useState(String(count))
-  useEffect(() => {
-    setValue(String(count))
-  }, [count])
-  const next = Math.max(0, Math.round(Number(value) || 0))
-
-  return (
-    <form
-      className="staff-form admin-readers-form"
-      onSubmit={(e) => {
-        e.preventDefault()
-        onSave(next)
-      }}
-    >
-      <label className="admin-field">
-        <span>Нүүр · уншигчдын тоо</span>
-        <input
-          type="number"
-          min={0}
-          step={1}
-          inputMode="numeric"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </label>
-      <button type="submit" className="btn btn-primary">
-        Хадгалах
-      </button>
-      <p className="admin-field-hint">
-        Нүүр дээр: <strong>{readersLine(next)}</strong>
-      </p>
-    </form>
-  )
 }
 
 const NAV_GROUPS: { label: string; items: { id: Tab; label: string }[] }[] = [
@@ -173,7 +129,7 @@ export function AdminPage() {
   const [password, setPassword] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('news')
-  const [newsRegion, setNewsRegion] = useState<'all' | 'domestic' | 'foreign' | 'yellow'>('all')
+  const [newsRegion, setNewsRegion] = useState<'all' | 'domestic' | 'foreign'>('all')
   const [nbaSub, setNbaSub] = useState<NbaSub>('hub')
   const [search, setSearch] = useState('')
   const [toast, setToast] = useState<ToastState>(null)
@@ -195,10 +151,7 @@ export function AdminPage() {
 
   const summary = useMemo(() => store.analyticsSummary(), [store.data])
   const hubStages = useMemo(() => buildHubStages(store.data), [store.data])
-  const canEnterWithGoogle = Boolean(user && store.canOpenCms(user.email))
-  const isDeedOnly = Boolean(
-    user && store.isDeedLigEditor(user.email) && !store.isEmailAdmin(user.email),
-  )
+  const canEnterWithGoogle = Boolean(user && store.isEmailAdmin(user.email))
   const flags = store.data.siteFlags || {
     ticketsClassified: true,
     shopSoon: true,
@@ -220,13 +173,9 @@ export function AdminPage() {
 
   const notify = (text: string, error?: boolean) => setToast({ text, error })
 
-  useEffect(() => {
-    if (isDeedOnly) setTab('deedLig')
-  }, [isDeedOnly])
-
   const saveAndSync = async (okText: string, snapshot?: AppData) => {
     try {
-      await store.pushCloud(snapshot, { scope: isDeedOnly ? 'deedLig' : 'full' })
+      await store.pushCloud(snapshot)
       notify(`${okText} · Supabase-д хадгаллаа`)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Cloud Push амжилтгүй'
@@ -250,12 +199,8 @@ export function AdminPage() {
       <div className="admin-login">
         <div className="admin-login-card">
           <img src="/logo.png" alt="" width={48} height={48} />
-          <h1>{isDeedOnly ? 'Дээд Лиг удирдлага' : 'Newsac Admin'}</h1>
-          <p>
-            {isDeedOnly
-              ? 'Зөвхөн Дээд Лигийн мэдээ, клубуудыг засна'
-              : 'Контент, shop, live, wall — нэг мэргэжлийн панелиас удирд'}
-          </p>
+          <h1>Newsac Admin</h1>
+          <p>Контент, shop, live, wall — нэг мэргэжлийн панелиас удирд</p>
 
           {user ? (
             <div className="admin-login-user">
@@ -266,7 +211,7 @@ export function AdminPage() {
                   className="btn btn-primary btn-block"
                   onClick={() => store.grantAdmin()}
                 >
-                  {isDeedOnly ? 'Дээд Лиг нээх' : 'Admin нээх'}
+                  Admin нээх
                 </button>
               ) : (
                 <p className="admin-hint">
@@ -292,8 +237,6 @@ export function AdminPage() {
             </button>
           )}
 
-          {!isDeedOnly && (
-          <>
           <div className="admin-or">эсвэл код</div>
 
           <form
@@ -314,11 +257,9 @@ export function AdminPage() {
               Кодоор нэвтрэх
             </button>
           </form>
-          <p className="admin-hint">Admin утас: {ADMIN_PHONES.join(' · ')}</p>
-          </>
-          )}
 
           {err && <p className="admin-err">{err}</p>}
+          <p className="admin-hint">Admin утас: {ADMIN_PHONES.join(' · ')}</p>
           <Link to="/" className="section-link">
             ← Сайт руу
           </Link>
@@ -331,8 +272,8 @@ export function AdminPage() {
     <div className="admin">
       <header className="admin-top">
         <div>
-          <strong>{isDeedOnly ? 'Дээд Лиг удирдлага' : 'Newsac Admin'}</strong>
-          <span>{user?.email || 'Код session'}{isDeedOnly ? ' · Дээд Лиг' : ' · CMS'}</span>
+          <strong>Newsac Admin</strong>
+          <span>{user?.email || 'Код session'} · CMS</span>
         </div>
         <div className="admin-top-actions">
           <Link to="/" className="btn btn-ghost">
@@ -345,7 +286,6 @@ export function AdminPage() {
       </header>
 
       <div className="admin-layout">
-        {!isDeedOnly && (
         <nav className="admin-nav" aria-label="Admin sections">
           {NAV_GROUPS.map((group) => (
             <div className="admin-nav-group" key={group.label}>
@@ -363,19 +303,9 @@ export function AdminPage() {
             </div>
           ))}
         </nav>
-        )}
 
         <div className="admin-body">
-          {isDeedOnly && (
-            <AdminDeedLigPanel
-              search={search}
-              setSearch={setSearch}
-              openEditor={openEditor}
-              askDelete={askDelete}
-              saveAndSync={saveAndSync}
-            />
-          )}
-          {!isDeedOnly && tab === 'hub' && (
+          {tab === 'hub' && (
             <div className="admin-hub">
               <div className="admin-panel-head">
                 <div>
@@ -440,7 +370,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'pages' && (
+          {tab === 'pages' && (
             <div>
               <div className="admin-panel-head">
                 <div>
@@ -506,7 +436,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'analytics' && (
+          {tab === 'analytics' && (
             <div className="admin-analytics">
               <div className="admin-panel-head">
                 <div>
@@ -594,7 +524,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'nba' && (
+          {tab === 'nba' && (
             <AdminNbaPanel
               sub={nbaSub}
               setSub={setNbaSub}
@@ -607,7 +537,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'deedLig' && (
+          {tab === 'deedLig' && (
             <AdminDeedLigPanel
               search={search}
               setSearch={setSearch}
@@ -617,7 +547,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'news' && (
+          {tab === 'news' && (
             <>
               <div className="admin-seg" role="tablist" aria-label="Мэдээний төрөл">
                 {(
@@ -625,7 +555,6 @@ export function AdminPage() {
                     { id: 'all', label: 'Бүгд' },
                     { id: 'domestic', label: 'Дотоод' },
                     { id: 'foreign', label: 'Гадаад' },
-                    { id: 'yellow', label: 'Шар' },
                   ] as const
                 ).map((r) => (
                   <button
@@ -640,7 +569,11 @@ export function AdminPage() {
                     <i>
                       {r.id === 'all'
                         ? store.data.news.length
-                        : store.data.news.filter((n) => resolveNewsRegion(n) === r.id).length}
+                        : store.data.news.filter((n) =>
+                            r.id === 'foreign'
+                              ? n.region === 'foreign'
+                              : n.region !== 'foreign',
+                          ).length}
                     </i>
                   </button>
                 ))}
@@ -648,19 +581,9 @@ export function AdminPage() {
               <div className="staff-box" style={{ marginBottom: '1.25rem' }}>
                 <h3>Нүүр · халуун 3 мэдээ</h3>
                 <p>
-                  Нүүр дээрх уншигчдын тоо, мөн «халуун 3» мэдээг эндээс солино. 1-р байр = том
-                  lead кард.
+                  Home дээрх «Монгол entertainment · халуун 3» хэсгийн 3 мэдээг эндээс солино.
+                  1-р байр = том lead кард.
                 </p>
-                <HomeReadersEditor
-                  count={resolveReadersCount(flags)}
-                  onSave={(n) => {
-                    store.setSiteFlags({
-                      homeReadersCount: n,
-                      homeReadersLabel: readersLine(n),
-                    })
-                    void saveAndSync('Уншигчдын тоо хадгалагдлаа')
-                  }}
-                />
                 <div className="admin-hot-slots">
                   {[0, 1, 2].map((slot) => {
                     const current =
@@ -710,12 +633,16 @@ export function AdminPage() {
               onSearch={setSearch}
               items={store.data.news
                 .filter((n) =>
-                  newsRegion === 'all' ? true : resolveNewsRegion(n) === newsRegion,
+                  newsRegion === 'all'
+                    ? true
+                    : newsRegion === 'foreign'
+                      ? n.region === 'foreign'
+                      : n.region !== 'foreign',
                 )
                 .map((n) => ({
                 id: n.id,
                 label: n.title,
-                meta: `${newsRegionLabel(n.region)} · ${n.category} · ${n.date}${
+                meta: `${n.region === 'foreign' ? 'Гадаад' : 'Дотоод'} · ${n.category} · ${n.date}${
                   (store.data.homeHotNewsIds || []).includes(n.id) ? ' · HOT' : ''
                 }`,
               }))}
@@ -732,7 +659,6 @@ export function AdminPage() {
                     date: todayDot(),
                     readMin: 3,
                     image: '',
-                    midImage: '',
                     membersOnly: false,
                   },
                   (v) => {
@@ -751,12 +677,11 @@ export function AdminPage() {
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
                       body,
-                      region: parseNewsRegion(v.region),
+                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       category: String(v.category || 'Мэдээ'),
                       date: String(v.date || todayDot()),
                       readMin: Number(v.readMin) || 3,
                       image,
-                      midImage: String(v.midImage || '').trim(),
                       membersOnly: Boolean(v.membersOnly),
                     }
                     const snapshot = store.upsertNews(item)
@@ -773,7 +698,7 @@ export function AdminPage() {
                   newsFields,
                   {
                     ...newsEdit,
-                    region: resolveNewsRegion(n),
+                    region: n.region === 'foreign' ? 'foreign' : 'domestic',
                     membersOnly: Boolean(n.membersOnly),
                   },
                   (v) => {
@@ -792,12 +717,11 @@ export function AdminPage() {
                       title: String(v.title).trim(),
                       excerpt: String(v.excerpt).trim(),
                       body,
-                      region: parseNewsRegion(v.region),
+                      region: v.region === 'foreign' ? 'foreign' : 'domestic',
                       category: String(v.category),
                       date: String(v.date),
                       readMin: Number(v.readMin) || 3,
                       image,
-                      midImage: String(v.midImage || '').trim(),
                       membersOnly: Boolean(v.membersOnly),
                     })
                     void saveAndSync('Мэдээ хадгалагдлаа', snapshot)
@@ -816,7 +740,7 @@ export function AdminPage() {
             </>
           )}
 
-          {!isDeedOnly && tab === 'videos' && (
+          {tab === 'videos' && (
             <EntityList
               title="Бичлэг"
               description="Зөв YouTube линк заавал · хадгалсны дараа Cloud руу автомат илгээнэ"
@@ -900,7 +824,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'rappers' && (
+          {tab === 'rappers' && (
             <EntityList
               title="Рэппер"
               description="Профайл + Artist Hub холболт"
@@ -1018,7 +942,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'shop' && (
+          {tab === 'shop' && (
             <EntityList
               title="Shop"
               description="Merch, digital, tip"
@@ -1090,7 +1014,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'tickets' && (
+          {tab === 'tickets' && (
             <EntityList
               title="Тасалбар"
               description="Тоглолт, суудал, үнэ"
@@ -1181,7 +1105,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'podcasts' && (
+          {tab === 'podcasts' && (
             <EntityList
               title="Podcast"
               description="Цуврал + audio URL"
@@ -1260,7 +1184,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'drop' && (
+          {tab === 'drop' && (
             <EntityList
               title="Daily Drop"
               description="Өдөр бүрийн featured контент"
@@ -1334,7 +1258,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'stories' && (
+          {tab === 'stories' && (
             <EntityList
               title="Story"
               description="Нүүрний story — YouTube + Instagram (@newsac_channel live, Meta API холбогдсон үед)"
@@ -1413,7 +1337,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'live' && (
+          {tab === 'live' && (
             <EntityList
               title="Livestream"
               description="Шууд / upcoming / ended"
@@ -1494,7 +1418,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'wall' && (
+          {tab === 'wall' && (
             <EntityList
               title="Wall"
               description="Community постууд"
@@ -1556,7 +1480,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'sponsors' && (
+          {tab === 'sponsors' && (
             <EntityList
               title="Sponsor"
               description="Home / videos / shop slot"
@@ -1628,7 +1552,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'chart' && (
+          {tab === 'chart' && (
             <EntityList
               title="Топ дуу"
               description="Долоо хоногийн Монгол чарт"
@@ -1751,7 +1675,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'battle' && (
+          {tab === 'battle' && (
             <EntityList
               title="Battle / Cypher"
               description="Фэн санал, хоёр тал"
@@ -1850,7 +1774,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'reels' && (
+          {tab === 'reels' && (
             <EntityList
               title="Reels"
               description="Босоо бичлэг · /reels · YouTube линк / Shorts"
@@ -1914,7 +1838,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'polls' && (
+          {tab === 'polls' && (
             <EntityList
               title="Санал асуулга"
               description="Нүүрний Poll widget"
@@ -2022,7 +1946,7 @@ export function AdminPage() {
             />
           )}
 
-          {!isDeedOnly && tab === 'audience' && (
+          {tab === 'audience' && (
             <div>
               <div className="admin-panel-head">
                 <div>
@@ -2094,7 +2018,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'about' && (
+          {tab === 'about' && (
             <div className="staff-box">
               <h3>Тухай хуудас</h3>
               <p>
@@ -2179,7 +2103,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'staff' && (
+          {tab === 'staff' && (
             <div className="staff-box">
               <h3>Staff Gmail</h3>
               <p>
@@ -2187,9 +2111,6 @@ export function AdminPage() {
                 {store.data.adminEmails.length
                   ? store.data.adminEmails.join(', ')
                   : 'хоосон'}
-              </p>
-              <p>
-                Дээд Лиг л удирдах: {(store.data.deedLigEditorEmails || []).join(', ') || 'хоосон'}
               </p>
               <form
                 className="staff-form"
@@ -2264,7 +2185,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'sync' && (
+          {tab === 'sync' && (
             <div className="sync-box">
               <h3>YouTube sync</h3>
               <p>
@@ -2307,7 +2228,7 @@ export function AdminPage() {
             </div>
           )}
 
-          {!isDeedOnly && tab === 'cloud' && (
+          {tab === 'cloud' && (
             <div className="sync-box">
               <h3>Supabase Cloud sync</h3>
               <p>

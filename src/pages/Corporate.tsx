@@ -72,15 +72,7 @@ export function ContactPage() {
         </li>
       </ul>
       <p className="corp-note">
-        <Link to="/news">Мэдээ</Link>
-        {' • '}
-        <Link to="/partnership">Хамтын ажиллагаа</Link>
-        {' • '}
-        <Link to="/advertise">Түншлэл</Link>
-        {' • '}
-        <a href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Санал хүсэлт')}`}>
-          Санал хүсэлт
-        </a>
+        <Link to="/about">Бидний тухай</Link> · <Link to="/partnership">Хамтран ажиллах</Link>
       </p>
     </CorporateShell>
   )
@@ -91,7 +83,7 @@ export function PartnershipPage() {
     <CorporateShell
       kicker="Partnership"
       title="Хамтран ажиллах"
-      lead="Брэндээ, бүтээлээ, үйл ажиллагаагаа Newsac.mn-ийн өсөн тэлж буй экосистемтэй холбоорой."
+      lead="Уран бүтээлчид, бренд, медиа, эвент — Newsac экосистемд нэгдээрэй."
     >
       <p>
         Бид контент, live, чарт, community, тасалбар зэрэг олон сувгаар хамтрагчидтай

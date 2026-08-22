@@ -3,7 +3,6 @@ import { YOUTUBE_CHANNEL_URL } from '../data/brand'
 import { useAuth } from '../context/AuthContext'
 import { useStore } from '../store/StoreContext'
 import { NewsletterBox, PollWidget, SponsorSlot } from '../components/Widgets'
-import { readersLine, resolveReadersCount } from '../lib/readersLabel'
 import type { DailyDrop } from '../store/types'
 import { youtubeThumb } from '../lib/youtube'
 import './Home.css'
@@ -110,87 +109,19 @@ function TodayStrip() {
   )
 }
 
-function AppCommandCenter() {
-  const { user, isMember } = useAuth()
-  const { data, analyticsSummary } = useStore()
-  const stories = [...(data.homeStories || [])]
-    .filter((s) => s.active)
-    .filter((s) => !/reels?/i.test(s.label) && !/reels?/i.test(s.status))
-    .filter((s) => !/шууд/i.test(s.label) && !/live/i.test(s.status))
-    .sort((a, b) => a.order - b.order)
-  const topNews = analyticsSummary().newsClicks[0]
-  const viralCount = Math.max(topNews?.clicks || 0, 24)
-
-  return (
-    <section className="app-command">
-      <div className="container">
-        <div className="app-command-head">
-          <div>
-            <span>Welcome to Newsac</span>
-            <strong>Newsac Nation</strong>
-          </div>
-          <Link to={user ? '/profile' : '/auth'} className="app-command-profile">
-            <span>{user?.name?.slice(0, 1).toUpperCase() || 'N'}</span>
-            <div>
-              <strong>{isMember ? 'Fan Pass' : user ? 'Үнэгүй эрх' : 'Нэвтрэх'}</strong>
-              <small>{isMember ? 'Идэвхтэй' : 'Профайл'}</small>
-            </div>
-            <b>›</b>
-          </Link>
-        </div>
-
-        <div className="story-rail" aria-label="Newsac шинэ зүйлс">
-          <div className="story-chip tone-live story-chip-ig" aria-hidden="true">
-            <span className="story-ring">
-              <img src="/logo.png" alt="" />
-              <i>HOT</i>
-            </span>
-            <strong>Breaking</strong>
-          </div>
-          <div className="story-chip tone-ticket" aria-hidden="true">
-            <span className="story-ring">
-              <img src="/logo.png" alt="" />
-              <i>{formatReaders(viralCount * 100)}</i>
-            </span>
-            <strong>Viral</strong>
-          </div>
-          {stories.map((story) => {
-            const thumb =
-              story.image?.trim() ||
-              (story.youtubeId ? youtubeThumb(story.youtubeId) : '')
-            return (
-              <div
-                key={story.id}
-                className={`story-chip tone-${story.tone || 'default'}`}
-                aria-hidden="true"
-              >
-                <span className="story-ring">
-                  {thumb ? (
-                    <img src={thumb} alt="" />
-                  ) : (
-                    <span className="story-fallback">{story.label.slice(0, 1)}</span>
-                  )}
-                  <i>{story.status}</i>
-                </span>
-                <strong>{story.label}</strong>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 export function Home() {
   const { user, reactTo } = useAuth()
-  const { data, track } = useStore()
+  const { data, track, analyticsSummary } = useStore()
   const news = data.news
   const videos = data.videos
+  const rappers = data.rappers
   const rankings = data.rankings
-  const deedLigNews = data.deedLigNews || []
-  const deedLead = deedLigNews[0]
-  const readersLabel = readersLine(resolveReadersCount(data.siteFlags))
+  const nbaHub = data.nbaHub
+  const nbaFeatured =
+    (nbaHub?.featuredId && data.nbaUpdates.find((u) => u.id === nbaHub.featuredId)) ||
+    data.nbaUpdates[0]
+  const topNewsClicks = analyticsSummary().newsClicks.reduce((sum, item) => sum + item.clicks, 0)
+  const liveReaders = Math.max(2400, 1800 + topNewsClicks * 14)
 
   const hotNews = (() => {
     const byId = new Map(news.map((n) => [n.id, n]))
@@ -221,13 +152,7 @@ export function Home() {
             <img src="/logo.png" alt="" className="hero-logo fx-float" />
             <div className="hero-brand-text">
               <span className="hero-word fx-glitch">Newsac</span>
-              <nav className="hero-pillars" aria-label="Хэсгүүд">
-                <Link to="/nba">NBA</Link>
-                <span aria-hidden="true">/</span>
-                <Link to="/deed-lig">Дээд Лиг</Link>
-                <span aria-hidden="true">/</span>
-                <Link to="/news">Hip-Hop</Link>
-              </nav>
+              <span className="hero-cats">NBA · Дээд Лиг · K-pop · Hip-hop</span>
             </div>
           </div>
 
@@ -238,8 +163,15 @@ export function Home() {
           ) : null}
 
           <h1 className="reveal in reveal-delay-1">
-            Монголын <em>хип-хоп</em> зах зээл
+            Монголын <em>entertainment</em> зах зээл
           </h1>
+          <div className="news-hook reveal in reveal-delay-1">
+            <span className="news-hook-dot" aria-hidden="true" />
+            <strong>{formatReaders(liveReaders)} хүмүүс уншиж байна</strong>
+          </div>
+          <p className="reveal in reveal-delay-2">
+            Спорт, K-pop, хип-хоп — мэдээ, бичлэг, шинжилгээ нэг дор.
+          </p>
 
           <div className="hero-cta reveal in reveal-delay-3">
             <Link to="/videos" className="btn btn-primary hero-btn-main fx-press">
@@ -286,7 +218,6 @@ export function Home() {
         </div>
       </div>
 
-      <AppCommandCenter />
       <TodayStrip />
 
       <section className="section">
@@ -299,11 +230,6 @@ export function Home() {
             <Link to="/news" className="section-link">
               Бүгдийг үзэх →
             </Link>
-          </div>
-
-          <div className="news-hook news-hook-inline reveal">
-            <span className="news-hook-dot" aria-hidden="true" />
-            <strong>{readersLabel}</strong>
           </div>
 
           <div className="news-feature reveal reveal-delay-1">
@@ -334,31 +260,31 @@ export function Home() {
         <div className="container">
           <div className="section-head reveal">
             <div>
-              <div className="section-kicker">Basketball</div>
-              <h2 className="section-title">Дээд Лиг</h2>
+              <div className="section-kicker">{nbaHub?.kicker || 'Basketball'}</div>
+              <h2 className="section-title">{nbaHub?.title || 'NBA'}</h2>
             </div>
-            <Link to="/deed-lig" className="section-link">
+            <Link to="/nba" className="section-link">
               Бүгдийг үзэх →
             </Link>
           </div>
           <Link
-            to={deedLead ? `/deed-lig/updates/${deedLead.id}` : '/deed-lig'}
-            className="home-deed reveal reveal-delay-1"
+            to={nbaFeatured ? `/nba/updates/${nbaFeatured.id}` : '/nba'}
+            className="home-nba reveal reveal-delay-1"
           >
             <div>
-              <span>Монголын сагсан бөмбөг · тусдаа мэдээ</span>
+              <span>{nbaFeatured?.tag || 'Newsac · NBA'}</span>
               <strong>
-                {deedLead
-                  ? deedLead.title
-                  : 'Хасын Хүлэгүүд · SG Эйпс · BCH Найтс · Сэлэнгэ Бодонс'}
+                {nbaFeatured?.title ||
+                  nbaHub?.subtitle ||
+                  'Update · Free Agency · Mamba · Quiz'}
               </strong>
               <p>
-                {deedLead
-                  ? deedLead.blurb
-                  : 'Дээд Лигийн мэдээлэл ерөнхий мэдээнээс тусдаа энд гарна.'}
+                {nbaFeatured?.blurb ||
+                  nbaHub?.subtitle ||
+                  'NBA мэдээлэл, Free Agency, Quiz — бүгд энд.'}
               </p>
             </div>
-            <b>Дээд Лиг</b>
+            <b>NBA</b>
           </Link>
         </div>
       </section>
@@ -446,6 +372,34 @@ export function Home() {
         </div>
       </section>
 
+      <section className="section">
+        <div className="container">
+          <div className="section-head reveal">
+            <div>
+              <div className="section-kicker">Түүх</div>
+              <h2 className="section-title">Рэпперүүдийн замнал</h2>
+            </div>
+            <Link to="/rappers" className="section-link">
+              Бүх профил →
+            </Link>
+          </div>
+
+          <div className="rapper-strip reveal reveal-delay-1">
+            {rappers.map((r) => (
+              <Link key={r.id} to={`/rappers/${r.id}`} className="rapper-chip">
+                <img src={r.image} alt="" loading="lazy" />
+                <div>
+                  <strong>{r.name}</strong>
+                  <span>
+                    {r.city} · {r.streams}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="section section-alt">
         <div className="container">
           <div className="home-originals reveal">
@@ -476,7 +430,7 @@ export function Home() {
                   <div className="fx-media">
                     <img src={show.image} alt="" loading="lazy" />
                     <span className="home-show-lock" aria-label="Тун удахгүй">
-                      <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                         <path
                           fill="currentColor"
                           d="M17 8h-1V6a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm7 13H7v-9h10v9Zm-5-2a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"

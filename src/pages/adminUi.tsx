@@ -1,20 +1,15 @@
 import {
   useEffect,
-  useRef,
   useState,
-  type CSSProperties,
   type FormEvent,
   type ReactNode,
 } from 'react'
-import { ImageCropper } from '../components/ImageCropper'
-import { imageToken, parseArticleBody } from '../lib/articleBody'
 import { uploadPublicImage } from '../lib/mediaUpload'
 import { supabaseConfigured } from '../lib/supabase'
 
 export type FieldType =
   | 'text'
   | 'textarea'
-  | 'article'
   | 'number'
   | 'select'
   | 'checkbox'
@@ -29,9 +24,6 @@ export type FieldDef = {
   options?: { value: string; label: string }[]
   half?: boolean
   required?: boolean
-  /** width / height, e.g. 3/4 for portraits */
-  cropAspect?: number
-  previewAspect?: string
 }
 
 export type ToastState = { text: string; error?: boolean } | null
@@ -162,8 +154,6 @@ function ImageField({
       onChange={(url) => onChange(url)}
       placeholder={def.placeholder}
       required={def.required}
-      cropAspect={def.cropAspect}
-      previewAspect={def.previewAspect}
     />
   )
 }
@@ -175,9 +165,6 @@ export function PhotoPicker({
   onChange,
   placeholder,
   required,
-  cropAspect,
-  previewAspect,
-  compact,
 }: {
   id: string
   label: string
@@ -185,15 +172,12 @@ export function PhotoPicker({
   onChange: (url: string) => void
   placeholder?: string
   required?: boolean
-  cropAspect?: number
-  previewAspect?: string
-  compact?: boolean
 }) {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-  const [cropSrc, setCropSrc] = useState<string | null>(null)
 
-  const upload = (file: File) => {
+  const pick = (file: File | undefined) => {
+    if (!file) return
     setBusy(true)
     setErr(null)
     void resolveImageFile(file)
@@ -204,41 +188,19 @@ export function PhotoPicker({
       .finally(() => setBusy(false))
   }
 
-  const pick = (file: File | undefined) => {
-    if (!file) return
-    if (cropAspect) {
-      setCropSrc(URL.createObjectURL(file))
-      return
-    }
-    upload(file)
-  }
-
-  const closeCrop = () => {
-    if (cropSrc) URL.revokeObjectURL(cropSrc)
-    setCropSrc(null)
-  }
-
-  const previewStyle: CSSProperties | undefined = previewAspect
-    ? { aspectRatio: previewAspect, maxWidth: previewAspect === '3 / 4' ? 220 : undefined }
-    : undefined
-
   return (
-    <div className={`admin-field admin-field-image${compact ? ' is-compact' : ''}`}>
+    <div className="admin-field admin-field-image">
       <span className="admin-field-label">
         {label}
         {required ? ' *' : ''}
       </span>
-      {!compact ? (
-        value ? (
-          <div className="admin-image-preview" style={previewStyle}>
-            <img src={value} alt="" />
-          </div>
-        ) : (
-          <div className="admin-image-preview is-empty" style={previewStyle}>
-            Photos
-          </div>
-        )
-      ) : null}
+      {value ? (
+        <div className="admin-image-preview">
+          <img src={value} alt="" />
+        </div>
+      ) : (
+        <div className="admin-image-preview is-empty">Photos</div>
+      )}
       <div className="admin-image-actions">
         <label className={`admin-image-pick${busy ? ' is-busy' : ''}`}>
           <input
@@ -251,21 +213,15 @@ export function PhotoPicker({
               e.target.value = ''
             }}
           />
-          {busy
-            ? 'Илгээж байна…'
-            : cropAspect
-              ? 'Photos-оос сонгоод тайрах'
-              : compact
-                ? 'Photos-оос зураг оруулах'
-                : 'Photos-оос сонгох'}
+          {busy ? 'Илгээж байна…' : 'Photos-оос сонгох'}
         </label>
         <label className={`admin-image-pick is-camera${busy ? ' is-busy' : ''}`}>
           <input
             id={`f-${id}-camera`}
             type="file"
             accept="image/*"
-            disabled={busy}
             capture="environment"
+            disabled={busy}
             onChange={(e) => {
               pick(e.target.files?.[0])
               e.target.value = ''
@@ -274,100 +230,17 @@ export function PhotoPicker({
           Камер
         </label>
       </div>
-      {cropAspect && !compact ? (
-        <p className="admin-field-hint">Босоо 3:4 хүрээнд чирж, томруулаад тайрна. Бүх хөрөг ижил хэмжээтэй.</p>
-      ) : null}
       {err ? <p className="admin-field-error">{err}</p> : null}
-      {compact ? null : (
-        <details className="admin-image-url">
-          <summary>эсвэл холбоос / URL</summary>
-          <input
-            id={`f-${id}`}
-            type="url"
-            value={value.startsWith('data:') ? '' : value}
-            placeholder={placeholder || 'https://...'}
-            onChange={(e) => onChange(e.target.value)}
-          />
-        </details>
-      )}
-      {cropSrc && cropAspect ? (
-        <ImageCropper
-          src={cropSrc}
-          aspect={cropAspect}
-          onCancel={closeCrop}
-          onConfirm={(file) => {
-            closeCrop()
-            upload(file)
-          }}
+      <details className="admin-image-url">
+        <summary>эсвэл холбоос / URL</summary>
+        <input
+          id={`f-${id}`}
+          type="url"
+          value={value.startsWith('data:') ? '' : value}
+          placeholder={placeholder || 'https://...'}
+          onChange={(e) => onChange(e.target.value)}
         />
-      ) : null}
-    </div>
-  )
-}
-
-function ArticleField({
-  def,
-  value,
-  onChange,
-}: {
-  def: FieldDef
-  value: string | number | boolean
-  onChange: (v: string | number | boolean) => void
-}) {
-  const taRef = useRef<HTMLTextAreaElement>(null)
-  const text = String(value ?? '')
-
-  const insertImage = (url: string) => {
-    const token = `\n\n${imageToken(url)}\n\n`
-    const el = taRef.current
-    if (!el) {
-      onChange(text + token)
-      return
-    }
-    const start = el.selectionStart ?? text.length
-    const end = el.selectionEnd ?? text.length
-    const next = text.slice(0, start) + token + text.slice(end)
-    onChange(next)
-    requestAnimationFrame(() => {
-      const pos = start + token.length
-      el.focus()
-      el.setSelectionRange(pos, pos)
-    })
-  }
-
-  const images = parseArticleBody(text).filter((b) => b.type === 'img')
-
-  return (
-    <div className="admin-field admin-article-field">
-      <label htmlFor={`f-${def.key}`}>{def.label}</label>
-      <textarea
-        ref={taRef}
-        id={`f-${def.key}`}
-        value={text}
-        placeholder={def.placeholder}
-        required={def.required}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <PhotoPicker
-        id={`${def.key}-inline`}
-        label="Дунд зураг нэмэх"
-        value=""
-        compact
-        onChange={insertImage}
-      />
-      {images.length > 0 ? (
-        <div className="admin-article-thumbs">
-          {images.map((img, i) =>
-            img.type === 'img' ? (
-              <img key={`${img.src}-${i}`} src={img.src} alt={`Дунд зураг ${i + 1}`} />
-            ) : null,
-          )}
-        </div>
-      ) : (
-        <p className="admin-field-hint">
-          Текст бичээд Photos/Камераас зураг сонговол мэдээний дунд орно. Олон зураг оруулж болно.
-        </p>
-      )}
+      </details>
     </div>
   )
 }
@@ -397,10 +270,6 @@ function Field({
 
   if (type === 'image') {
     return <ImageField def={def} value={value} onChange={onChange} />
-  }
-
-  if (type === 'article') {
-    return <ArticleField def={def} value={value} onChange={onChange} />
   }
 
   return (
@@ -455,7 +324,7 @@ export function FormFields({
   const rows: FieldDef[][] = []
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i]
-    if (f.type === 'image' || f.type === 'article') {
+    if (f.type === 'image') {
       rows.push([f])
       continue
     }

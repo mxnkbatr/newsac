@@ -123,7 +123,7 @@ export function AdminNbaPanel({
                 {
                   kicker: h?.kicker || 'Newsac · Basketball',
                   title: h?.title || 'NBA',
-                  subtitle: h?.subtitle || '',
+                  subtitle: h?.subtitle || 'Доорх filter-оос хэсгээ сонгоод орно.',
                   heroImage: h?.heroImage || '',
                   featuredId: h?.featuredId || '',
                 },
@@ -196,7 +196,6 @@ export function AdminNbaPanel({
                 when: 'саяхан',
                 readMin: 3,
                 image: '',
-                midImage: '',
                 blurb: '',
                 body: '',
               },
@@ -208,7 +207,6 @@ export function AdminNbaPanel({
                   when: String(v.when).trim(),
                   readMin: Number(v.readMin) || 3,
                   image: String(v.image).trim() || IMG.news,
-                  midImage: String(v.midImage || '').trim(),
                   blurb: String(v.blurb).trim(),
                   body: linesOf(v.body),
                 }
@@ -223,7 +221,7 @@ export function AdminNbaPanel({
             openEditor(
               'NBA мэдээлэл засах',
               nbaUpdateFields,
-              { ...n, body: n.body.join('\n\n') },
+              { ...n, body: n.body.join('\n') },
               (v) => {
                 const snapshot = store.upsertNbaUpdate({
                   ...n,
@@ -232,7 +230,6 @@ export function AdminNbaPanel({
                   when: String(v.when).trim(),
                   readMin: Number(v.readMin) || 3,
                   image: String(v.image).trim() || n.image,
-                  midImage: String(v.midImage || '').trim(),
                   blurb: String(v.blurb).trim(),
                   body: linesOf(v.body),
                 })
@@ -254,7 +251,7 @@ export function AdminNbaPanel({
       {sub === 'fa' && (
         <EntityList
           title="Free Agency"
-          description="/nba/free-agency · 3:4 хөрөг, нэр, нас, өндөр, байрлал"
+          description="/nba/free-agency · нэр, баг, гэрээ — засаад Cloud руу илгээнэ"
           search={search}
           onSearch={setSearch}
           items={[...d.nbaFreeAgents]
@@ -275,8 +272,6 @@ export function AdminNbaPanel({
                 lastTeam: '',
                 newTeam: '',
                 age: '',
-                height: '',
-                image: '',
                 fit: '',
                 note: '',
                 detail: '',
@@ -290,8 +285,6 @@ export function AdminNbaPanel({
                   lastTeam: String(v.lastTeam).trim(),
                   newTeam: String(v.newTeam).trim() || String(v.lastTeam).trim(),
                   age: String(v.age).trim(),
-                  height: String(v.height).trim(),
-                  image: String(v.image).trim(),
                   fit: String(v.fit).trim(),
                   note: String(v.note).trim(),
                   detail: linesOf(v.detail),
@@ -317,8 +310,6 @@ export function AdminNbaPanel({
                   lastTeam: String(v.lastTeam).trim(),
                   newTeam: String(v.newTeam).trim() || String(v.lastTeam).trim(),
                   age: String(v.age).trim(),
-                  height: String(v.height).trim(),
-                  image: String(v.image).trim(),
                   fit: String(v.fit).trim(),
                   note: String(v.note).trim(),
                   detail: linesOf(v.detail),

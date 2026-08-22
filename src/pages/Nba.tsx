@@ -7,8 +7,6 @@ import {
   SACFUN_YOUTUBE_URL,
 } from '../data/brand'
 import { SponsorSlot } from '../components/Widgets'
-import { ArticleBlocks } from '../components/ArticleBlocks'
-import { ShareButton } from '../components/ShareButton'
 import { useStore } from '../store/StoreContext'
 import { youtubeEmbedSrc, youtubeThumb } from '../lib/youtube'
 import './Pages.css'
@@ -43,16 +41,6 @@ function useNbaTitle(title: string) {
       document.title = 'Newsac'
     }
   }, [title])
-}
-
-function playerInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
 }
 
 function NbaPageFilter({ sticky = false }: { sticky?: boolean }) {
@@ -134,6 +122,7 @@ export function NbaPage() {
           <div>
             <div className="section-kicker">{hub?.kicker || 'Newsac · Basketball'}</div>
             <h1>{hub?.title || 'NBA'}</h1>
+            <p>{hub?.subtitle || 'Доорх filter-оос хэсгээ сонгоод орно.'}</p>
             <NbaPageFilter />
           </div>
           {featured && (
@@ -208,24 +197,16 @@ export function NbaUpdatesPage() {
       <section className="nba-section">
         <div className="container nba-list">
           {nbaUpdates.map((u) => (
-            <div key={u.id} className="share-card">
-              <Link to={`/nba/updates/${u.id}`} className="nba-list-card">
-                <img src={u.image} alt="" loading="lazy" />
-                <div>
-                  <span className="nba-update-tag">
-                    {u.tag} · {u.readMin} мин · {u.when}
-                  </span>
-                  <h2>{u.title}</h2>
-                  <p>{u.blurb}</p>
-                </div>
-              </Link>
-              <ShareButton
-                variant="icon"
-                title={u.title}
-                text={u.blurb}
-                path={`/nba/updates/${u.id}`}
-              />
-            </div>
+            <Link key={u.id} to={`/nba/updates/${u.id}`} className="nba-list-card">
+              <img src={u.image} alt="" loading="lazy" />
+              <div>
+                <span className="nba-update-tag">
+                  {u.tag} · {u.readMin} мин · {u.when}
+                </span>
+                <h2>{u.title}</h2>
+                <p>{u.blurb}</p>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -259,15 +240,10 @@ export function NbaUpdateDetailPage() {
           </span>
           <h1>{item.title}</h1>
           <p className="nba-article-lead">{item.blurb}</p>
-          <div className="detail-share">
-            <ShareButton
-              title={item.title}
-              text={item.blurb}
-              path={`/nba/updates/${item.id}`}
-            />
-          </div>
           <div className="nba-article-body">
-            <ArticleBlocks lines={item.body} midSrc={item.midImage} />
+            {item.body.map((p) => (
+              <p key={p.slice(0, 28)}>{p}</p>
+            ))}
           </div>
           <a href={FACEBOOK_PAGE_URL} className="nba-inline-yt" target="_blank" rel="noreferrer">
             Facebook page · {FACEBOOK_PAGE_NAME} →
@@ -323,15 +299,12 @@ export function NbaFreeAgencyPage() {
       <section className="nba-section">
         <div className="container nba-list">
           {freeAgents.map((fa) => (
-            <Link key={fa.id} to={`/nba/free-agency/${fa.id}`} className="nba-list-card nba-fa-card">
-              <span className="nba-fa-thumb">
-                {fa.image ? (
-                  <img src={fa.image} alt="" />
-                ) : (
-                  <span className="nba-fa-thumb-fallback">{playerInitials(fa.name)}</span>
-                )}
-                <span className="nba-fa-rank">{String(fa.rank).padStart(2, '0')}</span>
-              </span>
+            <Link
+              key={fa.id}
+              to={`/nba/free-agency/${fa.id}`}
+              className="nba-list-card nba-list-card-plain"
+            >
+              <span className="nba-fa-rank">{String(fa.rank).padStart(2, '0')}</span>
               <div>
                 <h2>{fa.name}</h2>
                 <div className="nba-fa-meta">
@@ -360,13 +333,6 @@ export function NbaFreeAgencyDetailPage() {
 
   if (!item) return <Navigate to="/nba/free-agency" replace />
 
-  const facts = [
-    { label: 'Нэр', value: item.name },
-    { label: 'Нас', value: item.age ? `${item.age} нас` : '—' },
-    { label: 'Өндөр', value: item.height || '—' },
-    { label: 'Байрлал', value: item.position || '—' },
-  ]
-
   return (
     <div className="nba-page">
       <article className="nba-article">
@@ -375,24 +341,10 @@ export function NbaFreeAgencyDetailPage() {
           <Link to="/nba/free-agency" className="nba-crumb">
             ← Free Agency
           </Link>
-          <span className="nba-update-tag">#{item.rank}</span>
-          <div className="nba-fa-profile">
-            <div className="nba-fa-portrait">
-              {item.image ? (
-                <img src={item.image} alt={item.name} />
-              ) : (
-                <span className="nba-fa-thumb-fallback">{playerInitials(item.name)}</span>
-              )}
-            </div>
-            <dl className="nba-fa-facts">
-              {facts.map((row) => (
-                <div key={row.label}>
-                  <dt>{row.label}</dt>
-                  <dd>{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+          <span className="nba-update-tag">
+            #{item.rank} · {item.position} · {item.age} нас
+          </span>
+          <h1>{item.name}</h1>
           <p className="nba-article-lead">{item.note}</p>
           <div className="nba-article-body">
             {item.detail.map((p) => (

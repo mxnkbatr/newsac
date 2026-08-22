@@ -23,10 +23,7 @@ export function Footer() {
             </div>
           </div>
           <p>
-            One Platform. Endless Entertainment.
-            <br />
-            Монгол болон дэлхийн хип-хоп, спорт, соёл, энтертайнментийг нэг дор холбосон
-            шинэ үеийн нэгдсэн медиа экосистем.
+            One platform. Endless entertainment — NBA, K-pop, хип-хоп, спорт, соёлын мэдээ нэг дор.
           </p>
         </div>
 

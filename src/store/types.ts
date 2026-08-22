@@ -7,7 +7,7 @@ export type NewsComment = {
   createdAt: string
 }
 
-export type NewsRegion = 'domestic' | 'foreign' | 'yellow'
+export type NewsRegion = 'domestic' | 'foreign'
 
 export type NewsItem = {
   id: string
@@ -18,9 +18,7 @@ export type NewsItem = {
   date: string
   readMin: number
   image: string
-  /** Мэдээний текст дунд гарах нэмэлт зураг */
-  midImage?: string
-  /** Дотоод / Гадаад / Шар мэдээ */
+  /** Дотоод / Гадаад мэдээ */
   region?: NewsRegion
   membersOnly?: boolean
   comments?: NewsComment[]
@@ -304,10 +302,6 @@ export type SiteFlags = {
   artistSoon: boolean
   /** Newsac Pass / membership coming soon */
   passSoon: boolean
-  /** Нүүр · мэдээний өмнөх уншигчдын тоо (2400 → «2.4K хүмүүс уншиж байна») */
-  homeReadersCount?: number
-  /** Хуучин бүрэн бичиг — homeReadersCount байхгүй үед fallback */
-  homeReadersLabel?: string
 }
 
 export type NbaStory = {
@@ -319,7 +313,6 @@ export type NbaStory = {
   when: string
   readMin: number
   image: string
-  midImage?: string
 }
 
 export type NbaHot = {
@@ -341,8 +334,6 @@ export type NbaFreeAgent = {
   lastTeam: string
   newTeam: string
   age: string
-  height: string
-  image: string
   note: string
   detail: string[]
   fit: string
@@ -381,14 +372,6 @@ export type NbaHub = {
   featuredId?: string
 }
 
-export type DeedLigClub = {
-  id: string
-  name: string
-  city: string
-  image: string
-  rank: number
-}
-
 export type NbaSacfunVideo = {
   id: string
   youtubeId: string
@@ -424,15 +407,12 @@ export type AppData = {
   nbaHub: NbaHub
   /** Монголын сагсан бөмбөгийн Дээд лиг — ерөнхий мэдээнээс тусдаа */
   deedLigNews: NbaStory[]
-  deedLigClubs: DeedLigClub[]
   lastSacfunYoutubeSync?: string
   /** Нүүр дээрх халуун 3 мэдээний ID (дараалал чухал) */
   homeHotNewsIds: string[]
   about: AboutPage
   siteFlags: SiteFlags
   adminEmails: string[]
-  /** Зөвхөн Дээд Лиг цэс удирдах Gmail-үүд */
-  deedLigEditorEmails?: string[]
   orders: Order[]
   ticketOrders: TicketOrder[]
   subscribers: Subscriber[]

@@ -159,7 +159,7 @@ export function AuthPage() {
         <img src="/logo.png" alt="" />
         <div>
           <strong>Newsac</strong>
-          <p>Хип-хоп зах зээлийн доторх дуу хоолой болоорой.</p>
+          <p>Entertainment зах зээлийн доторх дуу хоолой болоорой.</p>
         </div>
       </div>
 
